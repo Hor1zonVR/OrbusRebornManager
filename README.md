@@ -43,7 +43,8 @@ The application intentionally **does not** list every GitHub repository by itsel
 3. In **Settings / Curator**, paste the repository URL and set a descriptive display name and **asset pattern**, e.g. `*.dll` or `OrbusRebornCamera-*.zip`.
 4. Click **Add local draft**, then **Export curated mods.json**.
 5. Edit exported descriptions/author names, and commit this JSON to your manager's public repository at `catalog/mods.json`.
-6. The manager defaults to your public catalogue at `https://raw.githubusercontent.com/Hor1zonVR/OrbusRebornManager/main/catalog/mods.json`, so normal users do not need to set a URL. You can still override it in Settings for testing.
+6. Set **Online curated catalogue** in the manager to its raw HTTPS address, e.g. `https://raw.githubusercontent.com/YOUR_USERNAME/OrbusRebornManager/main/catalog/mods.json`.
+7. For production releases we'll bake that catalogue URL into the manager so ordinary players do not have to configure it.
 
 The catalogue is fetched whenever the app starts or the user clicks Refresh. Local drafts live only on your machine under `%LOCALAPPDATA%\OrbusRebornManager\catalog-local.json`; they are not automatically shared.
 
