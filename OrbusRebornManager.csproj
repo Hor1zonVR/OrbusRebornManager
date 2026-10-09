@@ -8,8 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>OrbusRebornManager</AssemblyName>
     <RootNamespace>OrbusRebornManager</RootNamespace>
-    <Version>0.2.0</Version>
-    <!-- Keep one EXE with its .NET desktop runtime, but compress bundled files. -->
+    <Version>0.3.0</Version>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
