@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "mods": [
+    {
+      "id": "orbusreborncamera",
+      "name": "Orbus Reborn Camera",
+      "author": "YOUR_GITHUB_USERNAME",
+      "description": "Wide-FOV desktop recording, third-person, selfie and full-avatar views.",
+      "repository": "https://github.com/YOUR_GITHUB_USERNAME/OrbusRebornCamera",
+      "assetPattern": "*.dll"
+    },
+    {
+      "id": "orbusrebornautomount",
+      "name": "Orbus Reborn AutoMount",
+      "author": "YOUR_GITHUB_USERNAME",
+      "description": "Automatically summon your existing mount after combat.",
+      "repository": "https://github.com/YOUR_GITHUB_USERNAME/OrbusRebornAutoMount",
+      "assetPattern": "*.dll"
+    }
+  ]
+}

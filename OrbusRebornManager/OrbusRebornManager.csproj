@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>OrbusRebornManager</AssemblyName>
+    <RootNamespace>OrbusRebornManager</RootNamespace>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="catalog/mods.json" LogicalName="OrbusRebornManager.Catalog.json" />
+    <None Update="catalog/mods.example.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
