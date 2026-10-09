@@ -20,12 +20,12 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install .NET 8
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Build standalone Windows EXE
+      - name: Build Windows EXE
         run: >
           dotnet publish OrbusRebornManager.csproj
           -c Release
@@ -37,14 +37,14 @@ jobs:
           -p:DebugSymbols=false
           -o publish/win-x64
 
-      - name: Upload test build
+      - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: OrbusRebornManager-win-x64
           path: publish/win-x64/OrbusRebornManager.exe
           if-no-files-found: error
 
-      - name: Publish GitHub Release
+      - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
