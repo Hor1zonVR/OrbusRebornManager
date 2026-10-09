@@ -1,3 +1,4 @@
+
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -7,7 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>OrbusRebornManager</AssemblyName>
     <RootNamespace>OrbusRebornManager</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <!-- Keep one EXE with its .NET desktop runtime, but compress bundled files. -->
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="catalog/mods.json" LogicalName="OrbusRebornManager.Catalog.json" />
