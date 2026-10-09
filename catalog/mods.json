@@ -1,4 +1,14 @@
+
 {
   "schemaVersion": 1,
-  "mods": []
+  "mods": [
+    {
+      "id": "orbusreborncamera",
+      "name": "OrbusRebornCamera",
+      "author": "Hor1zonVR",
+      "description": "A creator camera for OrbusVR Reborn with POV, third-person, selfie and static recording modes, adjustable FOV and local avatar visibility.",
+      "repository": "https://github.com/Hor1zonVR/OrbusRebornCamera",
+      "assetPattern": "BetterMirror.dll"
+    }
+  ]
 }
