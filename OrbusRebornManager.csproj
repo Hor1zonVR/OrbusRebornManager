@@ -8,11 +8,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>OrbusRebornManager</AssemblyName>
     <RootNamespace>OrbusRebornManager</RootNamespace>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="catalog/mods.json" LogicalName="OrbusRebornManager.Catalog.json" />
-    <None Update="catalog/mods.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="catalog/mods.json"
+                      LogicalName="OrbusRebornManager.Catalog.json" />
+    <None Update="catalog/mods.example.json"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
