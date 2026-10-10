@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 
 namespace OrbusRebornManager;
 
@@ -32,6 +33,8 @@ public partial class CreateInstanceWindow : Window
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "OrbusRebornModdingInstances")
             : storagePath;
+
+        UpdateLocationLabels();
 
         // Suggest an unused name instead of beginning with a collision.
         var names = _store.Load()
@@ -62,6 +65,7 @@ public partial class CreateInstanceWindow : Window
         try
         {
             SourcePathText.Text = _manager.NormalizeGamePath(dialog.FolderName);
+            UpdateLocationLabels();
             CreationStatusText.Text = "";
         }
         catch (Exception ex)
@@ -81,8 +85,42 @@ public partial class CreateInstanceWindow : Window
         if (dialog.ShowDialog(this) == true)
         {
             StoragePathText.Text = dialog.FolderName;
+            UpdateLocationLabels();
             CreationStatusText.Text = "";
         }
+    }
+
+    private void UpdateLocationLabels()
+    {
+        string source = SourcePathText.Text.TrimEnd(
+            Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string storage = StoragePathText.Text.TrimEnd(
+            Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        SourceLocationLabel.Text = string.IsNullOrWhiteSpace(source)
+            ? "Choose your original game folder"
+            : Path.GetFileName(source);
+        SourceLocationLabel.ToolTip = source;
+
+        string local = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData);
+        StorageLocationLabel.Text = storage.StartsWith(
+            local + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            ? "%LOCALAPPDATA%" + storage[local.Length..]
+            : storage;
+        StorageLocationLabel.ToolTip = storage;
+    }
+
+    private void Chrome_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left) return;
+        try { DragMove(); }
+        catch (InvalidOperationException) { }
+    }
+
+    private void Chrome_Close_Click(object sender, RoutedEventArgs e)
+    {
+        Cancel_Click(sender, e);
     }
 
     private static bool IsWithin(string folder, string potentialChild)
