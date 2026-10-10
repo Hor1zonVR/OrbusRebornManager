@@ -43,6 +43,52 @@ public static class InstanceArtwork
         }
     }
 
+    // Cropping happens only when displaying the cover. We always store the
+    // entire chosen source PNG so players can reframe it later.
+    public static BitmapSource? LoadCropped(string? path, System.Windows.Rect normalized)
+    {
+        if (Load(path) is not BitmapSource bitmap)
+            return null;
+        try
+        {
+            if (!double.IsFinite(normalized.X) || !double.IsFinite(normalized.Y) ||
+                !double.IsFinite(normalized.Width) || !double.IsFinite(normalized.Height))
+                return bitmap;
+
+            double x = Math.Clamp(normalized.X, 0, 1);
+            double y = Math.Clamp(normalized.Y, 0, 1);
+            double w = Math.Clamp(normalized.Width, 0.001, 1 - x);
+            double h = Math.Clamp(normalized.Height, 0.001, 1 - y);
+
+            int left = Math.Clamp((int)Math.Round(x * bitmap.PixelWidth),
+                0, bitmap.PixelWidth - 1);
+            int top = Math.Clamp((int)Math.Round(y * bitmap.PixelHeight),
+                0, bitmap.PixelHeight - 1);
+            int width = Math.Clamp((int)Math.Round(w * bitmap.PixelWidth),
+                1, bitmap.PixelWidth - left);
+            int height = Math.Clamp((int)Math.Round(h * bitmap.PixelHeight),
+                1, bitmap.PixelHeight - top);
+
+            var cropped = new CroppedBitmap(bitmap,
+                new System.Windows.Int32Rect(left, top, width, height));
+            cropped.Freeze();
+            return cropped;
+        }
+        catch
+        {
+            return bitmap;
+        }
+    }
+
+    public static System.Windows.Rect SavedCrop(GameInstance instance) =>
+        new(instance.IconCropX, instance.IconCropY,
+            instance.IconCropWidth, instance.IconCropHeight);
+
+    public static ImageSource? Cover(GameInstance instance) =>
+        instance.IconHasCrop
+            ? LoadCropped(instance.CustomIconPath, SavedCrop(instance))
+            : Load(instance.CustomIconPath);
+
     public static string Save(string sourcePath, string gamePath)
     {
         if (!File.Exists(sourcePath))
