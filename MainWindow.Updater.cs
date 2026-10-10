@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using Velopack;
@@ -15,17 +17,17 @@ public partial class MainWindow
     private void InitializeManagerUpdates()
     {
         CheckManagerUpdatesCheck.IsChecked = _settings.CheckManagerUpdates;
+        UninstallManagerButton.IsEnabled = false;
         ManagerVersionText.Text = "Installed version: v" +
             (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "unknown");
 
         try
         {
             _managerUpdater = new UpdateManager(
-                new GithubSource(
-                    "https://github.com/Hor1zonVR/OrbusRebornManager",
-                    accessToken: null,
-                    prerelease: false));
+                new SimpleWebSource(
+                    "https://hor1zonvr.github.io/OrbusRebornManager/updates"));
 
+            UninstallManagerButton.IsEnabled = _managerUpdater.IsInstalled;
             if (!_managerUpdater.IsInstalled)
             {
                 ManagerUpdateStatusText.Text =
@@ -35,13 +37,14 @@ public partial class MainWindow
             }
             else
             {
-                ManagerUpdateStatusText.Text = "Updates are delivered from official GitHub Releases.";
+                ManagerUpdateStatusText.Text = "Updates are provided through the official RebornManager update feed.";
             }
         }
         catch (Exception ex)
         {
             ManagerUpdateStatusText.Text = "Updater unavailable: " + ex.Message;
             CheckManagerUpdatesButton.IsEnabled = false;
+            UninstallManagerButton.IsEnabled = false;
         }
     }
 
@@ -136,4 +139,60 @@ public partial class MainWindow
             ManagerUpdateProgress.Visibility = Visibility.Collapsed;
         }
     }
+    private void UninstallManager_Click(object sender, RoutedEventArgs e)
+    {
+        if (_managerUpdateBusy || _jobs > 0)
+        {
+            MessageBox.Show(this,
+                "Finish the current operation before uninstalling RebornManager.",
+                "RebornManager is busy", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (_managerUpdater is not { IsInstalled: true })
+        {
+            MessageBox.Show(this,
+                "This copy is not managed by the RebornManager installer. " +
+                "Use Windows Installed apps to remove the installed version.",
+                "Uninstall unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var confirmation = MessageBox.Show(this,
+            "Uninstall RebornManager from this computer?\n\n" +
+            "Your OrbusVR game installations, modded instances, " +
+            "and RebornManager settings will be kept so you can reinstall safely.\n\n" +
+            "The manager will close to complete the uninstall.",
+            "Uninstall RebornManager", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (confirmation != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            // Velopack places Update.exe next to the installed app's "current" directory.
+            // Invoke its uninstall command; never delete install folders manually.
+            string installerRoot = Path.GetFullPath(
+                Path.Combine(AppContext.BaseDirectory, ".."));
+            string updaterPath = Path.Combine(installerRoot, "Update.exe");
+            if (!File.Exists(updaterPath))
+                throw new FileNotFoundException(
+                    "The installed Velopack uninstaller could not be found.", updaterPath);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = updaterPath,
+                Arguments = "uninstall",
+                WorkingDirectory = installerRoot,
+                UseShellExecute = true
+            }) ?? throw new InvalidOperationException("Could not launch the uninstaller.");
+
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Uninstall failed",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
 }
