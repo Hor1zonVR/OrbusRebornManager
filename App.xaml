@@ -235,7 +235,7 @@
                 <Canvas Width="300" Height="300">
                     <Ellipse Canvas.Left="38" Canvas.Top="38" Width="224" Height="224"
                              Stroke="#83C2B5" StrokeThickness="3"/>
-                    <Path Stroke="#83C2B5" StrokeThickness="4" StrokeLineCap="Round"
+                    <Path Stroke="#83C2B5" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                           Data="M 144,40 C 216,29 271,96 245,168 C 227,218 170,251 117,225 C 70,202 67,150 101,116 C 122,94 169,91 190,120 C 207,145 196,177 170,187 C 147,197 123,177 132,156"/>
                     <Path Stroke="#83C2B5" StrokeThickness="3"
                           Data="M 150,0 L 150,39 M 150,261 L 150,300 M 0,150 L 39,150 M 261,150 L 300,150"/>
