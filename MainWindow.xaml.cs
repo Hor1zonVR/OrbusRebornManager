@@ -171,6 +171,12 @@ public partial class MainWindow : Window
     private void Installed_Click(object sender, RoutedEventArgs e) => ShowPanel("installed");
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowPanel("settings");
 
+    private void SubmitMod_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SubmitModWindow { Owner = this };
+        dialog.ShowDialog();
+    }
+
     private void RefreshInstanceCards()
     {
         _allInstanceCards.Clear();
