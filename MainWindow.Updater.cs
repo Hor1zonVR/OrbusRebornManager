@@ -178,13 +178,15 @@ public partial class MainWindow
                 throw new FileNotFoundException(
                     "The installed Velopack uninstaller could not be found.", updaterPath);
 
-            Process.Start(new ProcessStartInfo
+            var process = Process.Start(new ProcessStartInfo
             {
                 FileName = updaterPath,
                 Arguments = "uninstall",
                 WorkingDirectory = installerRoot,
                 UseShellExecute = true
-            }) ?? throw new InvalidOperationException("Could not launch the uninstaller.");
+            });
+            if (process == null)
+                throw new InvalidOperationException("Could not launch the uninstaller.");
 
             Application.Current.Shutdown();
         }
