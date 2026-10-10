@@ -15,6 +15,10 @@ public sealed class ManagerSettings
 
     public bool AutoUpdate { get; set; } = true;
     public bool CheckManagerUpdates { get; set; } = true;
+    public string DefaultInstanceDirectory { get; set; } =
+        System.IO.Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "OrbusRebornModdingInstances");
 }
 
 public sealed class CatalogDocument
