@@ -118,7 +118,7 @@ public partial class MainWindow : Window
 
         (string header, string sub) = page switch
         {
-            "instances" => ("My Instances", "Your OrbusVR installations, all in one place."),
+            "instances" => ("Library", ""),
             "dashboard" => ("Instance Overview", "Your selected OrbusVR installation."),
             "discover" => ("Client Mods", "Discover and install community client mods."),
             "server" => ("Server Mods", "Find projects for community server operators."),
@@ -128,16 +128,18 @@ public partial class MainWindow : Window
         };
         PageHeading.Text = header;
         PageSubtitle.Text = sub;
+        PageSubtitle.Visibility = string.IsNullOrEmpty(sub) ?
+            Visibility.Collapsed : Visibility.Visible;
         HeaderCreateButton.Visibility = page == "instances" ? Visibility.Visible : Visibility.Collapsed;
         HeaderStatusCard.Visibility = page == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         NavHome.Background = page == "instances" || page == "dashboard" || page == "installed" ?
-            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+            new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavBrowse.Background = page == "discover" ?
-            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+            new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavServer.Background = page == "server" ?
-            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+            new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavSettings.Background = page == "settings" ?
-            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+            new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         if (page == "instances") RefreshInstanceCards();
         if (page == "installed") UpdateInstalledRows();
     }
@@ -640,12 +642,12 @@ public sealed class InstanceCard
 {
     private static readonly Brush[] TileBrushes =
     {
-        new SolidColorBrush(Color.FromRgb(37, 90, 92)),
-        new SolidColorBrush(Color.FromRgb(63, 65, 113)),
-        new SolidColorBrush(Color.FromRgb(99, 66, 88)),
-        new SolidColorBrush(Color.FromRgb(44, 79, 111)),
-        new SolidColorBrush(Color.FromRgb(66, 89, 64)),
-        new SolidColorBrush(Color.FromRgb(88, 73, 109))
+        new SolidColorBrush(Color.FromRgb(46, 66, 62)),
+        new SolidColorBrush(Color.FromRgb(53, 57, 76)),
+        new SolidColorBrush(Color.FromRgb(70, 53, 67)),
+        new SolidColorBrush(Color.FromRgb(47, 63, 75)),
+        new SolidColorBrush(Color.FromRgb(60, 68, 55)),
+        new SolidColorBrush(Color.FromRgb(63, 57, 74))
     };
 
     public GameInstance Instance { get; }
