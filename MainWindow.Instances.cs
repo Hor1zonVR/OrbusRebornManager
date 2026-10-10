@@ -47,6 +47,11 @@ public partial class MainWindow
         string source = existing.FirstOrDefault(i => !i.CreatedByManager)?.Path
             ?? _settings.GamePath;
 
+        await CreateInstanceFromSourceAsync(source);
+    }
+
+    private async Task CreateInstanceFromSourceAsync(string source)
+    {
         var window = new CreateInstanceWindow(
             _service, source, _settings.DefaultInstanceDirectory)
         {
@@ -107,6 +112,65 @@ public partial class MainWindow
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             RefreshInstanceCards();
         }
+    }
+
+    private async Task ShowFirstRunAsync(bool preview)
+    {
+        var welcome = new FirstRunWindow(_service, preview)
+        {
+            Owner = this
+        };
+
+        if (welcome.ShowDialog() != true)
+            return;
+
+        if (preview)
+        {
+            // A real preview of both first-launch screens. No persisted
+            // settings, registry edits, downloads or game-file copies.
+            var dialog = new CreateInstanceWindow(
+                _service, welcome.SelectedGamePath, welcome.SelectedStoragePath,
+                previewOnly: true)
+            {
+                Owner = this
+            };
+            dialog.ShowDialog();
+            return;
+        }
+
+        try
+        {
+            // Register the original installation, but never modify or copy it
+            // until the player explicitly confirms creation in the next window.
+            var registered = _instanceStore.AddExisting(
+                _instanceStore.Load(), welcome.SelectedGamePath);
+            _settings.GamePath = registered.Path;
+            _settings.DefaultInstanceDirectory = welcome.SelectedStoragePath;
+            _service.SaveSettings(_settings);
+            DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
+
+            RefreshInstanceCards();
+            UpdateDashboard();
+            UpdateReleaseStatuses();
+            UpdateInstalledRows();
+            ShowPanel("instances");
+
+            if (welcome.CreateFirstInstance)
+                await CreateInstanceFromSourceAsync(registered.Path);
+            else
+                Log("Your original game is added. Create a modded copy whenever you're ready.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this,
+                "Couldn't finish first-time setup: " + ex.Message,
+                "Setup incomplete", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private async void PreviewFirstRun_Click(object sender, RoutedEventArgs e)
+    {
+        await ShowFirstRunAsync(preview: true);
     }
 
     private void ChangeInstanceStorage_Click(object sender, RoutedEventArgs e)
