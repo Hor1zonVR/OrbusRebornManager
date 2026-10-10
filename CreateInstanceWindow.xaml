@@ -1,113 +1,144 @@
 <Window x:Class="OrbusRebornManager.CreateInstanceWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Create an OrbusVR instance"
-        Width="700" Height="710"
-        ResizeMode="NoResize"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Create instance"
+        Width="624" Height="550"
+        ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
         Background="{StaticResource BackgroundBrush}"
         Foreground="{StaticResource TextBrush}"
-        FontFamily="Segoe UI"
+        FontFamily="{StaticResource InterfaceFont}"
         Closing="Window_Closing">
-    <Grid Margin="28">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="0"
+                            GlassFrameThickness="0" CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Border BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+        <Grid Background="{StaticResource BackgroundBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <StackPanel Margin="0,0,0,23">
-            <TextBlock Text="NEW INSTANCE"
-                       Style="{StaticResource Eyebrow}"/>
-            <TextBlock Text="Create an instance"
-                       FontSize="27" FontWeight="Bold" Margin="0,8,0,5"/>
-            <TextBlock Text="A separate copy of OrbusVR for your mods."
-                       FontSize="13" Foreground="{StaticResource MutedBrush}"/>
-        </StackPanel>
-
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <Border Background="{StaticResource CardBrush}"
-                    BorderBrush="{StaticResource StrokeBrush}"
-                    BorderThickness="1" CornerRadius="14"
-                    Padding="23">
-            <StackPanel>
-                <TextBlock Text="Instance name" FontWeight="SemiBold" FontSize="13"/>
-                <TextBox x:Name="NameText" Margin="0,9,0,6"
-                         MaxLength="50" Text="Modded Orbus"/>
-                <TextBlock Text="Use letters, numbers, spaces, hyphens or underscores."
-                           Foreground="{StaticResource MutedBrush}" FontSize="11"/>
-
-                <TextBlock Text="Copy from" FontWeight="SemiBold"
-                           FontSize="13" Margin="0,22,0,9"/>
+            <Border Grid.Row="0" Background="#202127" BorderBrush="#393A43"
+                    BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Chrome_MouseLeftButtonDown">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="SourcePathText" IsReadOnly="True"
-                             ToolTip="Your existing OrbusVR installation"
-                             VerticalContentAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Browse"
-                            Style="{StaticResource PillButton}"
-                            Click="BrowseSource_Click" Margin="9,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="13,0,0,0"
+                                VerticalAlignment="Center">
+                        <ContentControl ContentTemplate="{StaticResource OrbusMark}"
+                                        Width="23" Height="23"/>
+                        <TextBlock Text="New instance" Margin="9,0,0,0"
+                                   VerticalAlignment="Center" FontWeight="SemiBold"
+                                   FontSize="13"/>
+                    </StackPanel>
+                    <Button Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets"
+                            Style="{StaticResource CloseChromeButton}"
+                            Click="Chrome_Close_Click"
+                            HorizontalAlignment="Right" ToolTip="Close"/>
                 </Grid>
-                <TextBlock Text="The source installation will not be modified."
-                           Foreground="{StaticResource MutedBrush}"
-                           FontSize="11" Margin="0,7,0,0"/>
+            </Border>
 
-                <TextBlock Text="Save instances in" FontWeight="SemiBold"
-                           FontSize="13" Margin="0,21,0,9"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="StoragePathText" IsReadOnly="True"
-                             ToolTip="Where your new instances are stored"
-                             VerticalContentAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Change"
-                            Style="{StaticResource PillButton}"
-                            Click="BrowseStorage_Click" Margin="9,0,0,0"/>
+            <StackPanel Grid.Row="1" Margin="25,20,25,0">
+                <TextBlock Text="Create an instance" FontSize="23" FontWeight="SemiBold"
+                           FontFamily="{StaticResource HeadingFont}"/>
+                <TextBlock Text="Set up a separate copy of OrbusVR."
+                           FontSize="13" Foreground="{StaticResource MutedBrush}"
+                           Margin="0,4,0,18"/>
+
+                <TextBlock Text="Name" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,7"/>
+                <TextBox x:Name="NameText" MaxLength="50" Text="Modded Orbus"
+                         FontSize="13.5" Padding="11,8" MinHeight="38"/>
+
+                <Grid Margin="0,16,0,7">
+                    <TextBlock Text="Copy from" FontWeight="SemiBold" FontSize="13"/>
                 </Grid>
-                <CheckBox x:Name="RememberLocationCheck"
-                          Content="Use this folder for future instances"
-                          IsChecked="True" Margin="0,12,0,0"/>
+                <Border Background="{StaticResource CardBrush}" CornerRadius="8"
+                        BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                        Padding="12,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,15,0">
+                            <TextBlock Text="OrbusVR installation" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock x:Name="SourceLocationLabel" FontSize="12"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Change"
+                                Style="{StaticResource PillButton}" Padding="12,7"
+                                Click="BrowseSource_Click" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
 
-                <Border Background="{StaticResource CardAltBrush}"
-                        CornerRadius="10" Margin="0,22,0,0" Padding="13">
+                <TextBlock Text="Save to" FontSize="13" FontWeight="SemiBold"
+                           Margin="0,15,0,7"/>
+                <Border Background="{StaticResource CardBrush}" CornerRadius="8"
+                        BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                        Padding="12,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,15,0">
+                            <TextBlock Text="Instance library" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock x:Name="StorageLocationLabel" FontSize="12"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Change"
+                                Style="{StaticResource PillButton}" Padding="12,7"
+                                Click="BrowseStorage_Click" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border Background="{StaticResource CardBrush}" CornerRadius="8"
+                        Margin="0,17,0,0" Padding="12,10">
                     <StackPanel>
-                        <CheckBox x:Name="LoaderCheck" IsChecked="True"
-                                  Content="Prepare for mods"/>
-                        <TextBlock Text="Automatically install the BepInEx mod loader into your new copy."
-                                   FontSize="11" Foreground="{StaticResource MutedBrush}"
-                                   Margin="22,6,0,0" TextWrapping="Wrap"/>
+                        <CheckBox x:Name="LoaderCheck" Content="Prepare for mods"
+                                  IsChecked="True" FontWeight="SemiBold" FontSize="13"/>
+                        <TextBlock Text="Install BepInEx in the new copy, not the original game."
+                                   FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                   Margin="22,4,0,0"/>
                     </StackPanel>
                 </Border>
-            </StackPanel>
-            </Border>
-        </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Margin="0,18,0,0">
-            <TextBlock x:Name="CreationStatusText"
-                       Foreground="{StaticResource MutedBrush}"
-                       FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8"/>
-            <ProgressBar x:Name="CopyProgress" Height="5" Maximum="100"
-                         Visibility="Collapsed" Margin="0,0,0,14"
-                         Foreground="{StaticResource AccentBrush}"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="1" x:Name="CancelButton" Content="Cancel"
-                        Style="{StaticResource PillButton}"
-                        Click="Cancel_Click" Margin="0,0,10,0"/>
-                <Button Grid.Column="2" x:Name="CreateButton" Content="Create instance"
-                        Style="{StaticResource PrimaryButton}" Click="Create_Click"
-                        MinWidth="145"/>
-            </Grid>
-        </StackPanel>
-    </Grid>
+                <!-- Values retained for safe-copy logic; summaries above are the UI. -->
+                <TextBox x:Name="SourcePathText" Visibility="Collapsed"/>
+                <TextBox x:Name="StoragePathText" Visibility="Collapsed"/>
+                <CheckBox x:Name="RememberLocationCheck" IsChecked="True"
+                          Visibility="Collapsed"/>
+            </StackPanel>
+
+            <Border Grid.Row="2" BorderBrush="{StaticResource StrokeBrush}"
+                    BorderThickness="0,1,0,0" Padding="24,13,24,16"
+                    Background="#202127">
+                <StackPanel>
+                    <TextBlock x:Name="CreationStatusText" FontSize="12"
+                               Foreground="{StaticResource MutedBrush}"
+                               TextWrapping="Wrap" Margin="0,0,0,7"/>
+                    <ProgressBar x:Name="CopyProgress" Visibility="Collapsed" Maximum="100"
+                                 Height="4" Foreground="{StaticResource AccentBrush}"
+                                 Margin="0,0,0,9"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="CancelButton" Content="Cancel"
+                                Style="{StaticResource PillButton}"
+                                Click="Cancel_Click" Margin="0,0,9,0" MinWidth="85"/>
+                        <Button x:Name="CreateButton" Content="Create instance"
+                                Style="{StaticResource PrimaryButton}" Click="Create_Click"
+                                MinWidth="143"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
 </Window>
