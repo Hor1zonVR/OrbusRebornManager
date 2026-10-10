@@ -867,10 +867,8 @@
                     </Grid>
 
                     <!-- Entire list is one surface, with unobtrusive row separators -->
-                    <Border Grid.Row="3" Background="#202127"
-                            BorderBrush="{StaticResource StrokeBrush}"
-                            BorderThickness="1" CornerRadius="13"
-                            VerticalAlignment="Stretch">
+                    <Border Grid.Row="3" Background="Transparent"
+                            BorderThickness="0" VerticalAlignment="Stretch">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="41"/>
@@ -878,7 +876,7 @@
                             </Grid.RowDefinitions>
 
                             <Border Grid.Row="0" Background="#292A32"
-                                    CornerRadius="12,12,0,0"
+                                    CornerRadius="10,10,0,0"
                                     BorderBrush="{StaticResource StrokeBrush}"
                                     BorderThickness="0,0,0,1"
                                     Padding="15,0">
@@ -912,7 +910,7 @@
                                     <ItemsControl ItemsSource="{Binding InstalledMods}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="Transparent" Padding="15,10"
+                                                <Border Background="#22232A" Padding="15,10"
                                                         BorderBrush="{StaticResource StrokeBrush}"
                                                         BorderThickness="0,0,0,1"
                                                         MinHeight="65">
