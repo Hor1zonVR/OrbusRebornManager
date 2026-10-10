@@ -249,8 +249,12 @@
                         <TextBlock x:Name="InstanceCountText" VerticalAlignment="Center"
                                    Margin="14,0,0,0" FontSize="13"
                                    Foreground="{StaticResource MutedBrush}"/>
-                        <Button Content="Add existing game" Click="OpenInstances_Click"
+                        <Button Content="Import .orbuspack" Click="ImportInstance_Click"
                                 Style="{StaticResource PillButton}" Margin="18,0,0,0"
+                                Padding="10,6" MinHeight="30"
+                                ToolTip="Create a new instance from a shared mod list"/>
+                        <Button Content="Add existing game" Click="OpenInstances_Click"
+                                Style="{StaticResource PillButton}" Margin="9,0,0,0"
                                 Padding="10,6" MinHeight="30"
                                 ToolTip="Register an OrbusVR installation you already have"/>
                     </StackPanel>
