@@ -14,6 +14,7 @@ public sealed class ManagerSettings
         "https://raw.githubusercontent.com/Hor1zonVR/OrbusRebornManager/main/catalog/mods.json";
 
     public bool AutoUpdate { get; set; } = true;
+    public bool CheckManagerUpdates { get; set; } = true;
 }
 
 public sealed class CatalogDocument
