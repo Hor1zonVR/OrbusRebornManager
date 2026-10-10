@@ -781,14 +781,21 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal"
                                     VerticalAlignment="Center">
-                            <Button Content="Customize"
-                                    Style="{StaticResource PillButton}"
-                                    Click="EditSelectedInstance_Click"
-                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
-                            <Button Content="Export"
-                                    Style="{StaticResource PillButton}"
-                                    Click="ExportSelectedInstance_Click"
-                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
+                            <Button Content="More" Style="{StaticResource InstanceMoreButton}"
+                                    Click="SelectedInstanceOptions_Click"
+                                    Width="36" Height="36" Margin="0,0,9,0"
+                                    ToolTip="Instance options">
+                                <Button.ContextMenu>
+                                    <ContextMenu Style="{StaticResource InstanceContextMenu}">
+                                        <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                  Header="Customize instance" Click="EditSelectedInstance_Click"/>
+                                        <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                  Header="Export mod list" Click="ExportSelectedInstance_Click"/>
+                                        <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                  Header="Open game folder" Click="SelectedOpenFolder_Click"/>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
                             <Button Content="Open folder"
                                     Style="{StaticResource PillButton}"
                                     Click="SelectedOpenFolder_Click"
