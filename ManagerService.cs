@@ -371,6 +371,11 @@ public sealed class ManagerService
             Path.Combine(game, "OrbusRebornManager", "disabled", id);
     }
 
+    // Read-only path helper for the instance overview. The manager only
+    // modifies these known managed folders, never other plugins.
+    public string GetManagedModPath(string game, string id, bool enabled) =>
+        ModFolder(game, id, enabled);
+
     // Avoid loading the same plugin filename twice in a modded instance.
     // In particular, don't install local-bettermirror alongside a manually
     // installed BepInEx/plugins/BetterMirror/BetterMirror.dll.
