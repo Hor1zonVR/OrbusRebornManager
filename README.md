@@ -5,26 +5,46 @@ This project is not intended for OrbusVR Classic or Preborn.
 
 > This is a development branch. Verify the Windows build and complete a two-version updater test before sharing the installer with the wider community.
 
-## Install and update
+## Install, uninstall, and update
 
-Download **Hor1zonVR.OrbusRebornManager-Setup.exe** (the Velopack installer) from the project's [GitHub Releases](https://github.com/Hor1zonVR/OrbusRebornManager/releases). Run it once. The installed manager will check this repository's **stable GitHub Releases** for updates.
+**Player download:** get `RebornManager-Setup.exe` from [GitHub Releases](https://github.com/Hor1zonVR/OrbusRebornManager/releases). Run it to install RebornManager. The user-facing GitHub release has **one attached download only**, with no package archives or updater manifests to sift through.
 
-When an update is available, RebornManager shows **Update & restart**. It downloads a validated package and restarts to apply it. Smaller delta packages are used where available; otherwise a full update is downloaded. Update checks can be disabled in Settings, and updates are **not installed silently**.
+The installed application can check for newer versions, show an **Update & restart** action, and install the update after user approval.
 
-**Upgrading from the old standalone EXE:** You and existing testers must install the new Setup.exe once. The previous standalone EXE cannot convert itself into an installed, self-updating edition. Existing instances and settings are stored separately under LocalAppData, so installing the new manager should not overwrite game copies.
+**Update packages:** The app obtains the `releases.win.json` feed and its matching Velopack `.nupkg` from GitHub Pages, **not** GitHub Releases:
+`https://hor1zonvr.github.io/OrbusRebornManager/updates/`.
 
-### Build for Windows
+These packages are needed for the in-app updater even though normal users should only see Setup.exe on the downloads page. The site hosts the latest full update package so users can jump directly to the newest version; delta updates can be added later.
 
-Requires the **.NET 8 SDK** and Windows 10/11 x64 on the build machine.
+**Uninstall:** Open RebornManager → Settings → Uninstall RebornManager. The button uses Velopack's Windows uninstaller. It keeps the original OrbusVR installation, your separate modded instances, and saved manager settings so you can reinstall without starting again. You can also uninstall using Windows Installed apps.
+
+**Existing testers:** v0.4.0 used GitHub Releases as its updater source. Since v0.4.1 switches to the separate feed, uninstall the old v0.4.0 through Windows Settings first, then install the new v0.4.1 Setup.exe. Once v0.4.1 is installed, later updates will use the new feed. The new in-app Uninstall button will be available from v0.4.1 onward.
+
+### Developer release prerequisites
+
+**Enable Pages once** on the GitHub repository: Settings → Pages → Build and deployment → Source → **GitHub Actions**. If Pages is not enabled, the release job will intentionally stop before publishing the public installer. This prevents a public Setup.exe appearing without its updater feed.
+
+When releasing:
+
+1. Merge the reviewed development branch after its Windows build passes.
+2. Bump `Version` in `OrbusRebornManager.csproj` to the new release number.
+3. Create and push a `vX.Y.Z` Git tag that matches the project version.
+4. Let GitHub Actions package the app, deploy the update feed to GitHub Pages, and then publish **only `RebornManager-Setup.exe`** to GitHub Releases.
+5. Verify installation and use a subsequent version to test the in-app updater end to end.
+
+The Actions test artifact contains just Setup.exe, although GitHub's Actions interface may wrap artifact downloads in a ZIP. The **public Releases page** exposes the executable directly without an extra ZIP.
+
+This project is currently a development preview. Do not tag a public release until the installer and update path have been validated on Windows.
+
+### Local Windows build
+
+Requires Windows and the **.NET 8 SDK**.
 
 ```powershell
 .\build-windows.ps1
 ```
 
-The script builds the application and generates a Velopack installer in `Releases`.
-For normal releases, push a Git tag matching the `Version` in `OrbusRebornManager.csproj` (for example, `v0.4.0`). GitHub Actions publishes the installer plus Velopack full and delta packages.
-
-**Release discipline:** Do not publish the next version until the current version's installer has been installed and tested on a Windows machine. To verify the update path, install v0.4.0, publish a v0.4.1 test release, and confirm the manager detects and applies it without losing settings or instances. Do not tag v0.4.0 while the UI or installer is still unfinished.
+The script builds the installer and update packages locally into `Releases/`. Use **the Setup.exe** for testing; the other generated files are inputs to the updater publishing process, not downloads for players.
 
 ## First run and testing
 
