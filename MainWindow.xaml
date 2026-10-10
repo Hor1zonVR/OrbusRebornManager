@@ -595,23 +595,54 @@
                 </ScrollViewer>
             </Grid>
 
-            <!-- MY MODS -->
-            <Grid Grid.Row="1"
-                  x:Name="InstalledPanel"
-                  Visibility="Collapsed">
+            <!-- SELECTED INSTANCE -->
+            <Grid Grid.Row="1" x:Name="InstalledPanel" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Background="#16322F"
-                        Padding="14"
-                        CornerRadius="10"
-                        Margin="0,0,0,12">
-                    <TextBlock Text="Mods are managed separately for each installation. Close the game before making changes."
-                               Foreground="#C3E7E0"
-                               TextWrapping="Wrap"
-                               FontSize="12"/>
+                <Border Background="{StaticResource CardBrush}"
+                        BorderBrush="{StaticResource StrokeBrush}"
+                        BorderThickness="1" CornerRadius="14"
+                        Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <Button Content="←  Back to instances"
+                                Style="{StaticResource PillButton}"
+                                Click="Instances_Click"
+                                Padding="12,8"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,0,15"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="SelectedInstanceName"
+                                           Text="Selected instance"
+                                           FontWeight="Bold" FontSize="20"/>
+                                <TextBlock x:Name="SelectedInstanceMeta"
+                                           FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                           Margin="0,6,0,0"/>
+                                <TextBlock x:Name="SelectedInstanceLoaderText"
+                                           FontSize="12" Foreground="{StaticResource AccentBrush}"
+                                           Margin="0,6,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                        VerticalAlignment="Center" Margin="16,0,0,0">
+                                <Button Content="Add mods" Style="{StaticResource PillButton}"
+                                        Click="Discover_Click" Margin="0,0,8,0"/>
+                                <Button Content="Play" Style="{StaticResource PrimaryButton}"
+                                        Click="Launch_Click"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="Installed mods"
+                                   FontWeight="SemiBold" FontSize="15"
+                                   Margin="0,20,0,8"/>
+                        <TextBlock Text="Enable, disable or remove mods for this instance only."
+                                   FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                    </StackPanel>
                 </Border>
 
                 <ScrollViewer Grid.Row="1"
@@ -675,7 +706,7 @@
                                            FontSize="19"
                                            TextAlignment="Center"/>
 
-                                <TextBlock Text="Choose Browse mods, or import a local test DLL from Home."
+                                <TextBlock Text="Browse Client Mods to install your first mod for this instance."
                                            Foreground="{StaticResource MutedBrush}"
                                            Margin="0,10,0,0"
                                            FontSize="12"
