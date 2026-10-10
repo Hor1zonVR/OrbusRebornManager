@@ -10,6 +10,7 @@ public sealed class GameInstance
     public string Name { get; set; } = "";
     public string Path { get; set; } = "";
     public bool CreatedByManager { get; set; }
+    public string CustomIconPath { get; set; } = "";
 }
 
 public sealed class InstanceStore
