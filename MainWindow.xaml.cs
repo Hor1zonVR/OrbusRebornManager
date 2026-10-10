@@ -729,6 +729,10 @@ public sealed class InstanceCard
     public Brush CoverBrush { get; }
     public ImageSource? CustomIcon { get; }
     public bool HasCustomIcon => CustomIcon != null;
+    public bool IconFit => Instance.IconFit;
+    public double IconZoom => Math.Clamp(Instance.IconZoom, 1.0, 2.5);
+    public double IconOffsetX => Math.Clamp(Instance.IconOffsetX, -80, 80);
+    public double IconOffsetY => Math.Clamp(Instance.IconOffsetY, -80, 80);
 
     public InstanceCard(GameInstance instance, string modCount,
         string readiness, bool isSelected)
