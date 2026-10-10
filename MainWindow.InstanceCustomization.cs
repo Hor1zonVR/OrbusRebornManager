@@ -5,11 +5,21 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace OrbusRebornManager;
 
 public partial class MainWindow
 {
+    private void SelectedInstanceOptions_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { ContextMenu: not null } button)
+            return;
+        button.ContextMenu.PlacementTarget = button;
+        button.ContextMenu.Placement = PlacementMode.Bottom;
+        button.ContextMenu.IsOpen = true;
+    }
+
     private void InstanceCustomize_Click(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement { Tag: InstanceCard card })
