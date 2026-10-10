@@ -2,93 +2,122 @@
 <Window x:Class="OrbusRebornManager.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Orbus Reborn Manager"
         Width="1210" Height="810"
+        WindowStyle="None" ResizeMode="CanResize"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
         MinWidth="980" MinHeight="660"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded"
         SourceInitialized="Window_SourceInitialized"
-        Background="#0A0F19"
-        Foreground="#F2F7FC"
-        FontFamily="Segoe UI">
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="{StaticResource InterfaceFont}">
 
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
+                            GlassFrameThickness="0" CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
     <Grid Background="{StaticResource BackgroundBrush}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="230"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-
-        <!-- Navigation -->
-        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}"
-                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,1,0">
-            <DockPanel Margin="16,25,16,19">
-                <StackPanel DockPanel.Dock="Top">
-                    <StackPanel Orientation="Horizontal" Margin="6,0,0,38">
-                        <Border Width="43" Height="43" CornerRadius="12"
-                                Background="{StaticResource AccentBrush}" Margin="0,0,12,0">
-                            <TextBlock Text="O" FontSize="27" FontWeight="Black"
-                                       Foreground="#082A2C" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="ORBUS REBORN" FontWeight="Bold" FontSize="16"/>
-                            <TextBlock Text="MOD MANAGER" FontWeight="SemiBold"
-                                       Foreground="{StaticResource MutedBrush}" FontSize="10"
-                                       Margin="0,3,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <TextBlock Text="LIBRARY" Style="{StaticResource Eyebrow}"
-                               Margin="13,0,0,11"/>
-                    <Button x:Name="NavHome" Style="{StaticResource SidebarButton}"
-                            Click="Instances_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Margin="0,0,15,0"/>
-                            <TextBlock Text="My Instances" VerticalAlignment="Center"/>
-                        </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!-- A WPF-rendered title bar avoids the mismatched Windows frame. -->
+        <Border Grid.Row="0" Background="#202127" BorderBrush="#373940"
+                BorderThickness="0,0,0,1"
+                MouseLeftButtonDown="ChromeTitle_MouseLeftButtonDown">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="13,0,0,0">
+                    <ContentControl ContentTemplate="{StaticResource OrbusMark}"
+                                    Width="27" Height="27"/>
+                    <TextBlock Text="Orbus Reborn" FontFamily="{StaticResource HeadingFont}"
+                               FontSize="14" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <TextBlock Text="Manager" FontSize="13" VerticalAlignment="Center"
+                               Foreground="{StaticResource MutedBrush}" Margin="7,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Column="1">
+                    <Button Style="{StaticResource ChromeButton}"
+                            ToolTip="Minimize" Click="Chrome_Minimize_Click">
+                        <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
                     </Button>
-                    <Button x:Name="NavBrowse" Style="{StaticResource SidebarButton}"
-                            Click="Discover_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Margin="0,0,15,0"/>
-                            <TextBlock Text="Client Mods" VerticalAlignment="Center"/>
-                        </StackPanel>
+                    <Button Style="{StaticResource ChromeButton}"
+                            ToolTip="Maximize or restore" Click="Chrome_Maximize_Click">
+                        <TextBlock x:Name="MaximizeGlyph" Text="&#xE922;"
+                                   FontFamily="Segoe MDL2 Assets" FontSize="13"/>
                     </Button>
-                    <Button x:Name="NavServer" Style="{StaticResource SidebarButton}"
-                            Click="ServerMods_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Margin="0,0,15,0"/>
-                            <TextBlock Text="Server Mods" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <Border Height="1" Background="{StaticResource StrokeBrush}"
-                            Margin="10,21,10,17"/>
-                    <Button x:Name="NavSettings" Style="{StaticResource SidebarButton}"
-                            Click="SimpleSettings_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Margin="0,0,15,0"/>
-                            <TextBlock Text="Settings" VerticalAlignment="Center"/>
-                        </StackPanel>
+                    <Button Style="{StaticResource CloseChromeButton}"
+                            ToolTip="Close" Click="Chrome_Close_Click">
+                        <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
                     </Button>
                 </StackPanel>
-                <StackPanel DockPanel.Dock="Bottom">
-                    <TextBlock Text="REBORN COMMUNITY EDITION" FontSize="10"
-                               HorizontalAlignment="Center"
-                               Foreground="{StaticResource MutedBrush}"/>
-                    <TextBlock x:Name="SidebarVersionText" Text="RebornManager" FontSize="10"
-                               HorizontalAlignment="Center" Foreground="#778BA0"
-                               Margin="0,7,0,0"/>
-                </StackPanel>
-            </DockPanel>
+            </Grid>
         </Border>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="214"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Quiet sidebar: one clear action per row, settings anchored below. -->
+            <Border Grid.Column="0" Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,1,0">
+                <DockPanel Margin="12,20,12,16">
+                    <StackPanel DockPanel.Dock="Bottom">
+                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="7,0,7,10"/>
+                        <Button x:Name="NavSettings" Style="{StaticResource SidebarButton}"
+                                Click="SimpleSettings_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17" Margin="0,0,13,0"/>
+                                <TextBlock Text="Settings" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock x:Name="SidebarVersionText" Text="RebornManager"
+                                   Foreground="{StaticResource MutedBrush}" FontSize="13"
+                                   HorizontalAlignment="Left" Margin="12,10,0,0"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Text="LIBRARY" Style="{StaticResource Eyebrow}"
+                                   Margin="12,2,0,14"/>
+                        <Button x:Name="NavHome" Style="{StaticResource SidebarButton}"
+                                Click="Instances_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17" Margin="0,0,13,0"/>
+                                <TextBlock Text="My Instances" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="NavBrowse" Style="{StaticResource SidebarButton}"
+                                Click="Discover_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17" Margin="0,0,13,0"/>
+                                <TextBlock Text="Client Mods" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="NavServer" Style="{StaticResource SidebarButton}"
+                                Click="ServerMods_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17" Margin="0,0,13,0"/>
+                                <TextBlock Text="Server Mods" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
 
         <!-- Main content -->
         <Grid Grid.Column="1"
-              Margin="32,28,32,21">
+              Margin="25,22,25,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -97,7 +126,7 @@
 
             <!-- Page heading -->
             <Grid Grid.Row="0"
-                  Margin="0,0,0,23">
+                  Margin="0,0,0,17">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -105,19 +134,18 @@
 
                 <StackPanel>
                     <TextBlock x:Name="PageHeading"
-                               Text="Home"
-                               FontSize="29"
+                               Text="Library"
+                               FontFamily="{StaticResource HeadingFont}"
+                               FontSize="24"
                                FontWeight="Bold"/>
 
                     <TextBlock x:Name="PageSubtitle"
                                Foreground="{StaticResource MutedBrush}"
-                               FontSize="12"
+                               FontSize="13"
                                Margin="0,6,0,0"/>
                 </StackPanel>
 
-                <Button x:Name="HeaderCreateButton" Grid.Column="1"
-                        Content="+  New Instance" Click="CreateInstance_Click"
-                        Style="{StaticResource PrimaryButton}" VerticalAlignment="Center"/>
+
                 <Border x:Name="HeaderStatusCard" Grid.Column="1"
                         Background="#15332F"
                         CornerRadius="20"
@@ -128,7 +156,7 @@
                         Margin="12,0,0,0">
                     <TextBlock x:Name="TopStatus"
                                Text="●  Select a game"
-                               FontSize="11"
+                               FontSize="12"
                                FontWeight="SemiBold"
                                Foreground="{StaticResource AccentBrush}"/>
                 </Border>
@@ -156,12 +184,13 @@
                                        Margin="37,0,0,0" VerticalAlignment="Center"
                                        IsHitTestVisible="False"/>
                         </Grid>
-                        <Button Grid.Column="1" Content="Add existing game"
-                                Style="{StaticResource PillButton}"
-                                Click="OpenInstances_Click"/>
+                        <Button Grid.Column="1" Content="+  New instance"
+                                x:Name="HeaderCreateButton"
+                                Style="{StaticResource PrimaryButton}"
+                                Click="CreateInstance_Click" VerticalAlignment="Center"/>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,19">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                         <Button x:Name="InstanceSortButton" Content="Recently added  ▾"
                                 Style="{StaticResource PillButton}" Padding="13,9"
                                 Click="OpenInstanceSort_Click" Margin="0,0,9,0">
@@ -197,8 +226,12 @@
                             </Button.ContextMenu>
                         </Button>
                         <TextBlock x:Name="InstanceCountText" VerticalAlignment="Center"
-                                   Margin="14,0,0,0" FontSize="12"
+                                   Margin="14,0,0,0" FontSize="13"
                                    Foreground="{StaticResource MutedBrush}"/>
+                        <Button Content="Add existing game" Click="OpenInstances_Click"
+                                Style="{StaticResource PillButton}" Margin="18,0,0,0"
+                                Padding="10,6" MinHeight="30"
+                                ToolTip="Register an OrbusVR installation you already have"/>
                     </StackPanel>
 
                     <ItemsControl ItemsSource="{Binding InstanceCards}">
@@ -207,8 +240,8 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Width="196" MinHeight="236" Margin="0,0,13,13"
-                                        Padding="9" CornerRadius="14" BorderThickness="1"
+                                <Border Width="178" MinHeight="217" Margin="0,0,11,11"
+                                        Padding="8" CornerRadius="11" BorderThickness="1"
                                         Background="{StaticResource CardBrush}"
                                         Tag="{Binding}" ToolTip="{Binding Readiness}"
                                         Cursor="Hand" MouseLeftButtonUp="InstanceCard_Click">
@@ -241,37 +274,34 @@
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     <StackPanel>
-                                        <Border Height="145" CornerRadius="10"
+                                        <Border Height="135" CornerRadius="9"
                                                 Background="{Binding CoverBrush}">
                                             <Grid>
-                                                <TextBlock Text="ORBUS REBORN" FontSize="9"
-                                                           Foreground="#DBFFFFFF" FontWeight="Bold"
-                                                           Margin="11,12,0,0" HorizontalAlignment="Left"
-                                                           VerticalAlignment="Top"/>
-                                                <TextBlock Text="O" FontSize="82" FontWeight="Black"
-                                                           Opacity="0.32" Foreground="White"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <ContentControl ContentTemplate="{StaticResource OrbusMark}"
+                                                                Width="77" Height="77" Opacity="0.85"
+                                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                
                                                 <Button Content="&#xE712;" FontFamily="Segoe MDL2 Assets"
                                                         Style="{StaticResource PillButton}"
-                                                        Padding="8" Width="34" Height="32"
+                                                        Padding="8" Width="32" Height="31"
                                                         Tag="{Binding}" Click="InstanceOptions_Click"
                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
                                                         Margin="0,6,6,0"
                                                         ToolTip="More actions"/>
                                                 <Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets"
                                                         Style="{StaticResource PrimaryButton}"
-                                                        Padding="9" Width="40" Height="38"
+                                                        Padding="9" Width="37" Height="35"
                                                         Tag="{Binding}" Click="InstancePlay_Click"
                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                         Margin="0,0,9,9" ToolTip="Play"/>
                                             </Grid>
                                         </Border>
-                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold"
-                                                   Margin="3,12,3,0" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding ModCount}" FontSize="12"
+                                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                                                   Margin="3,9,3,0" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding ModCount}" FontSize="13"
                                                    Foreground="{StaticResource MutedBrush}"
                                                    Margin="3,5,3,0" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding Kind}" FontSize="11"
+                                        <TextBlock Text="{Binding Kind}" FontSize="13"
                                                    Foreground="{StaticResource MutedBrush}"
                                                    Margin="3,4,3,5" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
@@ -299,7 +329,7 @@
                             <TextBlock Text="No matching instances"
                                        FontSize="19" FontWeight="Bold" TextAlignment="Center"/>
                             <TextBlock Text="Try another search or change the filter."
-                                       FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
                                        Margin="0,9,0,15" TextAlignment="Center"/>
                             <Button Content="Clear search and filters"
                                     HorizontalAlignment="Center"
@@ -328,7 +358,7 @@
 
                             <TextBlock Text="Manage the mod loader and installed mods for this game copy."
                                        Foreground="{StaticResource MutedBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        TextWrapping="Wrap"/>
 
                             <TextBox x:Name="GamePathText"
@@ -371,7 +401,7 @@
                                            Margin="0,12,0,5"/>
 
                                 <TextBlock Text="BepInEx, installed separately for each game copy."
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{StaticResource MutedBrush}"
                                            TextWrapping="Wrap"/>
 
@@ -399,7 +429,7 @@
                                            Margin="0,12,0,5"/>
 
                                 <TextBlock Text="Install approved community releases, or test a local DLL."
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{StaticResource MutedBrush}"
                                            TextWrapping="Wrap"/>
 
@@ -433,7 +463,7 @@
                                            FontWeight="Bold"/>
 
                                 <TextBlock Text="Launch the selected OrbusVR installation."
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{StaticResource MutedBrush}"
                                            Margin="0,6,0,0"/>
                             </StackPanel>
@@ -472,7 +502,7 @@
                             <StackPanel>
                                 <TextBlock Text="For server operators" FontSize="15" FontWeight="SemiBold"/>
                                 <TextBlock Text="Server mods belong on a game server, not inside your local OrbusVR instance."
-                                           Foreground="{StaticResource MutedBrush}" FontSize="12"
+                                           Foreground="{StaticResource MutedBrush}" FontSize="13"
                                            TextWrapping="Wrap" Margin="0,7,0,0"/>
                             </StackPanel>
                         </Border>
@@ -487,12 +517,12 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
-                                                <TextBlock Text="{Binding Author}" FontSize="11"
+                                                <TextBlock Text="{Binding Author}" FontSize="12"
                                                            Foreground="{StaticResource AccentBrush}" Margin="0,5,0,0"/>
-                                                <TextBlock Text="{Binding Description}" FontSize="12"
+                                                <TextBlock Text="{Binding Description}" FontSize="13"
                                                            Foreground="{StaticResource MutedBrush}"
                                                            TextWrapping="Wrap" Margin="0,9,0,0"/>
-                                                <TextBlock Text="{Binding Version}" FontSize="11"
+                                                <TextBlock Text="{Binding Version}" FontSize="12"
                                                            Foreground="{StaticResource MutedBrush}" Margin="0,8,0,0"/>
                                             </StackPanel>
                                             <Button Grid.Column="1" Content="View source" Tag="{Binding}"
@@ -510,7 +540,7 @@
                                 <TextBlock Text="No server mods found" FontSize="19"
                                            FontWeight="Bold" TextAlignment="Center"/>
                                 <TextBlock Text="Server projects appear here when they're added to the community catalogue."
-                                           FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                           FontSize="13" Foreground="{StaticResource MutedBrush}"
                                            Margin="0,10,0,0" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
@@ -561,7 +591,7 @@
                                 Margin="0,0,0,12">
                             <TextBlock x:Name="CatalogInfo"
                                        Foreground="#C3E7E0"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Text="Approved community mods"/>
                         </Border>
 
@@ -587,7 +617,7 @@
                                                      is a read-only property,
                                                      so bind explicitly OneWay. -->
                                                 <TextBlock Foreground="{StaticResource AccentBrush}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            Margin="0,6,0,0">
                                                     <Run Text="by "/>
                                                     <Run Text="{Binding Author, Mode=OneWay}"/>
@@ -598,12 +628,12 @@
                                                 <TextBlock Text="{Binding Description, Mode=OneWay}"
                                                            Foreground="{StaticResource MutedBrush}"
                                                            TextWrapping="Wrap"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            Margin="0,10,0,0"/>
 
                                                 <TextBlock Text="{Binding Status, Mode=OneWay}"
                                                            Foreground="#C3D5E5"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            Margin="0,10,0,0"/>
                                             </StackPanel>
 
@@ -645,7 +675,7 @@
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            Margin="0,10,0,0"
-                                           FontSize="12"/>
+                                           FontSize="13"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -680,10 +710,10 @@
                                            Text="Selected instance"
                                            FontWeight="Bold" FontSize="20"/>
                                 <TextBlock x:Name="SelectedInstanceMeta"
-                                           FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                           FontSize="13" Foreground="{StaticResource MutedBrush}"
                                            Margin="0,6,0,0"/>
                                 <TextBlock x:Name="SelectedInstanceLoaderText"
-                                           FontSize="12" Foreground="{StaticResource AccentBrush}"
+                                           FontSize="13" Foreground="{StaticResource AccentBrush}"
                                            Margin="0,6,0,0"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal"
@@ -698,7 +728,7 @@
                                    FontWeight="SemiBold" FontSize="15"
                                    Margin="0,20,0,8"/>
                         <TextBlock Text="Enable, disable or remove mods for this instance only."
-                                   FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                                   FontSize="13" Foreground="{StaticResource MutedBrush}"/>
                     </StackPanel>
                 </Border>
 
@@ -722,12 +752,12 @@
                                                            FontWeight="Bold"/>
 
                                                 <TextBlock Text="{Binding Version, Mode=OneWay}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            Foreground="{StaticResource AccentBrush}"
                                                            Margin="0,6,0,0"/>
 
                                                 <TextBlock Text="{Binding Status, Mode=OneWay}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            Foreground="{StaticResource MutedBrush}"
                                                            Margin="0,10,0,0"/>
                                             </StackPanel>
@@ -766,7 +796,7 @@
                                 <TextBlock Text="Browse Client Mods to install your first mod for this instance."
                                            Foreground="{StaticResource MutedBrush}"
                                            Margin="0,10,0,0"
-                                           FontSize="12"
+                                           FontSize="13"
                                            TextAlignment="Center"/>
                             </StackPanel>
                         </Border>
@@ -786,8 +816,8 @@
                             <TextBlock Text="Instance location" FontSize="20"
                                        FontWeight="Bold" Margin="0,10,0,7"/>
                             <TextBlock Text="New game copies are saved here by default."
-                                       FontSize="12" Foreground="{StaticResource MutedBrush}"/>
-                            <TextBlock x:Name="DefaultInstanceFolderText" FontSize="12"
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"/>
+                            <TextBlock x:Name="DefaultInstanceFolderText" FontSize="13"
                                        TextWrapping="Wrap" Margin="0,12,0,12"/>
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="Change location"
@@ -805,9 +835,9 @@
                             <TextBlock Text="APPLICATION" Style="{StaticResource Eyebrow}"/>
                             <TextBlock Text="RebornManager updates" FontSize="21"
                                        FontWeight="Bold" Margin="0,10,0,8"/>
-                            <TextBlock x:Name="ManagerVersionText" FontSize="12"
+                            <TextBlock x:Name="ManagerVersionText" FontSize="13"
                                        Foreground="{StaticResource MutedBrush}"/>
-                            <TextBlock x:Name="ManagerUpdateStatusText" FontSize="12"
+                            <TextBlock x:Name="ManagerUpdateStatusText" FontSize="13"
                                        TextWrapping="Wrap"
                                        Foreground="{StaticResource MutedBrush}"
                                        Margin="0,9,0,0"/>
@@ -835,7 +865,7 @@
 
                             <TextBlock Text="The manager checks approved mods on GitHub when you open it."
                                        Foreground="{StaticResource MutedBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        TextWrapping="Wrap"/>
 
                             <CheckBox x:Name="AutoUpdatesCheck"
@@ -862,7 +892,7 @@
 
                             <TextBlock Text="Send your GitHub repository to the maintainer on Discord. Approved mods are added to the catalogue for everyone."
                                        Foreground="{StaticResource MutedBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -874,7 +904,7 @@
                             <TextBlock Text="Remove RebornManager" FontSize="19"
                                        FontWeight="Bold" Margin="0,10,0,8"/>
                             <TextBlock Text="Uninstall the app while keeping your OrbusVR instances and settings."
-                                       FontSize="12" TextWrapping="Wrap"
+                                       FontSize="13" TextWrapping="Wrap"
                                        Foreground="{StaticResource MutedBrush}"/>
                             <Button x:Name="UninstallManagerButton"
                                     Content="Uninstall RebornManager"
@@ -917,7 +947,7 @@
                             Margin="0,0,12,0" VerticalAlignment="Center"/>
                     <TextBlock x:Name="StatusLine"
                                Foreground="#B6CADC"
-                               FontSize="11"
+                               FontSize="12"
                                Text="Ready"
                                TextTrimming="CharacterEllipsis"/>
 
@@ -933,5 +963,6 @@
                 </Grid>
             </Border>
         </Grid>
+    </Grid>
     </Grid>
 </Window>
