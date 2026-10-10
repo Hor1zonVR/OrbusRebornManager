@@ -89,7 +89,9 @@ The manager does not automatically discover arbitrary BepInEx plugins added manu
 
 ## Customize and share an instance
 
-Use an instance card's **three-dot menu → Customize instance**, or click **Customize** from its instance overview, to edit the displayed name and choose personal artwork. PNG, JPG and BMP files (up to 12 MB) are supported. RebornManager converts your image into a local PNG in `%LOCALAPPDATA%\\OrbusRebornManager\\instance-icons`; it never changes the OrbusVR game files. **Use default** restores the coloured Orbus mark. Renaming changes only the manager's label, not the actual game folder, so existing installs and shortcuts keep working.
+Use an instance card's **three-dot menu → Customize instance** (also available from the selected instance's three-dot menu) to edit its display name and cover. PNG, JPG and BMP images up to 12 MB are supported. RebornManager saves a local PNG under `%LOCALAPPDATA%\\OrbusRebornManager\\instance-icons`, not in the game folder.
+
+The artwork editor uses a live preview matching the library cover: **Fill** makes the artwork extend across the whole card, while **Fit** preserves the complete image and uses a soft backdrop. Drag the image or use the horizontal/vertical sliders to reposition it; use the zoom slider to adjust scale. **Reset framing** restores the default centred fill view, and **Use default** restores the Orbus cube. These adjustments persist across restarts. Existing artwork from older RebornManager versions remains usable and defaults to the full-cover view. Renaming is purely a display-name edit: it never moves game folders or changes installed mods.
 
 Choose **Export mod list** from the card menu (or **Export** from the instance page) to write a `.orbuspack` file. This is a human-readable JSON manifest with schema version 1, game identity, instance name, mod IDs, versions, GitHub repository metadata (where applicable) and enabled/disabled flags. The file **does not** contain game assets, DLLs, save data, configuration, Windows paths or personal icons. Locally imported DLLs are explicitly marked as manual requirements.
 
