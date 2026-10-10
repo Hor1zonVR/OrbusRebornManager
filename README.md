@@ -87,6 +87,14 @@ Select an instance card from **Library** to open its management page. This page 
 
 The manager does not automatically discover arbitrary BepInEx plugins added manually outside of the managed-mod registry. Such plugins remain on disk and are never deleted by this screen.
 
+## Customize and share an instance
+
+Use an instance card's **three-dot menu → Customize instance**, or click **Customize** from its instance overview, to edit the displayed name and choose personal artwork. PNG, JPG and BMP files (up to 12 MB) are supported. RebornManager converts your image into a local PNG in `%LOCALAPPDATA%\\OrbusRebornManager\\instance-icons`; it never changes the OrbusVR game files. **Use default** restores the coloured Orbus mark. Renaming changes only the manager's label, not the actual game folder, so existing installs and shortcuts keep working.
+
+Choose **Export mod list** from the card menu (or **Export** from the instance page) to write a `.orbuspack` file. This is a human-readable JSON manifest with schema version 1, game identity, instance name, mod IDs, versions, GitHub repository metadata (where applicable) and enabled/disabled flags. The file **does not** contain game assets, DLLs, save data, configuration, Windows paths or personal icons. Locally imported DLLs are explicitly marked as manual requirements.
+
+`.orbuspack` importing and automatic retrieval of pinned mod versions are **not implemented yet**. Exports are for sharing a mod list and serve as the basis of a future import workflow; they must not be presented as currently self-installing packages.
+
 ## Curated catalogue workflow
 
 RebornManager uses an explicitly curated catalogue, rather than crawling arbitrary GitHub repositories.
