@@ -727,11 +727,14 @@ public sealed class InstanceCard
     public string Readiness { get; }
     public bool IsSelected { get; }
     public Brush CoverBrush { get; }
+    public ImageSource? CustomIcon { get; }
+    public bool HasCustomIcon => CustomIcon != null;
 
     public InstanceCard(GameInstance instance, string modCount,
         string readiness, bool isSelected)
     {
         Instance = instance;
+        CustomIcon = InstanceArtwork.Load(instance.CustomIconPath);
         ModCount = modCount;
         Readiness = readiness;
         IsSelected = isSelected;
