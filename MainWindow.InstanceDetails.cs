@@ -26,6 +26,9 @@ public sealed class InstanceModRow
     public ModDefinition Definition { get; }
     public string Name => Installed.Name;
     public string Version => Installed.Local ? "Local build" : Installed.Version;
+    public string AssetDisplay => string.IsNullOrWhiteSpace(Installed.AssetName)
+        ? (Installed.Local ? "Local plugin" : "Managed plugin")
+        : Installed.AssetName;
     public string Author => Installed.Local ? "Local DLL" :
         string.IsNullOrWhiteSpace(Definition.Author) ? "Community mod" : Definition.Author;
     public string IconLetter => string.IsNullOrWhiteSpace(Name) ? "M" :
