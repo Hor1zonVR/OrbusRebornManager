@@ -18,98 +18,70 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Navigation -->
-        <Border Grid.Column="0"
-                Background="{StaticResource SidebarBrush}"
-                BorderBrush="#29394D"
-                BorderThickness="0,0,1,0">
-            <DockPanel Margin="16,26,16,19">
-                <StackPanel DockPanel.Dock="Top">
-                    <StackPanel Orientation="Horizontal"
-                                Margin="8,0,0,38">
-                        <Border Width="42"
-                                Height="42"
-                                CornerRadius="12"
-                                Background="{StaticResource AccentBrush}"
-                                Margin="0,0,11,0">
-                            <TextBlock Text="O"
-                                       FontSize="27"
-                                       FontWeight="Black"
-                                       Foreground="#082A2C"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Center"/>
-                        </Border>
 
+        <!-- Navigation -->
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="16,25,16,19">
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,38">
+                        <Border Width="43" Height="43" CornerRadius="12"
+                                Background="{StaticResource AccentBrush}" Margin="0,0,12,0">
+                            <TextBlock Text="O" FontSize="27" FontWeight="Black"
+                                       Foreground="#082A2C" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="ORBUS"
-                                       FontSize="20"
-                                       FontWeight="Bold"/>
-                            <TextBlock Text="REBORN MANAGER"
-                                       Foreground="{StaticResource AccentBrush}"
-                                       FontSize="9"
-                                       FontWeight="Bold"/>
+                            <TextBlock Text="ORBUS REBORN" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock Text="MOD MANAGER" FontWeight="SemiBold"
+                                       Foreground="{StaticResource MutedBrush}" FontSize="10"
+                                       Margin="0,3,0,0"/>
                         </StackPanel>
                     </StackPanel>
-
-                    <TextBlock Text="LIBRARY"
-                               Margin="12,0,0,11"
-                               FontWeight="Bold"
-                               Foreground="#8196AF"
-                               FontSize="10"/>
-
-                    <Button x:Name="NavHome"
-                            Content="⌂     Home"
-                            Click="Dashboard_Click"
-                            Style="{StaticResource SidebarButton}"/>
-
-                    <Button x:Name="NavBrowse"
-                            Content="▦     Browse mods"
-                            Click="Discover_Click"
-                            Style="{StaticResource SidebarButton}"/>
-
-                    <Button x:Name="NavInstalled"
-                            Content="▤     My mods"
-                            Click="Installed_Click"
-                            Style="{StaticResource SidebarButton}"/>
-
-                    <Border Height="1"
-                            Background="#263548"
-                            Margin="10,22,10,20"/>
-
-                    <Button x:Name="NavSettings"
-                            Content="⚙     Settings"
-                            Click="SimpleSettings_Click"
-                            Style="{StaticResource SidebarButton}"/>
-                </StackPanel>
-
-                <StackPanel DockPanel.Dock="Bottom"
-                            VerticalAlignment="Bottom">
-                    <Border Background="#17283A"
-                            CornerRadius="11"
-                            Padding="13"
-                            Margin="0,0,0,15">
-                        <StackPanel>
-                            <TextBlock Text="●   REBORN COMMUNITY EDITION"
-                                       FontSize="10"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource AccentBrush}"/>
-
-                            <TextBlock Text="Windows PC · IL2CPP"
-                                       FontSize="11"
-                                       Foreground="#A5BBCE"
-                                       Margin="0,8,0,0"/>
-
-                            <TextBlock Text="Classic / Preborn not supported"
-                                       FontSize="10"
-                                       Foreground="#7D96AE"
-                                       Margin="0,4,0,0"/>
+                    <TextBlock Text="LIBRARY" Style="{StaticResource Eyebrow}"
+                               Margin="13,0,0,11"/>
+                    <Button x:Name="NavHome" Style="{StaticResource SidebarButton}"
+                            Click="Instances_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="My Instances" VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Border>
-
-                    <TextBlock Text="ORBUS REBORN MANAGER  ·  V0.3.1"
-                               FontSize="9"
-                               Foreground="#778BA0"
-                               HorizontalAlignment="Center"/>
+                    </Button>
+                    <Button x:Name="NavBrowse" Style="{StaticResource SidebarButton}"
+                            Click="Discover_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="Client Mods" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="NavServer" Style="{StaticResource SidebarButton}"
+                            Click="ServerMods_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="Server Mods" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Border Height="1" Background="{StaticResource StrokeBrush}"
+                            Margin="10,21,10,17"/>
+                    <Button x:Name="NavSettings" Style="{StaticResource SidebarButton}"
+                            Click="SimpleSettings_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="Settings" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <TextBlock Text="REBORN COMMUNITY EDITION" FontSize="10"
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource MutedBrush}"/>
+                    <TextBlock Text="v0.4.0 development preview" FontSize="10"
+                               HorizontalAlignment="Center" Foreground="#778BA0"
+                               Margin="0,7,0,0"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -143,7 +115,10 @@
                                Margin="0,6,0,0"/>
                 </StackPanel>
 
-                <Border Grid.Column="1"
+                <Button x:Name="HeaderCreateButton" Grid.Column="1"
+                        Content="+  New Instance" Click="CreateInstance_Click"
+                        Style="{StaticResource PrimaryButton}" VerticalAlignment="Center"/>
+                <Border x:Name="HeaderStatusCard" Grid.Column="1"
                         Background="#15332F"
                         CornerRadius="20"
                         BorderBrush="#2A554F"
@@ -159,7 +134,114 @@
                 </Border>
             </Grid>
 
-            <!-- HOME -->
+
+            <!-- INSTANCES -->
+            <ScrollViewer Grid.Row="1" x:Name="InstancesPanel"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,3,4">
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="YOUR LIBRARY" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="Choose an instance to play or manage its mods."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Add existing game"
+                                Style="{StaticResource PillButton}"
+                                Click="OpenInstances_Click" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding InstanceCards}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="285" MinHeight="214" Margin="0,0,14,14"
+                                        Padding="19" CornerRadius="14" BorderThickness="1"
+                                        Background="{StaticResource CardBrush}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Manage mods" Tag="{Binding}" Click="InstanceManage_Click"/>
+                                            <MenuItem Header="Open folder" Tag="{Binding}" Click="InstanceOpenFolder_Click"/>
+                                            <Separator/>
+                                            <MenuItem Header="Remove from list" Tag="{Binding}" Click="InstanceForget_Click"/>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="48" Height="48" CornerRadius="12"
+                                                    Background="{StaticResource CardAltBrush}"
+                                                    Margin="0,0,13,0">
+                                                <TextBlock Text="&#xE7FC;" FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="23" Foreground="{StaticResource AccentBrush}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center" Width="178">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Kind}" FontSize="11"
+                                                           Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Margin="0,19,0,16">
+                                            <TextBlock Text="{Binding ModCount}" FontSize="13" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Readiness}" FontSize="12"
+                                                       Foreground="{StaticResource MutedBrush}"
+                                                       TextWrapping="Wrap" Margin="0,7,0,0"/>
+                                        </StackPanel>
+                                        <Grid Grid.Row="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Content="Play" Tag="{Binding}"
+                                                    Click="InstancePlay_Click"
+                                                    Style="{StaticResource PrimaryButton}" Margin="0,0,5,0"/>
+                                            <Button Grid.Column="1" Content="Manage" Tag="{Binding}"
+                                                    Click="InstanceManage_Click"
+                                                    Style="{StaticResource PillButton}" Margin="5,0,0,0"/>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Border x:Name="EmptyInstancesPanel" Style="{StaticResource PanelCard}"
+                            Padding="40" Visibility="Collapsed">
+                        <StackPanel HorizontalAlignment="Center" MaxWidth="430">
+                            <TextBlock Text="Your adventure starts here" FontSize="22"
+                                       FontWeight="Bold" TextAlignment="Center"/>
+                            <TextBlock Text="Add your OrbusVR installation, then make a separate copy for mods."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       TextAlignment="Center" TextWrapping="Wrap" Margin="0,11,0,20"/>
+                            <Button Content="Add OrbusVR installation"
+                                    HorizontalAlignment="Center" Click="OpenInstances_Click"
+                                    Style="{StaticResource PrimaryButton}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- INSTANCE DETAILS -->
             <ScrollViewer Grid.Row="1"
                           x:Name="DashboardPanel"
                           VerticalScrollBarVisibility="Auto">
@@ -170,12 +252,12 @@
                             <TextBlock Text="CURRENT GAME"
                                        Style="{StaticResource Eyebrow}"/>
 
-                            <TextBlock Text="Choose where you want to play"
+                            <TextBlock Text="Manage this installation"
                                        FontSize="22"
                                        FontWeight="Bold"
                                        Margin="0,9,0,7"/>
 
-                            <TextBlock Text="Play your original game, or make a separate copy for safe mod testing."
+                            <TextBlock Text="Manage the mod loader and installed mods for this game copy."
                                        Foreground="{StaticResource MutedBrush}"
                                        FontSize="12"
                                        TextWrapping="Wrap"/>
@@ -186,7 +268,7 @@
                                      Margin="0,15,0,0"/>
 
                             <WrapPanel Margin="0,13,0,0">
-                                <Button Content="Manage installations"
+                                <Button Content="Back to instances"
                                         Click="OpenInstances_Click"
                                         Style="{StaticResource PrimaryButton}"
                                         Margin="0,0,9,8"/>
@@ -296,6 +378,76 @@
                     </Border>
                 </StackPanel>
             </ScrollViewer>
+
+
+            <!-- SERVER CATALOGUE -->
+            <Grid Grid.Row="1" x:Name="ServerPanel" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ServerSearchText" VerticalContentAlignment="Center"
+                             ToolTip="Search server mods"
+                             TextChanged="ServerSearchText_Changed"/>
+                    <Button Grid.Column="1" Content="Refresh" Click="RefreshCatalog_Click"
+                            Style="{StaticResource PillButton}" Margin="10,0,0,0"/>
+                </Grid>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,3,0">
+                        <Border Style="{StaticResource PanelCard}" Padding="15" Margin="0,0,0,13">
+                            <StackPanel>
+                                <TextBlock Text="For server operators" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Server mods belong on a game server, not inside your local OrbusVR instance."
+                                           Foreground="{StaticResource MutedBrush}" FontSize="12"
+                                           TextWrapping="Wrap" Margin="0,7,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding ServerMods}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,11">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
+                                                <TextBlock Text="{Binding Author}" FontSize="11"
+                                                           Foreground="{StaticResource AccentBrush}" Margin="0,5,0,0"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="12"
+                                                           Foreground="{StaticResource MutedBrush}"
+                                                           TextWrapping="Wrap" Margin="0,9,0,0"/>
+                                                <TextBlock Text="{Binding Version}" FontSize="11"
+                                                           Foreground="{StaticResource MutedBrush}" Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Content="View source" Tag="{Binding}"
+                                                    Style="{StaticResource PillButton}"
+                                                    Click="OpenGithub_Click" Margin="16,0,0,0"
+                                                    VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border x:Name="EmptyServerPanel" Style="{StaticResource PanelCard}"
+                                Padding="36" Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="No server mods found" FontSize="19"
+                                           FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock Text="Server projects appear here when they're added to the community catalogue."
+                                           FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                           Margin="0,10,0,0" TextAlignment="Center" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
 
             <!-- BROWSE MODS -->
             <Grid Grid.Row="1"
