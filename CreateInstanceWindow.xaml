@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Create instance"
-        Width="624" Height="550"
+        Width="624" Height="610"
         ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -44,7 +44,7 @@
                                    VerticalAlignment="Center" FontWeight="SemiBold"
                                    FontSize="13"/>
                     </StackPanel>
-                    <Button Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets"
+                    <Button Content="×" FontFamily="Segoe UI" FontSize="19"
                             Style="{StaticResource CloseChromeButton}"
                             Click="Chrome_Close_Click"
                             HorizontalAlignment="Right" ToolTip="Close"/>
