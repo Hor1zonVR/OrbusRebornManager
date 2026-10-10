@@ -6,7 +6,7 @@
       "id": "orbusreborncamera",
       "name": "OrbusRebornCamera",
       "author": "Hor1zonVR",
-      "description": "A creator camera for OrbusVR Reborn with POV, third-person, selfie and static recording modes, adjustable FOV and local avatar visibility.",
+      "description": "Desktop creator camera for OrbusVR Reborn with an F2 control panel, POV, third-person, selfie and static recording modes, adjustable FOV, smoothness and distance, and optional local avatar visibility.",
       "repository": "https://github.com/Hor1zonVR/OrbusRebornCamera",
       "assetPattern": "BetterMirror.dll"
     }
