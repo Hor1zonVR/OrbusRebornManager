@@ -1,9 +1,13 @@
-# Orbus Reborn Manager — v0.4.0 development
+# Orbus Reborn Manager — v0.4.2 development
 
 A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**.
 This project is not intended for OrbusVR Classic or Preborn.
 
 > This is a development branch. Verify the Windows build and complete a two-version updater test before sharing the installer with the wider community.
+
+## 0.4.2 test candidate
+
+Changes: clicking an instance card opens its detail page; dark and legible right-click actions replace the Windows light popup; the instance detail page has a back button, Play and Add Mods. This release is intended to **test in-app updating from an already-installed v0.4.1**, not to require another manual installer download. Do not publish until the GitHub Pages update feed is configured and the Windows Actions build succeeds.
 
 ## Install, uninstall, and update
 
