@@ -140,7 +140,8 @@ public partial class MainWindow
                 " managed mod(s).\n\n" +
                 "The file does not contain game files, DLLs, local paths or your settings. " +
                 "Local test mods are listed as manual requirements.\n\n" +
-                "Importing this format is planned for a later update; it is not an automatic installer yet.",
+                "Use Library > Import .orbuspack to create a separate game copy with these approved mods. " +
+                "Local DLLs and unavailable pinned releases must be added manually.",
                 "Mod list exported", MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
