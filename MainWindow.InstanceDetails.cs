@@ -162,6 +162,12 @@ public partial class MainWindow
         GameInstance? instance = _instanceStore.Load().FirstOrDefault(
             x => string.Equals(Path.GetFullPath(x.Path), path,
                 StringComparison.OrdinalIgnoreCase));
+        var artwork = InstanceArtwork.Load(instance?.CustomIconPath);
+        SelectedInstanceArtwork.Source = artwork;
+        SelectedInstanceArtwork.Visibility = artwork == null
+            ? Visibility.Collapsed : Visibility.Visible;
+        SelectedInstanceLogo.Visibility = artwork == null
+            ? Visibility.Visible : Visibility.Collapsed;
         SelectedInstanceName.Text = instance?.Name ?? Path.GetFileName(path);
         SelectedInstanceMeta.Text = (instance?.CreatedByManager == true
             ? "Modded copy" : "Existing installation") + "  ·  " +
