@@ -137,7 +137,7 @@
             </Canvas>
 
             <!-- Page heading -->
-            <Grid Grid.Row="0"
+            <Grid Grid.Row="0" x:Name="PageHeaderGrid"
                   Margin="0,0,0,17">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -701,138 +701,125 @@
                 </ScrollViewer>
             </Grid>
 
-            <!-- SELECTED INSTANCE: overview and searchable managed mod library -->
+            <!-- Selected instance: a compact launcher header and a full-width,
+                 aligned mod table. No redundant title or giant cards. -->
             <Grid Grid.Row="1" x:Name="InstalledPanel" Visibility="Collapsed">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Background="{StaticResource CardBrush}"
-                        BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
-                        CornerRadius="16" Padding="19" Margin="0,0,0,16">
-                    <StackPanel>
-                        <Button Content="←  All instances"
-                                Click="Instances_Click"
-                                Style="{StaticResource PillButton}"
-                                Padding="10,7" MinHeight="32"
-                                HorizontalAlignment="Left" Margin="0,0,0,17"/>
+                <StackPanel Grid.Row="0" Margin="0,0,0,13">
+                    <Button Content="←  Library" Click="Instances_Click"
+                            Style="{StaticResource PillButton}"
+                            HorizontalAlignment="Left"
+                            Padding="9,5" MinHeight="27"
+                            FontSize="12" Margin="0,0,0,17"/>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="56" Height="56" CornerRadius="13"
-                                        Background="#3C4050" Margin="0,0,14,0">
-                                    <ContentControl ContentTemplate="{StaticResource OrbusMark}"
-                                                    Width="40" Height="40"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Center"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock x:Name="SelectedInstanceName"
-                                               Text="Selected instance"
-                                               FontWeight="SemiBold" FontSize="22"
-                                               FontFamily="{StaticResource HeadingFont}"
-                                               TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock x:Name="SelectedInstanceMeta"
-                                               FontSize="13" Foreground="{StaticResource MutedBrush}"
-                                               Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                        VerticalAlignment="Center" Margin="20,0,0,0">
-                                <Button Content="Open folder"
-                                        Style="{StaticResource PillButton}"
-                                        Click="SelectedOpenFolder_Click" Margin="0,0,8,0"/>
-                                <Button Content="+  Add mods"
-                                        Style="{StaticResource PillButton}"
-                                        Click="Discover_Click" Margin="0,0,8,0"/>
-                                <Button Content="▶  Play" MinWidth="90"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Click="Launch_Click"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <Grid Margin="0,19,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="61" Height="61" CornerRadius="13"
+                                Background="#353947" VerticalAlignment="Center">
+                            <ContentControl ContentTemplate="{StaticResource OrbusMark}"
+                                            Width="47" Height="47"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                                    Margin="14,0,12,0">
+                            <TextBlock x:Name="SelectedInstanceName"
+                                       FontFamily="{StaticResource HeadingFont}"
+                                       FontSize="23" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <TextBlock x:Name="SelectedInstanceMeta"
+                                           FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                                <TextBlock Text="    ·    " FontSize="12"
+                                           Foreground="{StaticResource MutedBrush}"/>
                                 <TextBlock x:Name="SelectedInstanceLoaderText"
-                                           FontSize="13" FontWeight="SemiBold"
-                                           Foreground="{StaticResource AccentBrush}"/>
-                                <TextBlock x:Name="SelectedInstancePathText"
-                                           Foreground="{StaticResource MutedBrush}"
-                                           FontSize="12" Margin="0,6,0,0"
-                                           TextTrimming="CharacterEllipsis"/>
+                                           FontSize="12" Foreground="{StaticResource AccentBrush}"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                        VerticalAlignment="Center" Margin="14,0,0,0">
-                                <Button x:Name="SelectedLoaderButton"
-                                        Content="Install BepInEx"
-                                        Style="{StaticResource PillButton}"
-                                        Click="InstallLoader_Click"
-                                        Visibility="Collapsed"
-                                        Margin="0,0,8,0"/>
-                                <Button Content="Plugins folder"
-                                        Style="{StaticResource PillButton}"
-                                        Click="SelectedOpenModsFolder_Click"/>
-                            </StackPanel>
-                        </Grid>
-                        <TextBlock x:Name="SelectedInstanceWarning"
-                                   TextWrapping="Wrap" FontSize="12"
-                                   Foreground="#F0C79C"
-                                   Margin="0,13,0,0" Visibility="Collapsed"/>
-                    </StackPanel>
-                </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Button Content="Open folder"
+                                    Style="{StaticResource PillButton}"
+                                    Click="SelectedOpenFolder_Click"
+                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
+                            <Button Content="Plugins"
+                                    Style="{StaticResource PillButton}"
+                                    Click="SelectedOpenModsFolder_Click"
+                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
+                            <Button x:Name="SelectedLoaderButton"
+                                    Content="Install BepInEx"
+                                    Style="{StaticResource PillButton}"
+                                    Click="InstallLoader_Click"
+                                    Visibility="Collapsed"
+                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
+                            <Button Content="▶  Play" Click="Launch_Click"
+                                    Style="{StaticResource PrimaryButton}"
+                                    MinWidth="99" MinHeight="39"
+                                    Padding="14,8"/>
+                        </StackPanel>
+                    </Grid>
 
-                <Grid Grid.Row="1">
+                    <TextBlock x:Name="SelectedInstancePathText" Visibility="Collapsed"/>
+                    <TextBlock x:Name="SelectedInstanceWarning"
+                               FontSize="12" Foreground="#F0C79C"
+                               TextWrapping="Wrap"
+                               Margin="0,12,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+
+                <Border Grid.Row="1" Height="1"
+                        Background="{StaticResource StrokeBrush}"
+                        Margin="0,6,0,19"/>
+
+                <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Margin="0,0,0,12">
+
+                    <!-- One toolbar: title and install actions -->
+                    <Grid Grid.Row="0" Margin="0,0,0,11">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="Installed mods" FontSize="18"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock x:Name="SelectedModSummary"
-                                       Text="Manage the mods installed in this instance."
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Mods" FontSize="18" FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="InstalledCountLabel"
                                        FontSize="12" Foreground="{StaticResource MutedBrush}"
-                                       Margin="0,5,0,0"/>
+                                       Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal"
                                     VerticalAlignment="Center">
-                            <TextBlock x:Name="InstalledCountLabel"
-                                       Foreground="{StaticResource MutedBrush}"
-                                       FontSize="12" VerticalAlignment="Center"
-                                       Margin="0,0,12,0"/>
-                            <Button Content="Import local DLL"
-                                    Click="ImportLocal_Click" Style="{StaticResource PillButton}"
-                                    Margin="0,0,8,0"/>
-                            <Button Content="Check updates"
-                                    Click="SelectedCheckModUpdates_Click"
-                                    Style="{StaticResource PillButton}"/>
+                            <Button Content="Import DLL" Click="ImportLocal_Click"
+                                    Style="{StaticResource PillButton}"
+                                    MinHeight="35" Padding="11,7" Margin="0,0,8,0"/>
+                            <Button Content="+  Browse mods" Click="Discover_Click"
+                                    Style="{StaticResource PrimaryButton}"
+                                    MinHeight="35" Padding="12,7"/>
                         </StackPanel>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,0,0,14">
+                    <Grid Grid.Row="1" Margin="0,0,0,9">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" MinWidth="190"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Grid Margin="0,0,11,0">
+                        <Grid Margin="0,0,10,0">
                             <TextBox x:Name="InstalledSearchText"
                                      TextChanged="InstalledSearch_Changed"
-                                     Padding="35,9,12,9" MinHeight="38"
+                                     Padding="35,8,12,8" MinHeight="38"
                                      VerticalContentAlignment="Center"/>
                             <TextBlock Text="⌕" FontSize="21"
                                        Foreground="{StaticResource MutedBrush}"
@@ -840,155 +827,227 @@
                                        IsHitTestVisible="False"/>
                             <TextBlock x:Name="InstalledSearchHint"
                                        Text="Search installed mods"
-                                       Foreground="{StaticResource MutedBrush}"
-                                       FontSize="12" VerticalAlignment="Center"
-                                       Margin="35,0,0,0" IsHitTestVisible="False"/>
+                                       FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                       VerticalAlignment="Center" Margin="35,0,0,0"
+                                       IsHitTestVisible="False"/>
                         </Grid>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <Button x:Name="FilterAllButton" Tag="all"
-                                    Content="All" Click="InstalledFilter_Click"
-                                    Style="{StaticResource PillButton}"
-                                    MinHeight="35" Padding="11,7" Margin="0,0,6,0"/>
-                            <Button x:Name="FilterEnabledButton" Tag="enabled"
-                                    Content="Enabled" Click="InstalledFilter_Click"
-                                    Style="{StaticResource PillButton}"
-                                    MinHeight="35" Padding="11,7" Margin="0,0,6,0"/>
-                            <Button x:Name="FilterDisabledButton" Tag="disabled"
-                                    Content="Disabled" Click="InstalledFilter_Click"
-                                    Style="{StaticResource PillButton}"
-                                    MinHeight="35" Padding="11,7" Margin="0,0,6,0"/>
-                            <Button x:Name="FilterUpdatesButton" Tag="updates"
-                                    Content="Updates" Click="InstalledFilter_Click"
-                                    Style="{StaticResource PillButton}"
-                                    MinHeight="35" Padding="11,7"/>
-                        </StackPanel>
+                        <Button Grid.Column="1" Content="Check for updates"
+                                Style="{StaticResource PillButton}"
+                                Click="SelectedCheckModUpdates_Click"
+                                MinHeight="38" Padding="12,8"/>
                     </Grid>
 
-                    <ScrollViewer Grid.Row="2" Focusable="False"
-                                  FocusVisualStyle="{x:Null}"
-                                  VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="0,0,4,4">
-                            <ItemsControl ItemsSource="{Binding InstalledMods}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{StaticResource CardBrush}"
-                                                BorderBrush="{StaticResource StrokeBrush}"
-                                                BorderThickness="1" CornerRadius="14"
-                                                Margin="0,0,0,9" Padding="15,13">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Orientation="Horizontal"
-                                                            VerticalAlignment="Center">
-                                                    <Border Width="47" Height="47"
-                                                            Background="{Binding IconBrush}"
-                                                            CornerRadius="12"
-                                                            Margin="0,0,13,0">
-                                                        <TextBlock Text="{Binding IconLetter, Mode=OneWay}"
-                                                                   Foreground="White"
-                                                                   FontSize="21" FontWeight="SemiBold"
-                                                                   VerticalAlignment="Center"
-                                                                   HorizontalAlignment="Center"/>
-                                                    </Border>
-                                                    <StackPanel VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Name, Mode=OneWay}"
-                                                                   FontSize="15" FontWeight="SemiBold"/>
-                                                        <StackPanel Orientation="Horizontal"
-                                                                    Margin="0,5,0,0">
-                                                            <TextBlock Text="{Binding Author, Mode=OneWay}"
-                                                                       FontSize="12"
-                                                                       Foreground="{StaticResource MutedBrush}"/>
-                                                            <TextBlock Text="  ·  " FontSize="12"
-                                                                       Foreground="{StaticResource MutedBrush}"/>
-                                                            <TextBlock Text="{Binding Version, Mode=OneWay}"
-                                                                       FontSize="12"
-                                                                       Foreground="{StaticResource MutedBrush}"/>
-                                                        </StackPanel>
-                                                        <StackPanel Orientation="Horizontal"
-                                                                    Margin="0,6,0,0">
-                                                            <TextBlock Text="{Binding Status, Mode=OneWay}"
-                                                                       FontSize="12" FontWeight="SemiBold"
-                                                                       Foreground="{Binding StatusBrush}"/>
-                                                            <TextBlock Text="{Binding UpdateText, Mode=OneWay}"
-                                                                       FontSize="12"
-                                                                       Foreground="#F0C79C"
-                                                                       Margin="12,0,0,0"/>
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="1"
-                                                            Orientation="Horizontal"
-                                                            VerticalAlignment="Center"
-                                                            Margin="15,0,0,0">
-                                                    <Button Content="Update" Tag="{Binding}"
-                                                            Click="InstalledUpdate_Click"
-                                                            Margin="0,0,8,0">
-                                                        <Button.Style>
-                                                            <Style TargetType="Button"
-                                                                   BasedOn="{StaticResource PrimaryButton}">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding CanUpdate}"
-                                                                                 Value="True">
-                                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Button.Style>
-                                                    </Button>
-                                                    <Button Content="{Binding ToggleText, Mode=OneWay}"
-                                                            Tag="{Binding}" Click="InstalledToggle_Click"
-                                                            IsEnabled="{Binding CanModify}"
-                                                            Style="{StaticResource PillButton}"
-                                                            MinWidth="75" Margin="0,0,8,0"/>
-                                                    <Button Content="Remove" Tag="{Binding}"
-                                                            Click="InstalledUninstall_Click"
-                                                            Style="{StaticResource PillButton}"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <Border x:Name="EmptyInstalledText"
-                                    Style="{StaticResource PanelCard}" Padding="38">
-                                <StackPanel HorizontalAlignment="Center"
-                                            MaxWidth="430">
-                                    <TextBlock Text="No managed mods yet"
-                                               FontSize="19" FontWeight="SemiBold"
-                                               HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Browse approved client mods or import a local DLL to get started."
-                                               TextWrapping="Wrap" TextAlignment="Center"
-                                               FontSize="13" Foreground="{StaticResource MutedBrush}"
-                                               Margin="0,9,0,17"/>
-                                    <Button Content="Browse client mods"
-                                            Click="Discover_Click"
-                                            HorizontalAlignment="Center"
-                                            Style="{StaticResource PrimaryButton}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border x:Name="NoMatchingInstalledText"
-                                    Style="{StaticResource PanelCard}" Padding="32"
-                                    Visibility="Collapsed">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="No matching mods"
-                                               FontSize="17" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Try another search or filter."
-                                               FontSize="12" Foreground="{StaticResource MutedBrush}"
-                                               Margin="0,8,0,14"/>
-                                    <Button Content="Clear filters"
-                                            Click="InstalledClearFilters_Click"
-                                            Style="{StaticResource PillButton}"
-                                            HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
+                    <Grid Grid.Row="2" Margin="0,0,0,13">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="FilterAllButton" Content="All" Tag="all"
+                                    Click="InstalledFilter_Click"
+                                    Style="{StaticResource PillButton}"
+                                    MinHeight="30" Padding="12,6" Margin="0,0,6,0"/>
+                            <Button x:Name="FilterEnabledButton" Content="Enabled" Tag="enabled"
+                                    Click="InstalledFilter_Click"
+                                    Style="{StaticResource PillButton}"
+                                    MinHeight="30" Padding="12,6" Margin="0,0,6,0"/>
+                            <Button x:Name="FilterDisabledButton" Content="Disabled" Tag="disabled"
+                                    Click="InstalledFilter_Click"
+                                    Style="{StaticResource PillButton}"
+                                    MinHeight="30" Padding="12,6" Margin="0,0,6,0"/>
+                            <Button x:Name="FilterUpdatesButton" Content="Updates" Tag="updates"
+                                    Click="InstalledFilter_Click"
+                                    Style="{StaticResource PillButton}"
+                                    MinHeight="30" Padding="12,6"/>
                         </StackPanel>
-                    </ScrollViewer>
+                        <TextBlock Grid.Column="1"
+                                   Text="Only manager-installed mods appear here"
+                                   FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Entire list is one surface, with unobtrusive row separators -->
+                    <Border Grid.Row="3" Background="#202127"
+                            BorderBrush="{StaticResource StrokeBrush}"
+                            BorderThickness="1" CornerRadius="13"
+                            VerticalAlignment="Stretch">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="41"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Background="#292A32"
+                                    CornerRadius="12,12,0,0"
+                                    BorderBrush="{StaticResource StrokeBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="15,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="215"/>
+                                        <ColumnDefinition Width="176"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="MOD" FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource MutedBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="VERSION"
+                                               FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{StaticResource MutedBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="ACTIONS"
+                                               FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{StaticResource MutedBrush}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"/>
+                                </Grid>
+                            </Border>
+
+                            <ScrollViewer Grid.Row="1" Focusable="False"
+                                          FocusVisualStyle="{x:Null}"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel>
+                                    <ItemsControl ItemsSource="{Binding InstalledMods}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="Transparent" Padding="15,10"
+                                                        BorderBrush="{StaticResource StrokeBrush}"
+                                                        BorderThickness="0,0,0,1"
+                                                        MinHeight="65">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="215"/>
+                                                            <ColumnDefinition Width="176"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    VerticalAlignment="Center">
+                                                            <Border Background="{Binding IconBrush}"
+                                                                    Width="43" Height="43"
+                                                                    CornerRadius="10"
+                                                                    Margin="0,0,12,0">
+                                                                <TextBlock Text="{Binding IconLetter, Mode=OneWay}"
+                                                                           FontSize="20"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="White"
+                                                                           HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <StackPanel VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Name, Mode=OneWay}"
+                                                                           FontSize="14" FontWeight="SemiBold"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                <StackPanel Orientation="Horizontal"
+                                                                            Margin="0,4,0,0">
+                                                                    <TextBlock Text="{Binding Author, Mode=OneWay}"
+                                                                               Foreground="{StaticResource MutedBrush}"
+                                                                               FontSize="12"/>
+                                                                    <TextBlock Text="   ·   " FontSize="12"
+                                                                               Foreground="{StaticResource MutedBrush}"/>
+                                                                    <TextBlock Text="{Binding Status, Mode=OneWay}"
+                                                                               FontSize="12"
+                                                                               Foreground="{Binding StatusBrush}"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                                                                    Margin="8,0,5,0">
+                                                            <TextBlock Text="{Binding Version, Mode=OneWay}"
+                                                                       FontSize="13" FontWeight="SemiBold"
+                                                                       TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding AssetDisplay, Mode=OneWay}"
+                                                                       Foreground="{StaticResource MutedBrush}"
+                                                                       FontSize="11"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Margin="0,4,0,0"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                                    HorizontalAlignment="Right"
+                                                                    VerticalAlignment="Center">
+                                                            <Button Content="Update" Tag="{Binding}"
+                                                                    Click="InstalledUpdate_Click"
+                                                                    Margin="0,0,9,0" MinHeight="30"
+                                                                    Padding="9,5">
+                                                                <Button.Style>
+                                                                    <Style TargetType="Button"
+                                                                           BasedOn="{StaticResource PrimaryButton}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding CanUpdate}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Button.Style>
+                                                            </Button>
+                                                            <Button Tag="{Binding}" Click="InstalledToggle_Click"
+                                                                    Style="{StaticResource ModSwitchButton}"
+                                                                    IsEnabled="{Binding CanModify}"
+                                                                    Margin="0,0,12,0"/>
+                                                            <Button Tag="{Binding}"
+                                                                    Click="InstalledUninstall_Click"
+                                                                    Style="{StaticResource ModIconActionButton}"
+                                                                    ToolTip="Remove this mod">
+                                                                <Viewbox Width="16" Height="16" Stretch="Uniform">
+                                                                    <Canvas Width="20" Height="20">
+                                                                        <Path Data="M 4,6 L 16,6 M 7,6 L 7.7,17 L 12.3,17 L 13,6 M 8,4 L 12,4"
+                                                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                                              StrokeThickness="1.7"
+                                                                              StrokeStartLineCap="Round"
+                                                                              StrokeEndLineCap="Round"
+                                                                              StrokeLineJoin="Round"
+                                                                              Fill="Transparent"/>
+                                                                    </Canvas>
+                                                                </Viewbox>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <Border x:Name="EmptyInstalledText" Background="Transparent"
+                                            Padding="35,36">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="No mods installed yet"
+                                                       FontSize="17" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center"/>
+                                            <TextBlock Text="Find approved client mods or import your own DLL."
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource MutedBrush}"
+                                                       Margin="0,7,0,16" TextAlignment="Center"/>
+                                            <Button Content="Browse mods"
+                                                    Click="Discover_Click"
+                                                    HorizontalAlignment="Center"
+                                                    Style="{StaticResource PrimaryButton}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border x:Name="NoMatchingInstalledText"
+                                            Background="Transparent" Padding="33"
+                                            Visibility="Collapsed">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="No matching mods"
+                                                       FontSize="16" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center"/>
+                                            <Button Content="Clear search and filters"
+                                                    Margin="0,13,0,0"
+                                                    Style="{StaticResource PillButton}"
+                                                    Click="InstalledClearFilters_Click"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock x:Name="SelectedModSummary" Visibility="Collapsed"/>
                 </Grid>
             </Grid>
 
