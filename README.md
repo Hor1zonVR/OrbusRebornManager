@@ -51,30 +51,27 @@ Requires Windows and the **.NET 8 SDK**.
 
 The script builds the installer and update packages locally into `Releases/`. Use **the Setup.exe** for testing; the other generated files are inputs to the updater publishing process, not downloads for players.
 
-## First run and testing
+## Instance library and first run
 
-1. Open `OrbusRebornManager.exe`.
-2. Select the OrbusVR Reborn folder containing **`vrclient.exe`**, **`GameAssembly.dll`**, and **`vrclient_Data/`**.
-3. Choose **Install BepInEx** if it isn't already installed. The app uses the *specific official* Unity IL2CPP x64 **6.0.0-be.788** build from `https://builds.bepinex.dev/projects/bepinex_be/788/` (a tested baseline for our Reborn camera mod).
-4. Launch OrbusVR once so BepInEx can generate its interop files; exit the game before installing plugins.
-5. Until GitHub Releases are published, click **Import local DLL** on the dashboard and pick your compiled `BetterMirror.dll`. The manager installs this file to `BepInEx/plugins/local-bettermirror/`.
-6. When camera releases are published, use the **Discover** tab instead. GitHub releases and managed updates will work through the catalogue.
+1. Install RebornManager using `RebornManager-Setup.exe` from the latest GitHub Release.
+2. On **My Instances**, choose **Add existing game** and point it to your OrbusVR Reborn installation (the folder containing `vrclient.exe`). This only registers the folder.
+3. Click **New Instance**. Give the copy a name and confirm the source installation.
+4. New copies default to `%LOCALAPPDATA%\OrbusRebornModdingInstances`. Click **Change** to choose another drive. The manager remembers your selected location if you leave the checkbox enabled.
+5. Leave **Prepare for mods** checked to install the supported BepInEx loader in your **new copy**, or untick it for a clean copy without the loader.
+6. When prepared for mods, launch the new instance once to let BepInEx generate interop files, then close the game before installing plugins.
+7. Open an instance card to manage its mods, or press the Play icon to launch it. Right-click or press the card's menu icon to open its folder.
+
+The instance library supports searching by name, sorting by recently added or name, and filtering original/existing installations versus manager-created modded copies. **Changing the default location never moves existing game copies.**
+
+New copies are created using the existing safe staging-and-copy routine, exclude the original loader's files, and check free disk space before copying. The original source game files are never deleted during instance creation.
 
 ## Curated catalogue workflow
 
-The application intentionally **does not** list every GitHub repository by itself.
+RebornManager uses an explicitly curated catalogue, rather than crawling arbitrary GitHub repositories.
 
-**Maintainer review:**
+**Maintainers:** review a mod author's source, binary release assets, permissions and game compatibility, then edit `catalog/mods.json` and commit the reviewed entry. Set `"target": "client"` or `"target": "server"` explicitly for each listing. Client mods can be installed into a selected instance; server-only mods are discoverable separately and must not be installed into a player's game.
 
-1. A developer DMs you their public GitHub repository.
-2. Review the repository's code, author, release assets, and compatibility yourself. Merely being on GitHub is not a safety guarantee.
-3. In **Settings / Curator**, paste the repository URL and set a descriptive display name and **asset pattern**, e.g. `*.dll` or `OrbusRebornCamera-*.zip`.
-4. Click **Add local draft**, then **Export curated mods.json**.
-5. Edit exported descriptions/author names, and commit this JSON to your manager's public repository at `catalog/mods.json`.
-6. Set **Online curated catalogue** in the manager to its raw HTTPS address, e.g. `https://raw.githubusercontent.com/YOUR_USERNAME/OrbusRebornManager/main/catalog/mods.json`.
-7. For production releases we'll bake that catalogue URL into the manager so ordinary players do not have to configure it.
-
-The catalogue is fetched whenever the app starts or the user clicks Refresh. Local drafts live only on your machine under `%LOCALAPPDATA%\OrbusRebornManager\catalog-local.json`; they are not automatically shared.
+The catalogue is fetched automatically from the configured GitHub raw JSON source. A GitHub repository is not a safety guarantee: review publishers and release assets before adding them.
 
 ### Catalogue entry format
 
