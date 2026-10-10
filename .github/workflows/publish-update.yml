@@ -1,0 +1,139 @@
+name: Publish RebornManager Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump (patch is the usual choice)"
+        type: choice
+        required: true
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: rebornmanager-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Create version and start release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require main branch
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Select the main branch when running Publish RebornManager Update."
+            exit 1
+          fi
+
+      - name: Check out latest main and tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require successful main build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          state="$(gh run list --repo "$GITHUB_REPOSITORY" \
+            --workflow build-windows.yml --branch main --limit 50 \
+            --json headSha,conclusion,event \
+            | jq -r --arg sha "$GITHUB_SHA" \
+              '[.[] | select(.headSha == $sha and .event == "push")][0].conclusion // "missing"')"
+          if [ "$state" != "success" ]; then
+            echo "::error::The current main commit must pass its Windows build first (status: $state)."
+            echo "Wait for the latest main build to finish and run this workflow again."
+            exit 1
+          fi
+
+      - name: Calculate and save the next version
+        id: version
+        shell: bash
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import re
+
+          path = pathlib.Path("OrbusRebornManager.csproj")
+          content = path.read_text(encoding="utf-8")
+          match = re.search(r"<Version>(\d+)\.(\d+)\.(\d+)</Version>", content)
+          if not match:
+              raise SystemExit("Expected a three-part <Version> in the project file.")
+
+          major, minor, patch = (int(x) for x in match.groups())
+          bump = os.environ["BUMP"]
+          if bump == "patch":
+              patch += 1
+          elif bump == "minor":
+              minor, patch = minor + 1, 0
+          elif bump == "major":
+              major, minor, patch = major + 1, 0, 0
+          else:
+              raise SystemExit(f"Unsupported version increment: {bump}")
+
+          version = f"{major}.{minor}.{patch}"
+          old = match.group(0)
+          content = content.replace(old, f"<Version>{version}</Version>", 1)
+          path.write_text(content, encoding="utf-8")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as outputs:
+              outputs.write(f"version={version}\n")
+              outputs.write(f"tag=v{version}\n")
+          print(f"Publishing RebornManager v{version}")
+          PY
+
+      - name: Commit version and create release tag
+        shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error::The version tag $TAG already exists."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add OrbusRebornManager.csproj
+          git commit -m "chore(release): $TAG"
+          git push origin HEAD:main
+          git tag "$TAG"
+          git push origin "refs/tags/$TAG"
+
+      - name: Start installer and updater publishing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # A push made by GITHUB_TOKEN does not trigger another push workflow.
+          # An explicit workflow_dispatch call does, including from GITHUB_TOKEN.
+          gh workflow run build-windows.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$TAG"
+          echo "Started release for $TAG."
+          echo "The Windows release workflow will verify the version,"
+          echo "deploy GitHub Pages, and publish only Setup.exe."
+
+      - name: Add release summary
+        shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          echo "## RebornManager $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "The release workflow was triggered. Wait for **Build and release RebornManager** to succeed." >> "$GITHUB_STEP_SUMMARY"
+          echo "Only then will the installer and in-app update be available." >> "$GITHUB_STEP_SUMMARY"
