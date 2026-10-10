@@ -1,0 +1,142 @@
+<Window x:Class="OrbusRebornManager.ImportPackagePreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Import an instance" Width="665" Height="588"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        FontFamily="{StaticResource InterfaceFont}"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource TextBrush}">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="0"
+                            GlassFrameThickness="0" CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Border BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="39"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource StrokeBrush}"
+                    BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Title_MouseLeftButtonDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Margin="13,0,0,0"
+                                VerticalAlignment="Center">
+                        <ContentControl ContentTemplate="{StaticResource OrbusMark}"
+                                        Width="24" Height="24"/>
+                        <TextBlock Text="Import an instance" Margin="9,0,0,0"
+                                   VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <Button Content="×" FontFamily="Segoe UI" FontSize="19"
+                            HorizontalAlignment="Right"
+                            Style="{StaticResource CloseChromeButton}"
+                            Click="Cancel_Click"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="25,21,25,16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Import a shared instance" FontSize="23"
+                           FontFamily="{StaticResource HeadingFont}"
+                           FontWeight="SemiBold"/>
+
+                <StackPanel Grid.Row="1" Margin="0,6,0,17">
+                    <TextBlock x:Name="PackageLabel" FontSize="13"
+                               Foreground="{StaticResource MutedBrush}"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="A new game copy will be created. Existing installations and their mods will never be changed."
+                               FontSize="12" Foreground="{StaticResource MutedBrush}"
+                               Margin="0,6,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <Border Grid.Row="2" Background="{StaticResource CardBrush}"
+                        BorderBrush="{StaticResource StrokeBrush}"
+                        BorderThickness="1" CornerRadius="13"
+                        Padding="14,12" Margin="0,0,0,13">
+                    <StackPanel>
+                        <TextBlock Text="NEW INSTANCE" Style="{StaticResource Eyebrow}"/>
+                        <TextBlock x:Name="InstanceNameLabel" FontSize="18"
+                                   FontWeight="SemiBold" Margin="0,6,0,3"/>
+                        <TextBlock x:Name="SummaryLabel" FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="3" BorderThickness="1"
+                        BorderBrush="{StaticResource StrokeBrush}"
+                        Background="{StaticResource CardBrush}"
+                        CornerRadius="12">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="MODS INCLUDED"
+                                   Style="{StaticResource Eyebrow}"
+                                   Margin="15,12,0,8"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      Margin="13,0,5,8">
+                            <ItemsControl ItemsSource="{Binding PackageRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#2B2D34" CornerRadius="8"
+                                                Padding="11,9" Margin="0,0,7,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontSize="13" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Detail}"
+                                                               TextWrapping="Wrap" FontSize="11"
+                                                               Foreground="{StaticResource MutedBrush}"
+                                                               Margin="0,3,7,0"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Status}"
+                                                           Foreground="{Binding StatusBrush}"
+                                                           FontSize="11" FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"
+                                                           Margin="11,0,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+
+                <TextBlock Grid.Row="4"
+                           Text="Only approved GitHub releases are downloaded. Missing versions and local DLLs are skipped and reported."
+                           FontSize="12" TextWrapping="Wrap"
+                           Margin="0,12,0,0"
+                           Foreground="{StaticResource MutedBrush}"/>
+            </Grid>
+
+            <Border Grid.Row="2" Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource StrokeBrush}"
+                    BorderThickness="0,1,0,0" Padding="22,13">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel" Style="{StaticResource PillButton}"
+                            Click="Cancel_Click" MinWidth="95" Margin="0,0,10,0"/>
+                    <Button Content="Continue to create instance"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="Continue_Click" MinWidth="225"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
