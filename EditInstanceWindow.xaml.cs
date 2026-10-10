@@ -11,33 +11,27 @@ namespace OrbusRebornManager;
 
 public partial class EditInstanceWindow : Window
 {
-    // Stored positions use the existing 164x137 library cover coordinate system.
-    // The large editor doubles that size without changing saved instance data.
-    private const double CoverWidth = 164;
-    private const double CoverHeight = 137;
-    private const double PreviewScaleFactor = 2;
-    private const double MinZoom = 1;
-    private const double MaxZoom = 2.5;
-    private const double ZoomStep = .1;
-
+    private readonly string _savedSourcePath;
     private string? _selectedNewImage;
-    private bool _ready;
-    private bool _dragging;
-    private bool _fit;
-    private double _zoom = 1;
-    private double _offsetX;
-    private double _offsetY;
-    private Point _dragOrigin;
-    private double _dragStartX;
-    private double _dragStartY;
+    private bool _hasCrop;
+    private Rect _crop;
+    private bool _legacyFit;
+    private double _legacyZoom;
+    private double _legacyOffsetX;
+    private double _legacyOffsetY;
 
     public string DisplayName { get; private set; } = "";
     public string? NewImagePath => _selectedNewImage;
     public bool ResetImage { get; private set; }
-    public bool IconFit => _fit;
-    public double IconZoom => _zoom;
-    public double IconOffsetX => _offsetX;
-    public double IconOffsetY => _offsetY;
+
+    // Old card framing is preserved until the player explicitly chooses
+    // a crop. This avoids modifying previously saved artwork on a name edit.
+    public bool IconFit => _hasCrop ? false : _legacyFit;
+    public double IconZoom => _hasCrop ? 1 : _legacyZoom;
+    public double IconOffsetX => _hasCrop ? 0 : _legacyOffsetX;
+    public double IconOffsetY => _hasCrop ? 0 : _legacyOffsetY;
+    public bool IconHasCrop => _hasCrop;
+    public Rect IconCrop => _crop;
 
     public EditInstanceWindow(GameInstance instance)
     {
@@ -49,15 +43,14 @@ public partial class EditInstanceWindow : Window
         PreviewKind.Text = instance.CreatedByManager
             ? "Modded copy" : "Existing installation";
 
-        _fit = instance.IconFit;
-        _zoom = Math.Clamp(instance.IconZoom, MinZoom, MaxZoom);
-        _offsetX = Math.Clamp(instance.IconOffsetX, -80, 80);
-        _offsetY = Math.Clamp(instance.IconOffsetY, -80, 80);
-
-        ShowPreview(InstanceArtwork.Load(instance.CustomIconPath),
-            "Custom cover");
-        _ready = true;
-        RefreshFraming();
+        _savedSourcePath = instance.CustomIconPath;
+        _hasCrop = instance.IconHasCrop;
+        _crop = InstanceArtwork.SavedCrop(instance);
+        _legacyFit = instance.IconFit;
+        _legacyZoom = Math.Clamp(instance.IconZoom, 1, 2.5);
+        _legacyOffsetX = instance.IconOffsetX;
+        _legacyOffsetY = instance.IconOffsetY;
+        RefreshCover();
 
         Loaded += (_, _) => NameText.Focus();
     }
@@ -70,227 +63,122 @@ public partial class EditInstanceWindow : Window
                 ? "Unnamed instance" : NameText.Text.Trim();
     }
 
-    private void ShowPreview(ImageSource? source, string label)
+    private void RefreshCover()
     {
-        CustomIcon.Source = source;
-        BlurredPreview.Source = source;
-        bool hasImage = source != null;
+        string? path = ResetImage ? null : _selectedNewImage ?? _savedSourcePath;
+        ImageSource? image = _hasCrop
+            ? InstanceArtwork.LoadCropped(path, _crop)
+            : InstanceArtwork.Load(path);
+        bool hasImage = image != null;
 
-        CustomIcon.Visibility = hasImage
-            ? Visibility.Visible : Visibility.Collapsed;
-        DefaultIcon.Visibility = hasImage
-            ? Visibility.Collapsed : Visibility.Visible;
-        ImageStatusText.Text = hasImage ? label : "Using original Orbus artwork";
+        CustomIcon.Source = image;
+        CustomIcon.Visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
+        DefaultIcon.Visibility = hasImage ? Visibility.Collapsed : Visibility.Visible;
+        AdjustCropButton.IsEnabled = hasImage;
+        ImageStatusText.Text = !hasImage
+            ? "Using original Orbus artwork"
+            : _hasCrop ? "Custom crop — can be adjusted anytime" :
+                "Legacy cover — choose Adjust to set the crop";
 
-        if (_ready)
-            RefreshFraming();
+        // A new explicit crop is already cut to the right ratio and should
+        // never receive the old transform a second time.
+        CustomIcon.Stretch = _hasCrop ? Stretch.UniformToFill
+            : _legacyFit ? Stretch.Uniform : Stretch.UniformToFill;
+        PreviewScale.ScaleX = _hasCrop ? 1 : _legacyZoom;
+        PreviewScale.ScaleY = _hasCrop ? 1 : _legacyZoom;
+        PreviewMove.X = _hasCrop ? 0 : _legacyOffsetX * 2;
+        PreviewMove.Y = _hasCrop ? 0 : _legacyOffsetY * 2;
     }
-
-    private void ClampPosition()
-    {
-        if (CustomIcon.Source is not BitmapSource bitmap)
-        {
-            _offsetX = _offsetY = 0;
-            return;
-        }
-
-        double imageWidth = Math.Max(1, bitmap.PixelWidth);
-        double imageHeight = Math.Max(1, bitmap.PixelHeight);
-
-        double scale = _fit
-            ? Math.Min(CoverWidth / imageWidth, CoverHeight / imageHeight)
-            : Math.Max(CoverWidth / imageWidth, CoverHeight / imageHeight);
-
-        // Prevent dragging a filled cover beyond its painted image.
-        // Fit mode keeps the full image centered until it is zoomed enough to pan.
-        double maxX = Math.Max(0, (imageWidth * scale * _zoom - CoverWidth) / 2);
-        double maxY = Math.Max(0, (imageHeight * scale * _zoom - CoverHeight) / 2);
-        _offsetX = Math.Clamp(_offsetX, -Math.Min(80, maxX), Math.Min(80, maxX));
-        _offsetY = Math.Clamp(_offsetY, -Math.Min(80, maxY), Math.Min(80, maxY));
-    }
-
-    private void RefreshFraming()
-    {
-        if (!_ready)
-            return;
-
-        bool enabled = CustomIcon.Source != null;
-        ClampPosition();
-
-        CustomIcon.Stretch = _fit ? Stretch.Uniform : Stretch.UniformToFill;
-        BlurredPreview.Visibility = enabled && _fit
-            ? Visibility.Visible : Visibility.Collapsed;
-        PreviewScale.ScaleX = _zoom;
-        PreviewScale.ScaleY = _zoom;
-        PreviewMove.X = _offsetX * PreviewScaleFactor;
-        PreviewMove.Y = _offsetY * PreviewScaleFactor;
-
-        ZoomValue.Text = $"{_zoom * 100:0}%";
-        ZoomOutButton.IsEnabled = enabled && _zoom > MinZoom + .001;
-        ZoomInButton.IsEnabled = enabled && _zoom < MaxZoom - .001;
-        FillButton.IsEnabled = enabled;
-        FitButton.IsEnabled = enabled;
-        PreviewBox.Cursor = enabled ? Cursors.SizeAll : Cursors.Arrow;
-
-        var active = new SolidColorBrush(Color.FromRgb(35, 77, 66));
-        var inactive = new SolidColorBrush(Color.FromRgb(51, 52, 61));
-        FillButton.Background = !_fit && enabled ? active : inactive;
-        FitButton.Background = _fit && enabled ? active : inactive;
-        FillButton.BorderBrush = !_fit && enabled
-            ? (Brush)FindResource("AccentBrush") : (Brush)FindResource("StrokeBrush");
-        FitButton.BorderBrush = _fit && enabled
-            ? (Brush)FindResource("AccentBrush") : (Brush)FindResource("StrokeBrush");
-    }
-
-    private void ChangeZoom(double difference)
-    {
-        if (CustomIcon.Source == null) return;
-        _zoom = Math.Clamp(Math.Round((_zoom + difference) * 10) / 10,
-            MinZoom, MaxZoom);
-        RefreshFraming();
-    }
-
-    private void ZoomOut_Click(object sender, RoutedEventArgs e) =>
-        ChangeZoom(-ZoomStep);
-
-    private void ZoomIn_Click(object sender, RoutedEventArgs e) =>
-        ChangeZoom(ZoomStep);
-
-    private void Fill_Click(object sender, RoutedEventArgs e)
-    {
-        _fit = false;
-        RefreshFraming();
-    }
-
-    private void Fit_Click(object sender, RoutedEventArgs e)
-    {
-        _fit = true;
-        RefreshFraming();
-    }
-
-    private void ResetFraming_Click(object sender, RoutedEventArgs e)
-    {
-        _fit = false;
-        _zoom = 1;
-        _offsetX = 0;
-        _offsetY = 0;
-        RefreshFraming();
-    }
-
-    private void Preview_MouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        if (CustomIcon.Source == null) return;
-        ChangeZoom(e.Delta > 0 ? ZoomStep : -ZoomStep);
-        e.Handled = true;
-    }
-
-    private void Preview_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (CustomIcon.Source == null || e.ChangedButton != MouseButton.Left)
-            return;
-
-        _dragOrigin = e.GetPosition(PreviewBox);
-        _dragStartX = _offsetX;
-        _dragStartY = _offsetY;
-        _dragging = true;
-        PreviewBox.CaptureMouse();
-        e.Handled = true;
-    }
-
-    private void Preview_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_dragging) return;
-        Point p = e.GetPosition(PreviewBox);
-        _offsetX = _dragStartX + (p.X - _dragOrigin.X) / PreviewScaleFactor;
-        _offsetY = _dragStartY + (p.Y - _dragOrigin.Y) / PreviewScaleFactor;
-        RefreshFraming();
-        e.Handled = true;
-    }
-
-    private void Preview_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        _dragging = false;
-        if (PreviewBox.IsMouseCaptured)
-            PreviewBox.ReleaseMouseCapture();
-        e.Handled = true;
-    }
-
-    private void Preview_LostMouseCapture(object sender, MouseEventArgs e) =>
-        _dragging = false;
-
-    private void Preview_DragOver(object sender, DragEventArgs e)
-    {
-        e.Effects = HasSupportedDrop(e.Data) ? DragDropEffects.Copy
-            : DragDropEffects.None;
-        e.Handled = true;
-    }
-
-    private void Preview_Drop(object sender, DragEventArgs e)
-    {
-        if (!HasSupportedDrop(e.Data)) return;
-        if (e.Data.GetData(DataFormats.FileDrop) is string[] files &&
-            files.Length == 1)
-            LoadCandidateImage(files[0]);
-        e.Handled = true;
-    }
-
-    private static bool HasSupportedDrop(IDataObject data)
-    {
-        if (!data.GetDataPresent(DataFormats.FileDrop)) return false;
-        if (data.GetData(DataFormats.FileDrop) is not string[] files ||
-            files.Length != 1) return false;
-        return IsSupportedExtension(files[0]);
-    }
-
-    private static bool IsSupportedExtension(string file) =>
-        Path.GetExtension(file).ToLowerInvariant() is
-            ".png" or ".jpg" or ".jpeg" or ".bmp";
 
     private void ChooseImage_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFileDialog
+        var picker = new OpenFileDialog
         {
-            Title = "Choose an instance cover image",
-            Filter = "Images (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp"
+            Title = "Choose a cover image",
+            Filter = "Pictures (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp"
         };
-        if (dialog.ShowDialog(this) == true)
-            LoadCandidateImage(dialog.FileName);
+        if (picker.ShowDialog(this) == true)
+            OpenCropper(picker.FileName, newFile: true);
     }
 
-    private void LoadCandidateImage(string file)
+    private void AdjustCrop_Click(object sender, RoutedEventArgs e)
+    {
+        string source = _selectedNewImage ?? _savedSourcePath;
+        if (string.IsNullOrWhiteSpace(source)) return;
+        OpenCropper(source, newFile: false);
+    }
+
+    private void OpenCropper(string path, bool newFile)
     {
         try
         {
-            if (!IsSupportedExtension(file) || !File.Exists(file))
+            if (!File.Exists(path) ||
+                Path.GetExtension(path).ToLowerInvariant() is not
+                    (".png" or ".jpg" or ".jpeg" or ".bmp"))
                 throw new InvalidOperationException("Choose a PNG, JPG or BMP image.");
-            if (new FileInfo(file).Length > 12L * 1024 * 1024)
+
+            if (new FileInfo(path).Length > 12L * 1024 * 1024)
                 throw new InvalidOperationException("Choose an image smaller than 12 MB.");
 
-            ImageSource preview = InstanceArtwork.Load(file)
-                ?? throw new InvalidOperationException("The selected image couldn't be opened.");
+            // Don't alter the saved image or the pending editor state
+            // until the crop window returns a confirmed selection.
+            Rect? previous = !newFile && _hasCrop ? _crop : null;
+            var window = new CropInstanceCoverWindow(path, previous)
+            {
+                Owner = this
+            };
+            if (window.ShowDialog() != true)
+                return;
 
-            _selectedNewImage = file;
+            if (newFile)
+                _selectedNewImage = path;
+
+            _crop = window.SelectedCrop;
+            _hasCrop = true;
             ResetImage = false;
-            _fit = false;
-            _zoom = 1;
-            _offsetX = _offsetY = 0;
-            ShowPreview(preview, Path.GetFileName(file));
+            RefreshCover();
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Invalid cover image",
+            MessageBox.Show(this, ex.Message, "Could not crop image",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+    }
+
+    private void Cover_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = TryDroppedFile(e.Data) != null
+            ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void Cover_Drop(object sender, DragEventArgs e)
+    {
+        if (TryDroppedFile(e.Data) is string file)
+            OpenCropper(file, newFile: true);
+        e.Handled = true;
+    }
+
+    private static string? TryDroppedFile(IDataObject data)
+    {
+        if (!data.GetDataPresent(DataFormats.FileDrop) ||
+            data.GetData(DataFormats.FileDrop) is not string[] files ||
+            files.Length != 1)
+            return null;
+        return Path.GetExtension(files[0]).ToLowerInvariant() is
+            ".png" or ".jpg" or ".jpeg" or ".bmp" ? files[0] : null;
     }
 
     private void ClearImage_Click(object sender, RoutedEventArgs e)
     {
         _selectedNewImage = null;
+        _hasCrop = false;
+        _crop = new Rect(0, 0, 1, 1);
+        _legacyFit = false;
+        _legacyZoom = 1;
+        _legacyOffsetX = _legacyOffsetY = 0;
         ResetImage = true;
-        _fit = false;
-        _zoom = 1;
-        _offsetX = _offsetY = 0;
-        ShowPreview(null, "");
+        RefreshCover();
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -299,10 +187,11 @@ public partial class EditInstanceWindow : Window
         if (name.Length == 0 || name.Length > 50 || name.Any(char.IsControl))
         {
             MessageBox.Show(this,
-                "Use a display name between 1 and 50 characters without control characters.",
+                "Use a name between 1 and 50 characters, without control characters.",
                 "Invalid instance name", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
+
         DisplayName = name;
         DialogResult = true;
     }
@@ -312,7 +201,6 @@ public partial class EditInstanceWindow : Window
     private void Title_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton != MouseButton.Left) return;
-        try { DragMove(); }
-        catch (InvalidOperationException) { }
+        try { DragMove(); } catch (InvalidOperationException) { }
     }
 }
