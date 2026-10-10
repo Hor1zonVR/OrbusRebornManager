@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Customize instance"
-        Width="798" Height="648" MinWidth="798" MinHeight="648"
+        Width="798" Height="690" MinWidth="798" MinHeight="690"
         ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
