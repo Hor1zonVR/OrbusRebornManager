@@ -24,6 +24,14 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Faint background motif, original Orbus-inspired geometry.
+                 It is decorative and never overlaps input hit targets. -->
+            <Canvas Grid.Row="1" IsHitTestVisible="False" ClipToBounds="True"
+                    Opacity="0.042">
+                <ContentControl ContentTemplate="{StaticResource ArcaneRingMotif}"
+                                Width="240" Height="240" Canvas.Top="-65" Canvas.Right="-45"/>
+            </Canvas>
+
             <Border Grid.Row="0" Background="#202127" BorderBrush="#393A43"
                     BorderThickness="0,0,0,1"
                     MouseLeftButtonDown="Chrome_MouseLeftButtonDown">
@@ -57,9 +65,9 @@
                 <Grid Margin="0,16,0,7">
                     <TextBlock Text="Copy from" FontWeight="SemiBold" FontSize="13"/>
                 </Grid>
-                <Border Background="{StaticResource CardBrush}" CornerRadius="8"
+                <Border Background="{StaticResource CardBrush}" CornerRadius="15"
                         BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
-                        Padding="12,10">
+                        Padding="13,10">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
