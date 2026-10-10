@@ -33,6 +33,13 @@ public partial class MainWindow
                 DwmSetWindowAttribute(
                     hwnd, olderDarkTitleBar, ref enabled, size);
             }
+
+            // Windows 11 only: request native rounded outer window corners.
+            // Windows 10 safely ignores this attribute, keeping resize behaviour.
+            int roundedCorners = 2; // DWMWCP_ROUND
+            const int cornerPreference = 33; // DWMWA_WINDOW_CORNER_PREFERENCE
+            DwmSetWindowAttribute(
+                hwnd, cornerPreference, ref roundedCorners, size);
         }
         catch (DllNotFoundException) { }
         catch (EntryPointNotFoundException) { }
