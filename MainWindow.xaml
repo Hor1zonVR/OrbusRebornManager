@@ -135,36 +135,83 @@
             </Grid>
 
 
-            <!-- INSTANCES -->
+            <!-- INSTANCE LIBRARY: compact tiles, search and simple filters -->
             <ScrollViewer Grid.Row="1" x:Name="InstancesPanel"
                           VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,3,4">
-                    <Grid Margin="0,0,0,20">
+                <StackPanel Margin="0,0,3,5">
+                    <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="YOUR LIBRARY" Style="{StaticResource Eyebrow}"/>
-                            <TextBlock Text="Choose an instance to play or manage its mods."
+                        <Grid Grid.Column="0" Margin="0,0,12,0">
+                            <TextBox x:Name="InstanceSearchText" Padding="37,10,12,10"
+                                     TextChanged="InstanceSearch_Changed"/>
+                            <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16" Foreground="{StaticResource MutedBrush}"
+                                       Margin="13,0,0,0" VerticalAlignment="Center"
+                                       IsHitTestVisible="False"/>
+                            <TextBlock x:Name="InstanceSearchHint" Text="Search instances"
                                        FontSize="13" Foreground="{StaticResource MutedBrush}"
-                                       Margin="0,8,0,0"/>
-                        </StackPanel>
+                                       Margin="37,0,0,0" VerticalAlignment="Center"
+                                       IsHitTestVisible="False"/>
+                        </Grid>
                         <Button Grid.Column="1" Content="Add existing game"
                                 Style="{StaticResource PillButton}"
-                                Click="OpenInstances_Click" VerticalAlignment="Center"/>
+                                Click="OpenInstances_Click"/>
                     </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,19">
+                        <Button x:Name="InstanceSortButton" Content="Recently added  &#xE70D;"
+                                Style="{StaticResource PillButton}" Padding="13,9"
+                                Click="OpenInstanceSort_Click" Margin="0,0,9,0">
+                            <Button.ContextMenu>
+                                <ContextMenu Style="{StaticResource InstanceContextMenu}">
+                                    <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                              Header="Recently added" Tag="recent"
+                                              Click="InstanceSortOption_Click"/>
+                                    <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                              Header="Name: A to Z" Tag="name"
+                                              Click="InstanceSortOption_Click"/>
+                                    <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                              Header="Name: Z to A" Tag="name-desc"
+                                              Click="InstanceSortOption_Click"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                        <Button x:Name="InstanceFilterButton" Content="All instances  &#xE70D;"
+                                Style="{StaticResource PillButton}" Padding="13,9"
+                                Click="OpenInstanceFilter_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu Style="{StaticResource InstanceContextMenu}">
+                                    <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                              Header="All instances" Tag="all"
+                                              Click="InstanceFilterOption_Click"/>
+                                    <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                              Header="Modded copies" Tag="managed"
+                                              Click="InstanceFilterOption_Click"/>
+                                    <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                              Header="Existing installations" Tag="existing"
+                                              Click="InstanceFilterOption_Click"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                        <TextBlock x:Name="InstanceCountText" VerticalAlignment="Center"
+                                   Margin="14,0,0,0" FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}"/>
+                    </StackPanel>
+
                     <ItemsControl ItemsSource="{Binding InstanceCards}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Width="285" MinHeight="214" Margin="0,0,14,14"
-                                        Tag="{Binding}" ToolTip="Open instance"
-                                        Cursor="Hand" MouseLeftButtonUp="InstanceCard_Click"
-                                        Padding="19" CornerRadius="14" BorderThickness="1"
-                                        Background="{StaticResource CardBrush}">
+                                <Border Width="196" MinHeight="236" Margin="0,0,13,13"
+                                        Padding="9" CornerRadius="14" BorderThickness="1"
+                                        Background="{StaticResource CardBrush}"
+                                        Tag="{Binding}" ToolTip="{Binding Readiness}"
+                                        Cursor="Hand" MouseLeftButtonUp="InstanceCard_Click">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
@@ -193,61 +240,71 @@
                                                       Header="Remove from list" Tag="{Binding}" Click="InstanceForget_Click"/>
                                         </ContextMenu>
                                     </Border.ContextMenu>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Border Width="48" Height="48" CornerRadius="12"
-                                                    Background="{StaticResource CardAltBrush}"
-                                                    Margin="0,0,13,0">
-                                                <TextBlock Text="&#xE7FC;" FontFamily="Segoe MDL2 Assets"
-                                                           FontSize="23" Foreground="{StaticResource AccentBrush}"
+                                    <StackPanel>
+                                        <Border Height="145" CornerRadius="10"
+                                                Background="{Binding CoverBrush}">
+                                            <Grid>
+                                                <TextBlock Text="ORBUS REBORN" FontSize="9"
+                                                           Foreground="#DBFFFFFF" FontWeight="Bold"
+                                                           Margin="11,12,0,0" HorizontalAlignment="Left"
+                                                           VerticalAlignment="Top"/>
+                                                <TextBlock Text="O" FontSize="82" FontWeight="Black"
+                                                           Opacity="0.32" Foreground="White"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <StackPanel VerticalAlignment="Center" Width="178">
-                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding Kind}" FontSize="11"
-                                                           Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Margin="0,19,0,16">
-                                            <TextBlock Text="{Binding ModCount}" FontSize="13" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Readiness}" FontSize="12"
-                                                       Foreground="{StaticResource MutedBrush}"
-                                                       TextWrapping="Wrap" Margin="0,7,0,0"/>
-                                        </StackPanel>
-                                        <Grid Grid.Row="2">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Content="Play" Tag="{Binding}"
-                                                    Click="InstancePlay_Click"
-                                                    Style="{StaticResource PrimaryButton}" Margin="0,0,5,0"/>
-                                            <Button Grid.Column="1" Content="Manage" Tag="{Binding}"
-                                                    Click="InstanceManage_Click"
-                                                    Style="{StaticResource PillButton}" Margin="5,0,0,0"/>
-                                        </Grid>
-                                    </Grid>
+                                                <Button Content="&#xE712;" FontFamily="Segoe MDL2 Assets"
+                                                        Style="{StaticResource PillButton}"
+                                                        Padding="8" Width="34" Height="32"
+                                                        Tag="{Binding}" Click="InstanceOptions_Click"
+                                                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                        Margin="0,6,6,0"
+                                                        ToolTip="More actions"/>
+                                                <Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets"
+                                                        Style="{StaticResource PrimaryButton}"
+                                                        Padding="9" Width="40" Height="38"
+                                                        Tag="{Binding}" Click="InstancePlay_Click"
+                                                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                        Margin="0,0,9,9" ToolTip="Play"/>
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold"
+                                                   Margin="3,12,3,0" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding ModCount}" FontSize="12"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Margin="3,5,3,0" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Kind}" FontSize="11"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Margin="3,4,3,5" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
                     <Border x:Name="EmptyInstancesPanel" Style="{StaticResource PanelCard}"
                             Padding="40" Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" MaxWidth="430">
                             <TextBlock Text="Your adventure starts here" FontSize="22"
                                        FontWeight="Bold" TextAlignment="Center"/>
-                            <TextBlock Text="Add your OrbusVR installation, then make a separate copy for mods."
+                            <TextBlock Text="Add your OrbusVR installation, then create a separate copy for mods."
                                        FontSize="13" Foreground="{StaticResource MutedBrush}"
                                        TextAlignment="Center" TextWrapping="Wrap" Margin="0,11,0,20"/>
                             <Button Content="Add OrbusVR installation"
                                     HorizontalAlignment="Center" Click="OpenInstances_Click"
                                     Style="{StaticResource PrimaryButton}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="NoMatchingInstancesPanel" Style="{StaticResource PanelCard}"
+                            Padding="36" Visibility="Collapsed">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="No matching instances"
+                                       FontSize="19" FontWeight="Bold" TextAlignment="Center"/>
+                            <TextBlock Text="Try another search or change the filter."
+                                       FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                       Margin="0,9,0,15" TextAlignment="Center"/>
+                            <Button Content="Clear search and filters"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource PillButton}"
+                                    Click="ClearInstanceFilters_Click"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
