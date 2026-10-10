@@ -1,13 +1,10 @@
-
-name: Build OrbusRebornManager
+name: Build and package RebornManager
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
     tags:
       - "v*"
   workflow_dispatch:
@@ -16,40 +13,88 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  windows:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up .NET
+      - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Build Windows EXE
-        run: >
-          dotnet publish OrbusRebornManager.csproj
-          -c Release
-          -r win-x64
-          --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:DebugType=None
-          -p:DebugSymbols=false
-          -o publish/win-x64
+      - name: Verify release version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content -Raw OrbusRebornManager.csproj
+          $version = [string]$project.Project.PropertyGroup.Version
+          if ([string]::IsNullOrWhiteSpace($version)) { throw "Project version is missing." }
+          if ("${{ github.ref_type }}".Replace(" ","") -eq "tag" -and "${{ github.ref_name }}".Replace(" ","") -ne "v$version") {
+            throw "Git tag must match project version v$version."
+          }
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Upload EXE artifact
+      - name: Publish Windows app
+        shell: pwsh
+        run: |
+          dotnet publish OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+
+      - name: Install pinned Velopack CLI
+        shell: pwsh
+        run: |
+          dotnet tool install --tool-path ./.tools vpk --version 1.2.161
+          if ($LASTEXITCODE -ne 0) { throw "Velopack CLI installation failed" }
+
+      - name: Download previous release for delta generation
+        shell: pwsh
+        env:
+          VPK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $headers = @{
+            Authorization = "Bearer $env:VPK_TOKEN"
+            "User-Agent" = "RebornManager-Release-Build"
+          }
+          $url = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases?per_page=100"
+          $releases = @(Invoke-RestMethod -Uri $url -Headers $headers)
+          $hasVelopackRelease = @($releases | Where-Object {
+            @($_.assets | Where-Object { $_.name -like "*-full.nupkg" }).Count -gt 0
+          }).Count -gt 0
+
+          if ($hasVelopackRelease) {
+            & ./.tools/vpk.exe download github --repoUrl "https://github.com/$env:GITHUB_REPOSITORY" --channel win
+            if ($LASTEXITCODE -ne 0) { throw "Could not retrieve the previous Velopack release" }
+          } else {
+            Write-Host "First Velopack release: build full package without a delta."
+          }
+
+      - name: Package installer and updates
+        shell: pwsh
+        run: |
+          & ./.tools/vpk.exe pack --packId Hor1zonVR.OrbusRebornManager `
+            --packVersion $env:APP_VERSION --packDir publish/win-x64 `
+            --mainExe OrbusRebornManager.exe --packTitle "Orbus Reborn Manager" `
+            --channel win --runtime win-x64
+          if ($LASTEXITCODE -ne 0) { throw "Velopack packaging failed" }
+
+      - name: Upload installer for testing
         uses: actions/upload-artifact@v4
         with:
-          name: OrbusRebornManager-win-x64
-          path: publish/win-x64/OrbusRebornManager.exe
+          name: RebornManager-Setup-win-x64
+          path: Releases/**
           if-no-files-found: error
 
-      - name: Publish release
+      - name: Publish update packages on version tags
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: publish/win-x64/OrbusRebornManager.exe
-          generate_release_notes: true
+        shell: pwsh
+        env:
+          VPK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          & ./.tools/vpk.exe upload github `
+            --repoUrl "https://github.com/$env:GITHUB_REPOSITORY" `
+            --channel win --publish --tag $env:GITHUB_REF_NAME `
+            --releaseName "RebornManager $env:APP_VERSION"
+          if ($LASTEXITCODE -ne 0) { throw "GitHub release upload failed" }
