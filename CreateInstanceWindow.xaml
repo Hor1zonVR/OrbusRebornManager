@@ -45,7 +45,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="SourcePathText" IsReadOnly="True"
                              ToolTip="Your existing OrbusVR installation"
-                             TextTrimming="None" VerticalContentAlignment="Center"/>
+                             VerticalContentAlignment="Center"/>
                     <Button Grid.Column="1" Content="Browse"
                             Style="{StaticResource PillButton}"
                             Click="BrowseSource_Click" Margin="9,0,0,0"/>
