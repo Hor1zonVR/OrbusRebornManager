@@ -259,12 +259,8 @@ public partial class MainWindow : Window
                 string.Equals(x.Instance.Path, card.Instance.Path,
                     StringComparison.OrdinalIgnoreCase)) ?? card;
             ShowPanel("installed");
-            PageHeading.Text = "Instance overview";
-            PageSubtitle.Text = "";
-            PageSubtitle.Visibility = Visibility.Collapsed;
-            SelectedInstanceName.Text = card.Name;
-            SelectedInstanceMeta.Text = card.Kind + "  ·  " + card.ModCount;
-            SelectedInstanceLoaderText.Text = card.Readiness;
+            // The dedicated overview refresh reads the current registry,
+            // loader and files. Don't overwrite it with stale library metadata.
         }
         catch (Exception ex)
         {
@@ -372,6 +368,8 @@ public partial class MainWindow : Window
         {
             await _service.InstallLoaderAsync(game, m => Dispatcher.Invoke(() => Log(m)));
             UpdateDashboard();
+            UpdateInstalledRows();
+            RefreshInstanceCards();
             MessageBox.Show(this,
                 "BepInEx installed! Launch OrbusVR once and let it generate its IL2CPP interop files. The first launch may be slow.",
                 "Loader ready", MessageBoxButton.OK, MessageBoxImage.Information);
