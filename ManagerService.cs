@@ -231,6 +231,64 @@ public sealed class ManagerService
         return (release, asset);
     }
 
+    /// <summary>
+    /// Resolve the exact version exported in an .orbuspack. Never silently
+    /// substitute /releases/latest for a missing or unpublished version.
+    /// Only call with a trusted catalogue ModDefinition (not the untrusted
+    /// manifest repository) after matching the approved source.
+    /// </summary>
+    public async Task<(GitHubRelease Release, GitHubAsset Asset)> GetPinnedReleaseAsync(
+        ModDefinition mod, string tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag) ||
+            tag.Length > 80 ||
+            !Regex.IsMatch(tag, @"^[A-Za-z0-9][A-Za-z0-9._+\-]{0,79}$"))
+            throw new InvalidOperationException("Invalid pinned mod version.");
+
+        var repo = GetRepoParts(mod.Repository);
+        string address = $"https://api.github.com/repos/{repo.Owner}/{repo.Repository}/releases/tags/{Uri.EscapeDataString(tag)}";
+        using var response = await Client.GetAsync(address);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException("Version " + tag +
+                " is no longer published as a stable GitHub release.");
+
+        response.EnsureSuccessStatusCode();
+
+        var release = JsonSerializer.Deserialize<GitHubRelease>(
+            await response.Content.ReadAsStringAsync(), Json)
+            ?? throw new InvalidOperationException("Invalid GitHub release.");
+
+        if (release.Draft || release.Prerelease ||
+            !release.TagName.Equals(tag, StringComparison.Ordinal))
+            throw new InvalidOperationException(
+                "Requested version isn't a matching published stable release.");
+
+        var matches = release.Assets.Where(a =>
+            (a.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
+             a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) &&
+            GlobMatches(mod.AssetPattern, a.Name)).ToList();
+
+        if (matches.Count != 1)
+            throw new InvalidOperationException(
+                "Version " + tag + " must contain one approved DLL or ZIP asset.");
+
+        var asset = matches[0];
+        if (asset.Size <= 0 || asset.Size > MaxModBytes)
+            throw new InvalidOperationException(
+                "Pinned mod release exceeds the 100 MB limit.");
+
+        if (!Uri.TryCreate(asset.DownloadUrl, UriKind.Absolute, out var download) ||
+            download.Scheme != "https" || download.Host != "github.com" ||
+            !download.AbsolutePath.StartsWith(
+                $"/{repo.Owner}/{repo.Repository}/releases/download/",
+                StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException(
+                "Unexpected GitHub release download URL.");
+
+        return (release, asset);
+    }
+
     private static bool GlobMatches(string glob, string filename)
     {
         string expression = "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
