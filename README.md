@@ -1,27 +1,30 @@
-# Orbus Reborn Manager — v0.1 (Windows)
+# Orbus Reborn Manager — v0.4.0 development
 
-A standalone **OrbusVR Reborn Community Edition** client mod installer and curated GitHub mod catalogue. This app is **not** for OrbusVR Classic or Preborn.
+A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**.
+This project is not intended for OrbusVR Classic or Preborn.
 
-> This is source code, not a precompiled executable. It has not yet been compiled or tested on Windows. Build and verify before sharing broadly.
+> This is a development branch. Verify the Windows build and complete a two-version updater test before sharing the installer with the wider community.
 
-## Build a standalone EXE
+## Install and update
 
-Requires **Windows 10/11 x64** and the **.NET 8 SDK** on the build machine.
+Download **Hor1zonVR.OrbusRebornManager-Setup.exe** (the Velopack installer) from the project's [GitHub Releases](https://github.com/Hor1zonVR/OrbusRebornManager/releases). Run it once. The installed manager will check this repository's **stable GitHub Releases** for updates.
 
-1. Extract this source folder anywhere.
-2. Open PowerShell in the source folder.
-3. Run `powershell -ExecutionPolicy Bypass -File .\build-windows.ps1` (or open PowerShell and run `.\build-windows.ps1`).
-4. The distributable file is `publish\win-x64\OrbusRebornManager.exe`.
+When an update is available, RebornManager shows **Update & restart**. It downloads a validated package and restarts to apply it. Smaller delta packages are used where available; otherwise a full update is downloaded. Update checks can be disabled in Settings, and updates are **not installed silently**.
 
-Build command without the helper script:
+**Upgrading from the old standalone EXE:** You and existing testers must install the new Setup.exe once. The previous standalone EXE cannot convert itself into an installed, self-updating edition. Existing instances and settings are stored separately under LocalAppData, so installing the new manager should not overwrite game copies.
+
+### Build for Windows
+
+Requires the **.NET 8 SDK** and Windows 10/11 x64 on the build machine.
 
 ```powershell
-dotnet publish .\OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\win-x64
+.\build-windows.ps1
 ```
 
-The EXE bundles .NET for **players**, so Jordan won't have to install the SDK or a separate runtime.
+The script builds the application and generates a Velopack installer in `Releases`.
+For normal releases, push a Git tag matching the `Version` in `OrbusRebornManager.csproj` (for example, `v0.4.0`). GitHub Actions publishes the installer plus Velopack full and delta packages.
 
-The included GitHub Actions workflow can build the Windows EXE after this source is published to a repository.
+**Release discipline:** Do not publish the next version until the current version's installer has been installed and tested on a Windows machine. To verify the update path, install v0.4.0, publish a v0.4.1 test release, and confirm the manager detects and applies it without losing settings or instances. Do not tag v0.4.0 while the UI or installer is still unfinished.
 
 ## First run and testing
 
