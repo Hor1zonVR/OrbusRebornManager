@@ -42,6 +42,24 @@ public partial class MainWindow : Window
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        try
+        {
+            // A fresh install starts with no registered game and no selected
+            // path. Reinstalling an existing manager doesn't erase that data,
+            // so returning players aren't forced through setup again.
+            if (string.IsNullOrWhiteSpace(_settings.GamePath) &&
+                _instanceStore.Load().Count == 0)
+            {
+                await ShowFirstRunAsync(preview: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this,
+                "Couldn't open first-time setup: " + ex.Message,
+                "Setup unavailable", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
         RefreshInstanceCards();
         await RefreshCatalogAsync();
         if (_settings.CheckManagerUpdates)
