@@ -11,11 +11,13 @@
     <Version>0.4.14</Version>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <StartupObject>OrbusRebornManager.App</StartupObject>
+    <ApplicationIcon>Assets/OrbusRebornManager.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
     <Page Include="App.xaml" />
     <PackageReference Include="Velopack" Version="1.2.161" />
+    <Resource Include="Assets/OrbusRebornManager.ico" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="catalog/mods.json"
