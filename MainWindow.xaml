@@ -161,12 +161,17 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Width="285" MinHeight="214" Margin="0,0,14,14"
+                                        Tag="{Binding}" ToolTip="Open instance"
+                                        Cursor="Hand" MouseLeftButtonUp="InstanceCard_Click"
                                         Padding="19" CornerRadius="14" BorderThickness="1"
                                         Background="{StaticResource CardBrush}">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
                                             <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#6A8A91"/>
+                                                </Trigger>
                                                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                     <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                                                 </DataTrigger>
@@ -174,11 +179,18 @@
                                         </Style>
                                     </Border.Style>
                                     <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Manage mods" Tag="{Binding}" Click="InstanceManage_Click"/>
-                                            <MenuItem Header="Open folder" Tag="{Binding}" Click="InstanceOpenFolder_Click"/>
-                                            <Separator/>
-                                            <MenuItem Header="Remove from list" Tag="{Binding}" Click="InstanceForget_Click"/>
+                                        <ContextMenu Style="{StaticResource InstanceContextMenu}"
+                                                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="Play" Tag="{Binding}" Click="InstancePlay_Click"/>
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="View instance" Tag="{Binding}" Click="InstanceManage_Click"/>
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="Open folder" Tag="{Binding}" Click="InstanceOpenFolder_Click"/>
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="Copy folder path" Tag="{Binding}" Click="InstanceCopyPath_Click"/>
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="Remove from list" Tag="{Binding}" Click="InstanceForget_Click"/>
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     <Grid>
