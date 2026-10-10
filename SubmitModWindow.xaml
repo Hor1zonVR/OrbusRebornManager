@@ -1,0 +1,109 @@
+<Window x:Class="OrbusRebornManager.SubmitModWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Submit a mod"
+        Width="590" Height="470"
+        ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="{StaticResource InterfaceFont}">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="0"
+                            GlassFrameThickness="0" CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Border BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="39"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Title_MouseLeftButtonDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="13,0,0,0">
+                        <ContentControl ContentTemplate="{StaticResource OrbusMark}"
+                                        Width="23" Height="23"/>
+                        <TextBlock Text="Submit a mod" Margin="10,0,0,0"
+                                   VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <Button Content="×" FontFamily="Segoe UI" FontSize="19"
+                            Style="{StaticResource CloseChromeButton}"
+                            HorizontalAlignment="Right" Click="Close_Click"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="1" Margin="27,24,27,0">
+                <TextBlock Text="Get your mod listed" FontFamily="{StaticResource HeadingFont}"
+                           FontSize="23" FontWeight="SemiBold"/>
+                <TextBlock Text="Built something for OrbusVR Reborn? Submit it for review and inclusion in the community catalogue."
+                           TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}"
+                           FontSize="13" Margin="0,7,0,18"/>
+
+                <Border Background="{StaticResource CardBrush}"
+                        BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                        CornerRadius="13" Padding="18,15" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="CONTACT ON DISCORD" Style="{StaticResource Eyebrow}"/>
+                        <Grid Margin="0,9,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="horizonvr" FontSize="24" FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="  ·  Discord username" FontSize="12"
+                                           VerticalAlignment="Center"
+                                           Foreground="{StaticResource MutedBrush}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Copy username"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Click="CopyUsername_Click" Padding="14,8"
+                                    VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="Send a direct message to horizonvr on Discord."
+                                   FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="WHAT TO INCLUDE" Style="{StaticResource Eyebrow}"/>
+                <TextBlock Text="Mod name, GitHub repository, latest stable release (DLL or ZIP), what it does, and whether it runs on the client or server."
+                           TextWrapping="Wrap" FontSize="13"
+                           Margin="0,9,0,13"/>
+
+                <Border Background="#242B2C" CornerRadius="11"
+                        Padding="13,10">
+                    <TextBlock Text="All submissions are reviewed before they're added to the catalogue. Submitting a mod doesn't guarantee approval."
+                               Foreground="{StaticResource MutedBrush}"
+                               TextWrapping="Wrap" FontSize="12"/>
+                </Border>
+            </StackPanel>
+
+            <Border Grid.Row="2" BorderBrush="{StaticResource StrokeBrush}"
+                    BorderThickness="0,1,0,0" Background="{StaticResource SidebarBrush}">
+                <Grid Margin="24,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="CopyStatusText" VerticalAlignment="Center"
+                               FontSize="12" Foreground="{StaticResource AccentBrush}"/>
+                    <Button Grid.Column="1" Content="Copy message template"
+                            Style="{StaticResource PillButton}"
+                            Margin="0,0,10,0" Click="CopyTemplate_Click"/>
+                    <Button Grid.Column="2" Content="Done" MinWidth="90"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="Close_Click"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
