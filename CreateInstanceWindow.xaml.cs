@@ -162,6 +162,7 @@ public partial class CreateInstanceWindow : Window
             _copyCancellation?.Dispose();
             _copyCancellation = null;
             CreateButton.IsEnabled = true;
+            CancelButton.IsEnabled = true;
             CopyProgress.Visibility = Visibility.Collapsed;
         }
     }
