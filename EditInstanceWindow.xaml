@@ -1,0 +1,111 @@
+<Window x:Class="OrbusRebornManager.EditInstanceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Customize instance" Width="590" Height="493"
+        ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        FontFamily="{StaticResource InterfaceFont}"
+        Foreground="{StaticResource TextBrush}"
+        Background="{StaticResource BackgroundBrush}">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="0"
+                            GlassFrameThickness="0" CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Border BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="39"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Title_MouseLeftButtonDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                Margin="13,0,0,0">
+                        <ContentControl Width="25" Height="25"
+                                        ContentTemplate="{StaticResource OrbusMark}"/>
+                        <TextBlock Text="Customize instance" Margin="10,0,0,0"
+                                   VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <Button Content="×" FontFamily="Segoe UI" FontSize="19"
+                            Style="{StaticResource CloseChromeButton}"
+                            HorizontalAlignment="Right" Click="Cancel_Click"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="1" Margin="25,21,25,12">
+                <TextBlock Text="Customize your instance" FontSize="22"
+                           FontWeight="SemiBold" FontFamily="{StaticResource HeadingFont}"/>
+                <TextBlock Text="Change how this installation appears in your library."
+                           FontSize="13" Foreground="{StaticResource MutedBrush}"
+                           Margin="0,6,0,19"/>
+
+                <TextBlock Text="Display name" FontSize="13" FontWeight="SemiBold"
+                           Margin="0,0,0,8"/>
+                <TextBox x:Name="NameText" MinHeight="39" MaxLength="50"
+                         VerticalContentAlignment="Center" Padding="12,8"/>
+                <TextBlock Text="Changing the name will not move or rename your game folder."
+                           FontSize="12" Foreground="{StaticResource MutedBrush}"
+                           Margin="0,7,0,18"/>
+
+                <TextBlock Text="Instance artwork" FontSize="13" FontWeight="SemiBold"
+                           Margin="0,0,0,9"/>
+                <Border Background="{StaticResource CardBrush}" CornerRadius="14"
+                        BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                        Padding="13">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="74"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="68" Height="68" CornerRadius="13"
+                                Background="#343B48">
+                            <Grid ClipToBounds="True">
+                                <ContentControl x:Name="DefaultIcon" Width="49" Height="49"
+                                                ContentTemplate="{StaticResource OrbusMark}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Image x:Name="CustomIcon" Stretch="UniformToFill"
+                                       Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="13,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Custom icon" FontSize="13" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="ImageStatusText"
+                                       Text="Using the default Orbus artwork"
+                                       FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                       Margin="0,4,0,10" TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Choose image" Style="{StaticResource PillButton}"
+                                        Click="ChooseImage_Click" MinHeight="32" Padding="10,6"/>
+                                <Button Content="Use default" Style="{StaticResource PillButton}"
+                                        Click="ClearImage_Click" MinHeight="32" Padding="10,6"
+                                        Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <TextBlock Text="PNG, JPG or BMP, up to 12 MB. The image is stored in RebornManager's AppData."
+                           FontSize="12" Foreground="{StaticResource MutedBrush}"
+                           TextWrapping="Wrap" Margin="0,9,0,0"/>
+            </StackPanel>
+
+            <Border Grid.Row="2" Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,1,0,0"
+                    Padding="24,14">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel" Click="Cancel_Click"
+                            Style="{StaticResource PillButton}" Margin="0,0,9,0"
+                            MinWidth="89"/>
+                    <Button Content="Save changes" Click="Save_Click"
+                            Style="{StaticResource PrimaryButton}" MinWidth="135"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
