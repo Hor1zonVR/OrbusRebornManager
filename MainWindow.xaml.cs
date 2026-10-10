@@ -5,6 +5,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Input;
+using System.Windows.Controls.Primitives;
 
 namespace OrbusRebornManager;
 
@@ -200,11 +202,65 @@ public partial class MainWindow : Window
         RefreshInstanceCards();
     }
 
+    private void InstanceCard_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left ||
+            sender is not FrameworkElement { Tag: InstanceCard card })
+            return;
+
+        // A button inside the card must perform only its own action.
+        DependencyObject? source = e.OriginalSource as DependencyObject;
+        while (source != null && !ReferenceEquals(source, sender))
+        {
+            if (source is ButtonBase)
+                return;
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        OpenInstance(card);
+        e.Handled = true;
+    }
+
+    private void OpenInstance(InstanceCard card)
+    {
+        try
+        {
+            SelectInstance(card);
+            ShowPanel("installed");
+            PageHeading.Text = card.Name;
+            PageSubtitle.Text = "Manage mods and launch your instance.";
+            SelectedInstanceName.Text = card.Name;
+            SelectedInstanceMeta.Text = card.Kind + "  ·  " + card.ModCount;
+            SelectedInstanceLoaderText.Text = card.Readiness;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Instance unavailable",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void InstanceCopyPath_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: InstanceCard card })
+            return;
+
+        try
+        {
+            Clipboard.SetText(card.Instance.Path);
+            Log("Instance folder path copied.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Couldn't copy folder path",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void InstanceManage_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement { Tag: InstanceCard card }) return;
-        try { SelectInstance(card); ShowPanel("installed"); }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Instance unavailable"); }
+        OpenInstance(card);
     }
 
     private void InstancePlay_Click(object sender, RoutedEventArgs e)
