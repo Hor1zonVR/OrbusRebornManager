@@ -31,6 +31,7 @@ public partial class MainWindow : Window
         DataContext = this;
         _settings = _service.LoadSettings();
         GamePathText.Text = _settings.GamePath;
+        DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
         CatalogUrlText.Text = _settings.CatalogUrl;
         AutoUpdatesCheck.IsChecked = _settings.AutoUpdate;
         SidebarVersionText.Text = "v" + (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "unknown");
