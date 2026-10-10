@@ -849,6 +849,21 @@
                         </StackPanel>
                     </Border>
 
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,11">
+                        <StackPanel>
+                            <TextBlock Text="FIRST-TIME SETUP" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="Try the welcome experience"
+                                       FontSize="17" FontWeight="SemiBold" Margin="0,9,0,7"/>
+                            <TextBlock Text="Preview what a new player sees when selecting their game and creating their first instance. This preview does not change your settings or copy any game files."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap" Margin="0,0,0,13"/>
+                            <Button Content="Preview first-launch setup"
+                                    Style="{StaticResource PillButton}"
+                                    Click="PreviewFirstRun_Click"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+
                     <Border Style="{StaticResource PanelCard}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="APPLICATION" Style="{StaticResource Eyebrow}"/>
