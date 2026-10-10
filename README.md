@@ -97,7 +97,17 @@ The cover picker now opens a **separate, full-image crop window** rather than im
 
 Choose **Export mod list** from the card menu (or **Export** from the instance page) to write a `.orbuspack` file. This is a human-readable JSON manifest with schema version 1, game identity, instance name, mod IDs, versions, GitHub repository metadata (where applicable) and enabled/disabled flags. The file **does not** contain game assets, DLLs, save data, configuration, Windows paths or personal icons. Locally imported DLLs are explicitly marked as manual requirements.
 
-`.orbuspack` importing and automatic retrieval of pinned mod versions are **not implemented yet**. Exports are for sharing a mod list and serve as the basis of a future import workflow; they must not be presented as currently self-installing packages.
+### Import a shared .orbuspack
+
+From **Library → Import .orbuspack**, choose a mod list, review the approved and skipped mods, and continue through the usual **Create instance** dialog. Importing **always creates a new, separate game copy**, using a chosen existing OrbusVR installation as its source and the normal instance-storage location. Existing installations and their managed mods are not changed. BepInEx is installed in the new copy and the importer attempts to restore each exported mod at its **exact stable release tag**; it never silently installs the latest version in place of a missing pinned version.
+
+Only client mods whose **ID and GitHub repository match RM's approved catalogue** can be downloaded, using the catalogue's trusted asset rules and existing safe installer. A local DLL does not travel inside the package; manual DLLs, unknown repositories, missing release tags, prereleases and unavailable binaries are skipped and clearly reported at completion. Each exported enabled/disabled state is restored for successfully installed mods.
+
+If a download fails, the completed new game copy is preserved in the Library rather than deleting user data. Launch the imported copy once to let BepInEx generate IL2CPP interop. On future RM sessions, normal automatic-mod-update preferences still apply; pinned versions describe **the initial restoration**, not a permanent version lock.
+
+### Submit a mod
+
+Use the new **Submit a mod** sidebar item, above Settings. It shows the maintainer's Discord username **`horizonvr`**, with one-click username and submission-message copying. The old unhelpful Settings paragraph has been removed.
 
 ## Curated catalogue workflow
 
