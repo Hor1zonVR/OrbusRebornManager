@@ -33,6 +33,7 @@ public partial class MainWindow : Window
         GamePathText.Text = _settings.GamePath;
         CatalogUrlText.Text = _settings.CatalogUrl;
         AutoUpdatesCheck.IsChecked = _settings.AutoUpdate;
+        SidebarVersionText.Text = "v" + (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "unknown");
         InitializeManagerUpdates();
         ShowPanel("instances");
         UpdateDashboard();
