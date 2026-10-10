@@ -60,7 +60,10 @@ public partial class MainWindow
         try
         {
             if (window.RememberLocation)
+            {
                 _settings.DefaultInstanceDirectory = window.SelectedStoragePath;
+                DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
+            }
 
             _settings.GamePath = created.Path;
             _service.SaveSettings(_settings);
@@ -103,6 +106,47 @@ public partial class MainWindow
                 "Instance setup incomplete",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             RefreshInstanceCards();
+        }
+    }
+
+    private void ChangeInstanceStorage_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "Choose the default folder for new OrbusVR instances"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+
+        try
+        {
+            _settings.DefaultInstanceDirectory = Path.GetFullPath(dialog.FolderName);
+            _service.SaveSettings(_settings);
+            DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
+            Log("Default instance location changed. Existing copies were not moved.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Could not save location",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void OpenInstanceStorage_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            string folder = Path.GetFullPath(_settings.DefaultInstanceDirectory);
+            Directory.CreateDirectory(folder);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = folder,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Could not open instance folder",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
