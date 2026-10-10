@@ -17,6 +17,13 @@ public sealed class GameInstance
     public double IconZoom { get; set; } = 1.0;
     public double IconOffsetX { get; set; }
     public double IconOffsetY { get; set; }
+    // True when a user has explicitly selected a crop in the full-image editor.
+    // The source image remains preserved for future re-cropping.
+    public bool IconHasCrop { get; set; }
+    public double IconCropX { get; set; }
+    public double IconCropY { get; set; }
+    public double IconCropWidth { get; set; } = 1;
+    public double IconCropHeight { get; set; } = 1;
 }
 
 public sealed class InstanceStore
