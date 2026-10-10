@@ -55,6 +55,7 @@ jobs:
           & ./.tools/vpk.exe pack --packId Hor1zonVR.OrbusRebornManager `
             --packVersion $env:APP_VERSION --packDir publish/win-x64 `
             --mainExe OrbusRebornManager.exe --packTitle "Orbus Reborn Manager" `
+            --icon Assets/OrbusRebornManager.ico `
             --channel win --runtime win-x64
           if ($LASTEXITCODE -ne 0) { throw "Velopack packaging failed" }
 
