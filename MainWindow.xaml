@@ -767,6 +767,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <Button x:Name="UpdateActionButton" Grid.Column="1"
@@ -774,7 +775,7 @@
                             Click="UpdateAction_Click"
                             Style="{StaticResource PrimaryButton}"
                             Visibility="Collapsed"
-                            Margin="0,0,110,0" VerticalAlignment="Center"/>
+                            Margin="0,0,12,0" VerticalAlignment="Center"/>
                     <TextBlock x:Name="StatusLine"
                                Foreground="#B6CADC"
                                FontSize="11"
