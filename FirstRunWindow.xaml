@@ -33,7 +33,7 @@
                         <TextBlock Text="Orbus Reborn Manager" VerticalAlignment="Center"
                                    Margin="10,0,0,0" FontWeight="SemiBold" FontSize="13"/>
                     </StackPanel>
-                    <Button Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets"
+                    <Button Content="×" FontFamily="Segoe UI" FontSize="19"
                             HorizontalAlignment="Right"
                             Style="{StaticResource CloseChromeButton}"
                             Click="Close_Click" ToolTip="Close setup"/>
