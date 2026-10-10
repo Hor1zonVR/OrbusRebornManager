@@ -16,6 +16,9 @@ public partial class MainWindow : Window
     private readonly List<ModRow> _allDiscover = new();
     private bool _initialCatalogCheck = true;
     private int _jobs;
+    private readonly InstanceStore _instanceStore = new();
+    public ObservableCollection<InstanceCard> InstanceCards { get; } = new();
+    public ObservableCollection<ModRow> ServerMods { get; } = new();
 
     public ObservableCollection<ModRow> DiscoverMods { get; } = new();
     public ObservableCollection<ModRow> InstalledMods { get; } = new();
@@ -28,12 +31,13 @@ public partial class MainWindow : Window
         GamePathText.Text = _settings.GamePath;
         CatalogUrlText.Text = _settings.CatalogUrl;
         AutoUpdatesCheck.IsChecked = _settings.AutoUpdate;
-        ShowPanel("dashboard");
+        ShowPanel("instances");
         UpdateDashboard();
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        RefreshInstanceCards();
         await RefreshCatalogAsync();
     }
 
@@ -98,31 +102,155 @@ public partial class MainWindow : Window
 
     private void ShowPanel(string page)
     {
+        InstancesPanel.Visibility = page == "instances" ? Visibility.Visible : Visibility.Collapsed;
         DashboardPanel.Visibility = page == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         DiscoverPanel.Visibility = page == "discover" ? Visibility.Visible : Visibility.Collapsed;
+        ServerPanel.Visibility = page == "server" ? Visibility.Visible : Visibility.Collapsed;
         InstalledPanel.Visibility = page == "installed" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = page == "settings" ? Visibility.Visible : Visibility.Collapsed;
 
         (string header, string sub) = page switch
         {
-            "discover" => ("Discover mods", "Approved GitHub releases, one click away."),
-            "installed" => ("Installed mods", "Manage your Reborn instance safely."),
-            "settings" => ("Settings & curator", "Configure updates and review GitHub repositories."),
-            _ => ("Dashboard", "Your home for OrbusVR Reborn Community Edition mods.")
+            "instances" => ("My Instances", "Your OrbusVR installations, all in one place."),
+            "dashboard" => ("Instance Overview", "Your selected OrbusVR installation."),
+            "discover" => ("Client Mods", "Discover and install community client mods."),
+            "server" => ("Server Mods", "Find projects for community server operators."),
+            "installed" => ("Installed Mods", "Manage mods for your selected instance."),
+            "settings" => ("Settings", "Manage your preferences."),
+            _ => ("My Instances", "")
         };
         PageHeading.Text = header;
         PageSubtitle.Text = sub;
-        NavHome.Background = page == "dashboard" ? new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
-        NavBrowse.Background = page == "discover" ? new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
-        NavInstalled.Background = page == "installed" ? new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
-        NavSettings.Background = page == "settings" ? new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+        HeaderCreateButton.Visibility = page == "instances" ? Visibility.Visible : Visibility.Collapsed;
+        HeaderStatusCard.Visibility = page == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
+        NavHome.Background = page == "instances" || page == "dashboard" || page == "installed" ?
+            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+        NavBrowse.Background = page == "discover" ?
+            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+        NavServer.Background = page == "server" ?
+            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+        NavSettings.Background = page == "settings" ?
+            new SolidColorBrush(Color.FromRgb(37, 55, 70)) : Brushes.Transparent;
+        if (page == "instances") RefreshInstanceCards();
         if (page == "installed") UpdateInstalledRows();
     }
 
+    private void Instances_Click(object sender, RoutedEventArgs e) => ShowPanel("instances");
     private void Dashboard_Click(object sender, RoutedEventArgs e) => ShowPanel("dashboard");
     private void Discover_Click(object sender, RoutedEventArgs e) => ShowPanel("discover");
+    private void ServerMods_Click(object sender, RoutedEventArgs e) => ShowPanel("server");
     private void Installed_Click(object sender, RoutedEventArgs e) => ShowPanel("installed");
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowPanel("settings");
+
+    private void RefreshInstanceCards()
+    {
+        InstanceCards.Clear();
+        try
+        {
+            var list = _instanceStore.Load();
+            if (!string.IsNullOrWhiteSpace(_settings.GamePath) &&
+                !list.Any(x => string.Equals(
+                    Path.GetFullPath(x.Path).TrimEnd(Path.DirectorySeparatorChar),
+                    Path.GetFullPath(_settings.GamePath).TrimEnd(Path.DirectorySeparatorChar),
+                    StringComparison.OrdinalIgnoreCase)))
+            {
+                try
+                {
+                    string valid = _service.NormalizeGamePath(_settings.GamePath);
+                    _instanceStore.AddExisting(list, valid);
+                }
+                catch { /* Invalid paths are displayed on the existing overview. */ }
+            }
+            foreach (var instance in list)
+            {
+                string status;
+                string count = "0 mods";
+                try
+                {
+                    string valid = _service.NormalizeGamePath(instance.Path);
+                    int mods = _service.LoadInstalled(valid).Mods.Count;
+                    count = mods == 1 ? "1 mod" : mods + " mods";
+                    status = _service.IsBepInExInstalled(valid) ? "Ready for mods" : "Mod loader needed";
+                }
+                catch
+                {
+                    status = "Game files not found";
+                }
+                bool selected = string.Equals(instance.Path, _settings.GamePath,
+                    StringComparison.OrdinalIgnoreCase);
+                InstanceCards.Add(new InstanceCard(instance, count, status, selected));
+            }
+        }
+        catch (Exception ex) { Log("Could not load instances: " + ex.Message); }
+        EmptyInstancesPanel.Visibility = InstanceCards.Count == 0 ?
+            Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void SelectInstance(InstanceCard card)
+    {
+        string valid = _service.NormalizeGamePath(card.Instance.Path);
+        _settings.GamePath = valid;
+        _service.SaveSettings(_settings);
+        UpdateDashboard();
+        UpdateInstalledRows();
+        UpdateReleaseStatuses();
+        RefreshInstanceCards();
+    }
+
+    private void InstanceManage_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: InstanceCard card }) return;
+        try { SelectInstance(card); ShowPanel("installed"); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Instance unavailable"); }
+    }
+
+    private void InstancePlay_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: InstanceCard card }) return;
+        try
+        {
+            SelectInstance(card);
+            _service.Launch(card.Instance.Path);
+            Log("Launching " + card.Name + "...");
+        }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Launch failed"); }
+    }
+
+    private void InstanceOpenFolder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: InstanceCard card }) return;
+        try
+        {
+            if (!Directory.Exists(card.Instance.Path)) throw new DirectoryNotFoundException(card.Instance.Path);
+            Process.Start(new ProcessStartInfo { FileName = card.Instance.Path, UseShellExecute = true });
+        }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Folder unavailable"); }
+    }
+
+    private void InstanceForget_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: InstanceCard card }) return;
+        if (MessageBox.Show(this,
+            "Remove '" + card.Name + "' from the manager? Game files will not be deleted.",
+            "Remove from list", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        try
+        {
+            var list = _instanceStore.Load();
+            list.RemoveAll(x => string.Equals(x.Path, card.Instance.Path, StringComparison.OrdinalIgnoreCase));
+            _instanceStore.Save(list);
+            if (string.Equals(_settings.GamePath, card.Instance.Path, StringComparison.OrdinalIgnoreCase))
+            {
+                _settings.GamePath = "";
+                _service.SaveSettings(_settings);
+                UpdateDashboard();
+            }
+            RefreshInstanceCards();
+            Log("Removed from the instance list. Game files preserved.");
+        }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Could not remove instance"); }
+    }
+
+    private void ServerSearchText_Changed(object sender, TextChangedEventArgs e) => FilterMods();
 
     private void BrowseFolder_Click(object sender, RoutedEventArgs e)
     {
@@ -199,7 +327,9 @@ public partial class MainWindow : Window
             _catalog = result.Catalog;
             CatalogInfo.Text = result.Status + "  ·  " + _catalog.Mods.Count + " approved mod(s)";
             _allDiscover.Clear();
-            foreach (var def in _catalog.Mods) _allDiscover.Add(new ModRow(def));
+            foreach (var def in _catalog.Mods)
+                if (!string.Equals(def.Target, "server", StringComparison.OrdinalIgnoreCase))
+                    _allDiscover.Add(new ModRow(def));
             FilterMods();
             UpdateReleaseStatuses();
             Log("Catalogue refreshed: " + _catalog.Mods.Count + " mods.");
@@ -277,6 +407,16 @@ public partial class MainWindow : Window
                 row.Description.Contains(search, StringComparison.OrdinalIgnoreCase))
                 DiscoverMods.Add(row);
         EmptyCatalogText.Visibility = DiscoverMods.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        string serverSearch = ServerSearchText?.Text?.Trim() ?? "";
+        ServerMods.Clear();
+        foreach (var mod in _catalog.Mods)
+            if (string.Equals(mod.Target, "server", StringComparison.OrdinalIgnoreCase) &&
+                (serverSearch.Length == 0 ||
+                 mod.Name.Contains(serverSearch, StringComparison.OrdinalIgnoreCase) ||
+                 mod.Author.Contains(serverSearch, StringComparison.OrdinalIgnoreCase) ||
+                 mod.Description.Contains(serverSearch, StringComparison.OrdinalIgnoreCase)))
+                ServerMods.Add(new ModRow(mod));
+        EmptyServerPanel.Visibility = ServerMods.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void SearchText_Changed(object sender, TextChangedEventArgs e) { if (DiscoverMods != null) FilterMods(); }
@@ -420,5 +560,22 @@ public partial class MainWindow : Window
             MessageBox.Show(this, "Catalogue exported. Review the JSON and commit it to your public catalogue repository to make the listings available to other players.", "Export complete", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex) { MessageBox.Show(this, ex.Message, "Export failed", MessageBoxButton.OK, MessageBoxImage.Warning); }
+    }
+}
+
+public sealed class InstanceCard
+{
+    public GameInstance Instance { get; }
+    public string Name => Instance.Name;
+    public string Kind => Instance.CreatedByManager ? "Modded instance" : "Existing installation";
+    public string ModCount { get; }
+    public string Readiness { get; }
+    public bool IsSelected { get; }
+    public InstanceCard(GameInstance instance, string modCount, string readiness, bool isSelected)
+    {
+        Instance = instance;
+        ModCount = modCount;
+        Readiness = readiness;
+        IsSelected = isSelected;
     }
 }
