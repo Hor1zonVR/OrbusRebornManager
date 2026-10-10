@@ -1,78 +1,113 @@
-
+using Microsoft.Win32;
+using System;
+using System.IO;
+using System.Linq;
 using System.Windows;
 
 namespace OrbusRebornManager;
 
 public partial class MainWindow
 {
-    private async void OpenInstances_Click(
-        object sender, RoutedEventArgs e) =>
-        await OpenInstancesAsync(focusCreation: false);
-
-    private async void CreateInstance_Click(
-        object sender, RoutedEventArgs e) =>
-        await OpenInstancesAsync(focusCreation: true);
-
-    private async Task OpenInstancesAsync(bool focusCreation)
+    private void OpenInstances_Click(object sender, RoutedEventArgs e)
     {
-        var window = new InstancesWindow(
-            _service,
-            _settings.GamePath,
-            focusCreation)
+        var dialog = new OpenFolderDialog
+        {
+            Title = "Choose an existing OrbusVR Reborn installation"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+
+        try
+        {
+            string game = _service.NormalizeGamePath(dialog.FolderName);
+            var list = _instanceStore.Load();
+            var instance = _instanceStore.AddExisting(
+                list, game, Path.GetFileName(game));
+
+            _settings.GamePath = instance.Path;
+            _service.SaveSettings(_settings);
+            UpdateDashboard();
+            UpdateReleaseStatuses();
+            UpdateInstalledRows();
+            RefreshInstanceCards();
+            OpenInstance(new InstanceCard(instance, "", "", true));
+            Log("Added " + instance.Name + " to your library.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Could not add installation",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private async void CreateInstance_Click(object sender, RoutedEventArgs e)
+    {
+        var existing = _instanceStore.Load();
+
+        // Prefer the original installation over an already-modded copy.
+        string source = existing.FirstOrDefault(i => !i.CreatedByManager)?.Path
+            ?? _settings.GamePath;
+
+        var window = new CreateInstanceWindow(
+            _service, source, _settings.DefaultInstanceDirectory)
         {
             Owner = this
         };
 
-        if (window.ShowDialog() != true ||
-            string.IsNullOrWhiteSpace(window.SelectedGamePath))
+        if (window.ShowDialog() != true || window.CreatedInstance == null)
             return;
 
-        _settings.GamePath = window.SelectedGamePath;
-        _service.SaveSettings(_settings);
-
-        UpdateDashboard();
-        UpdateInstalledRows();
-        UpdateReleaseStatuses();
-        RefreshInstanceCards();
-
-        Log("Selected " + _settings.GamePath);
-
-        if (window.CreatedNewInstance &&
-            MessageBox.Show(
-                this,
-                "Your clean OrbusVR copy is ready!\n\n" +
-                "Install BepInEx into this new instance now?",
-                "New instance created",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question) == MessageBoxResult.Yes)
+        var created = window.CreatedInstance;
+        try
         {
-            await RunAsync(async () =>
+            if (window.RememberLocation)
+                _settings.DefaultInstanceDirectory = window.SelectedStoragePath;
+
+            _settings.GamePath = created.Path;
+            _service.SaveSettings(_settings);
+
+            RefreshInstanceCards();
+            UpdateDashboard();
+            UpdateReleaseStatuses();
+            UpdateInstalledRows();
+
+            if (window.InstallLoader)
             {
-                await _service.InstallLoaderAsync(
-                    _settings.GamePath,
-                    message => Dispatcher.Invoke(
-                        () => Log(message)));
+                await RunAsync(async () =>
+                {
+                    Log("Setting up the mod loader...");
+                    await _service.InstallLoaderAsync(
+                        created.Path,
+                        message => Dispatcher.Invoke(() => Log(message)));
+                });
 
                 UpdateDashboard();
+            }
 
-                MessageBox.Show(
-                    this,
-                    "BepInEx is installed in the new instance. " +
-                    "Launch OrbusVR once before adding mods, " +
-                    "then close the game and import your camera DLL.",
-                    "Instance ready",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            });
+            OpenInstance(new InstanceCard(created, "", "", true));
+            RefreshInstanceCards();
+
+            if (window.InstallLoader && _service.IsBepInExInstalled(created.Path))
+            {
+                Log("Instance ready. Launch OrbusVR once to finish preparing BepInEx.");
+            }
+            else
+            {
+                Log("Instance created. You can prepare it for mods when you're ready.");
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this,
+                "The game copy was created, but setup was incomplete: " + ex.Message +
+                "\n\nYour instance files were not deleted.",
+                "Instance setup incomplete",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            RefreshInstanceCards();
         }
     }
 
-    private void SimpleSettings_Click(
-        object sender, RoutedEventArgs e)
+    private void SimpleSettings_Click(object sender, RoutedEventArgs e)
     {
         Settings_Click(sender, e);
-
-        PageHeading.Text = "Settings";
-        PageSubtitle.Text = "Keep installed mods up to date.";
     }
 }
