@@ -398,6 +398,7 @@ public partial class MainWindow : Window
 
     private void FilterMods()
     {
+        if (EmptyCatalogText == null || EmptyServerPanel == null) return;
         string search = SearchText?.Text?.Trim() ?? "";
         DiscoverMods.Clear();
         foreach (var row in _allDiscover)
