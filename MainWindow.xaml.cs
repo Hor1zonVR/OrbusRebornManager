@@ -150,7 +150,7 @@ public partial class MainWindow : Window
 
     private void RefreshInstanceCards()
     {
-        InstanceCards.Clear();
+        _allInstanceCards.Clear();
         try
         {
             var list = _instanceStore.Load();
@@ -165,8 +165,9 @@ public partial class MainWindow : Window
                     string valid = _service.NormalizeGamePath(_settings.GamePath);
                     _instanceStore.AddExisting(list, valid);
                 }
-                catch { /* Invalid paths are displayed on the existing overview. */ }
+                catch { /* A moved installation can be re-added from the library. */ }
             }
+
             foreach (var instance in list)
             {
                 string status;
@@ -176,20 +177,26 @@ public partial class MainWindow : Window
                     string valid = _service.NormalizeGamePath(instance.Path);
                     int mods = _service.LoadInstalled(valid).Mods.Count;
                     count = mods == 1 ? "1 mod" : mods + " mods";
-                    status = _service.IsBepInExInstalled(valid) ? "Ready for mods" : "Mod loader needed";
+                    status = _service.IsBepInExInstalled(valid)
+                        ? "Ready for mods"
+                        : "Mod loader needed";
                 }
                 catch
                 {
                     status = "Game files not found";
                 }
+
                 bool selected = string.Equals(instance.Path, _settings.GamePath,
                     StringComparison.OrdinalIgnoreCase);
-                InstanceCards.Add(new InstanceCard(instance, count, status, selected));
+                _allInstanceCards.Add(new InstanceCard(instance, count, status, selected));
             }
         }
-        catch (Exception ex) { Log("Could not load instances: " + ex.Message); }
-        EmptyInstancesPanel.Visibility = InstanceCards.Count == 0 ?
-            Visibility.Visible : Visibility.Collapsed;
+        catch (Exception ex)
+        {
+            Log("Could not load instances: " + ex.Message);
+        }
+
+        ApplyInstanceFilters();
     }
 
     private void SelectInstance(InstanceCard card)
@@ -227,6 +234,9 @@ public partial class MainWindow : Window
         try
         {
             SelectInstance(card);
+            card = _allInstanceCards.FirstOrDefault(x =>
+                string.Equals(x.Instance.Path, card.Instance.Path,
+                    StringComparison.OrdinalIgnoreCase)) ?? card;
             ShowPanel("installed");
             PageHeading.Text = card.Name;
             PageSubtitle.Text = "Manage mods and launch your instance.";
@@ -627,17 +637,36 @@ public partial class MainWindow : Window
 
 public sealed class InstanceCard
 {
+    private static readonly Brush[] TileBrushes =
+    {
+        new SolidColorBrush(Color.FromRgb(37, 90, 92)),
+        new SolidColorBrush(Color.FromRgb(63, 65, 113)),
+        new SolidColorBrush(Color.FromRgb(99, 66, 88)),
+        new SolidColorBrush(Color.FromRgb(44, 79, 111)),
+        new SolidColorBrush(Color.FromRgb(66, 89, 64)),
+        new SolidColorBrush(Color.FromRgb(88, 73, 109))
+    };
+
     public GameInstance Instance { get; }
     public string Name => Instance.Name;
-    public string Kind => Instance.CreatedByManager ? "Modded instance" : "Existing installation";
+    public string Kind => Instance.CreatedByManager ? "Modded copy" : "Existing installation";
     public string ModCount { get; }
     public string Readiness { get; }
     public bool IsSelected { get; }
-    public InstanceCard(GameInstance instance, string modCount, string readiness, bool isSelected)
+    public Brush CoverBrush { get; }
+
+    public InstanceCard(GameInstance instance, string modCount,
+        string readiness, bool isSelected)
     {
         Instance = instance;
         ModCount = modCount;
         Readiness = readiness;
         IsSelected = isSelected;
+
+        // Stable colour assignment; no external artwork or image downloads required.
+        uint hash = 2166136261;
+        foreach (char c in instance.Path.ToUpperInvariant())
+            hash = (hash ^ c) * 16777619;
+        CoverBrush = TileBrushes[(int)(hash % TileBrushes.Length)];
     }
 }
