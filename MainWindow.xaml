@@ -124,6 +124,18 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Sparse, decorative Orbus-inspired sigils. These never accept input and
+                 remain behind cards/controls; at 4–6% opacity they're atmosphere only. -->
+            <Canvas Grid.RowSpan="3" IsHitTestVisible="False"
+                    ClipToBounds="True" Opacity="0.055">
+                <ContentControl ContentTemplate="{StaticResource ArcaneRingMotif}"
+                                Width="330" Height="330" Canvas.Right="-75" Canvas.Top="-35"/>
+                <ContentControl ContentTemplate="{StaticResource ArcaneSpiralMotif}"
+                                Width="285" Height="285" Canvas.Left="80" Canvas.Bottom="-120"/>
+                <ContentControl ContentTemplate="{StaticResource ArcaneHexMotif}"
+                                Width="165" Height="165" Canvas.Right="90" Canvas.Bottom="85"/>
+            </Canvas>
+
             <!-- Page heading -->
             <Grid Grid.Row="0"
                   Margin="0,0,0,17">
@@ -250,7 +262,7 @@
                                             <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
                                             <Style.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="BorderBrush" Value="#6A8A91"/>
+                                                    <Setter Property="BorderBrush" Value="#8E749D"/>
                                                 </Trigger>
                                                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                     <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
@@ -274,23 +286,29 @@
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     <StackPanel>
-                                        <Border Height="135" CornerRadius="9"
+                                        <Border Height="137" CornerRadius="14"
                                                 Background="{Binding CoverBrush}">
-                                            <Grid>
+                                            <Grid ClipToBounds="True">
+                                                <ContentControl ContentTemplate="{StaticResource ArcaneHexMotif}"
+                                                                Width="129" Height="129"
+                                                                Opacity="0.13"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                IsHitTestVisible="False"/>
                                                 <ContentControl ContentTemplate="{StaticResource OrbusMark}"
                                                                 Width="77" Height="77" Opacity="0.85"
                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 
                                                 <Button Content="&#xE712;" FontFamily="Segoe MDL2 Assets"
                                                         Style="{StaticResource PillButton}"
-                                                        Padding="8" Width="32" Height="31"
+                                                        Padding="7" Width="32" Height="31"
                                                         Tag="{Binding}" Click="InstanceOptions_Click"
                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
                                                         Margin="0,6,6,0"
                                                         ToolTip="More actions"/>
                                                 <Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets"
                                                         Style="{StaticResource PrimaryButton}"
-                                                        Padding="9" Width="37" Height="35"
+                                                        Padding="7" Width="37" Height="35"
                                                         Tag="{Binding}" Click="InstancePlay_Click"
                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                         Margin="0,0,9,9" ToolTip="Play"/>
@@ -586,7 +604,7 @@
                               VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,0,3,0">
                         <Border Background="{StaticResource CardBrush}"
-                                CornerRadius="8"
+                                CornerRadius="14"
                                 Padding="12"
                                 Margin="0,0,0,12">
                             <TextBlock x:Name="CatalogInfo"
@@ -691,7 +709,7 @@
 
                 <Border Background="{StaticResource CardBrush}"
                         BorderBrush="{StaticResource StrokeBrush}"
-                        BorderThickness="1" CornerRadius="10"
+                        BorderThickness="1" CornerRadius="15"
                         Padding="16" Margin="0,0,0,12">
                     <StackPanel>
                         <Button Content="←  Back to instances"
