@@ -79,6 +79,9 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="13,8"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <!-- The custom template draws a focus border instead of WPF's
+                 default dotted FocusVisualAdorner. -->
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="MinHeight" Value="40"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -97,6 +100,11 @@
                                               RecognizesAccessKey="True"/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Shell" Property="BorderBrush"
+                                        Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="Shell" Property="BorderThickness" Value="2"/>
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Shell" Property="Opacity" Value="0.83"/>
                             </Trigger>
@@ -118,6 +126,47 @@
             <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
             <Setter Property="Foreground" Value="#0F2821"/>
             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+        </Style>
+
+        <!-- Card action icons are real vector geometry, not font glyphs.
+             Segoe MDL2's private-use symbols rendered as boxes on some PCs. -->
+        <DataTemplate x:Key="InstanceMoreIcon">
+            <Viewbox Width="17" Height="17" Stretch="Uniform" IsHitTestVisible="False">
+                <Canvas Width="18" Height="18">
+                    <Ellipse Canvas.Left="2" Canvas.Top="7.25" Width="3.5" Height="3.5"
+                             Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    <Ellipse Canvas.Left="7.25" Canvas.Top="7.25" Width="3.5" Height="3.5"
+                             Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    <Ellipse Canvas.Left="12.5" Canvas.Top="7.25" Width="3.5" Height="3.5"
+                             Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                </Canvas>
+            </Viewbox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="InstancePlayIcon">
+            <Viewbox Width="17" Height="17" Stretch="Uniform" IsHitTestVisible="False">
+                <Canvas Width="18" Height="18">
+                    <Path Data="M 5,2.5 L 15,9 L 5,15.5 Z"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.8" StrokeLineJoin="Round"
+                          Fill="Transparent"/>
+                </Canvas>
+            </Viewbox>
+        </DataTemplate>
+
+        <Style x:Key="InstanceMoreButton" BasedOn="{StaticResource PillButton}" TargetType="Button">
+            <Setter Property="Background" Value="#333540"/>
+            <Setter Property="BorderBrush" Value="#444650"/>
+            <Setter Property="Foreground" Value="#EDF0F5"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="ContentTemplate" Value="{StaticResource InstanceMoreIcon}"/>
+        </Style>
+
+        <Style x:Key="InstancePlayButton" BasedOn="{StaticResource PrimaryButton}" TargetType="Button">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="ContentTemplate" Value="{StaticResource InstancePlayIcon}"/>
         </Style>
 
         <Style x:Key="SidebarButton" TargetType="Button"
