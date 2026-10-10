@@ -182,7 +182,9 @@ public partial class CreateInstanceWindow : Window
     private void Window_Closing(object? sender,
         System.ComponentModel.CancelEventArgs e)
     {
-        if (!_busy) return;
+        // Setting DialogResult after a successful copy closes the dialog.
+        // Never treat that close as a user-requested cancellation.
+        if (!_busy || CreatedInstance != null) return;
         e.Cancel = true;
         _copyCancellation?.Cancel();
         CreationStatusText.Text = "Cancelling copy...";
