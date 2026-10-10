@@ -237,6 +237,40 @@ public sealed class InstanceStore
             Collect(source, "");
             cancellationToken.ThrowIfCancellationRequested();
 
+            // Check free space before writing anything. The copied game
+            // can be large, especially when the default lives on C:.
+            long requiredBytes = 0;
+            foreach (var (file, _) in files)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                checked { requiredBytes += new FileInfo(file).Length; }
+            }
+
+            try
+            {
+                var drive = new DriveInfo(
+                    System.IO.Path.GetPathRoot(destinationParent)!);
+                long reserve = Math.Min(256L * 1024 * 1024,
+                    Math.Max(64L * 1024 * 1024, requiredBytes / 20));
+                if (drive.IsReady &&
+                    drive.AvailableFreeSpace < requiredBytes + reserve)
+                {
+                    throw new InvalidOperationException(
+                        "There isn't enough free space to copy OrbusVR to " +
+                        destinationParent + ". Choose another storage drive " +
+                        "from the New Instance window.");
+                }
+            }
+            catch (ArgumentException)
+            {
+                // Some network and virtual filesystems do not expose capacity.
+            }
+            catch (IOException)
+            {
+                // Let the copy attempt surface the actual filesystem error.
+            }
+
+
             // Copy into a temporary folder first.
             // Never risk deleting someone else's destination.
             string staging = System.IO.Path.Combine(
