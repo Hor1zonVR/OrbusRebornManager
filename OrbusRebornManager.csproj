@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>OrbusRebornManager</AssemblyName>
     <RootNamespace>OrbusRebornManager</RootNamespace>
-    <Version>0.4.4</Version>
+    <Version>0.4.5</Version>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <StartupObject>OrbusRebornManager.App</StartupObject>
   </PropertyGroup>
