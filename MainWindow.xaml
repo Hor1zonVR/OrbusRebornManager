@@ -162,7 +162,7 @@
                     </Grid>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,19">
-                        <Button x:Name="InstanceSortButton" Content="Recently added  &#xE70D;"
+                        <Button x:Name="InstanceSortButton" Content="Recently added  ▾"
                                 Style="{StaticResource PillButton}" Padding="13,9"
                                 Click="OpenInstanceSort_Click" Margin="0,0,9,0">
                             <Button.ContextMenu>
@@ -179,7 +179,7 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                        <Button x:Name="InstanceFilterButton" Content="All instances  &#xE70D;"
+                        <Button x:Name="InstanceFilterButton" Content="All instances  ▾"
                                 Style="{StaticResource PillButton}" Padding="13,9"
                                 Click="OpenInstanceFilter_Click">
                             <Button.ContextMenu>
@@ -780,6 +780,26 @@
                           Visibility="Collapsed"
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="0,0,3,0">
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="STORAGE" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="Instance location" FontSize="20"
+                                       FontWeight="Bold" Margin="0,10,0,7"/>
+                            <TextBlock Text="New game copies are saved here by default."
+                                       FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                            <TextBlock x:Name="DefaultInstanceFolderText" FontSize="12"
+                                       TextWrapping="Wrap" Margin="0,12,0,12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Change location"
+                                        Click="ChangeInstanceStorage_Click"
+                                        Style="{StaticResource PillButton}"/>
+                                <Button Content="Open folder" Margin="8,0,0,0"
+                                        Click="OpenInstanceStorage_Click"
+                                        Style="{StaticResource PillButton}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
                     <Border Style="{StaticResource PanelCard}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="APPLICATION" Style="{StaticResource Eyebrow}"/>
