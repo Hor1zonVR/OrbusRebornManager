@@ -30,6 +30,8 @@ public sealed class ModDefinition
     public string Description { get; set; } = "";
     public string Repository { get; set; } = "";
     public string AssetPattern { get; set; } = "*.dll";
+    public string Target { get; set; } = "client";
+    public string Category { get; set; } = "Other";
 }
 
 public sealed class InstalledMod
