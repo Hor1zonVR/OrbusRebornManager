@@ -72,6 +72,14 @@
                 <DockPanel Margin="12,20,12,16">
                     <StackPanel DockPanel.Dock="Bottom">
                         <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="7,0,7,10"/>
+                        <Button Style="{StaticResource SidebarButton}"
+                                Click="SubmitMod_Click" ToolTip="Submit an OrbusVR mod for catalogue review">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8F2;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17" Margin="0,0,13,0"/>
+                                <TextBlock Text="Submit a mod" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="NavSettings" Style="{StaticResource SidebarButton}"
                                 Click="SimpleSettings_Click">
                             <StackPanel Orientation="Horizontal">
@@ -1219,24 +1227,6 @@
                                     Click="SaveSettings_Click"
                                     Style="{StaticResource PrimaryButton}"
                                     HorizontalAlignment="Left"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource PanelCard}"
-                            Margin="0,16,0,0">
-                        <StackPanel>
-                            <TextBlock Text="WANT TO SUBMIT A MOD?"
-                                       Style="{StaticResource Eyebrow}"/>
-
-                            <TextBlock Text="Contact the maintainer"
-                                       FontSize="17"
-                                       FontWeight="SemiBold"
-                                       Margin="0,9,0,7"/>
-
-                            <TextBlock Text="Send your GitHub repository to the maintainer on Discord. Approved mods are added to the catalogue for everyone."
-                                       Foreground="{StaticResource MutedBrush}"
-                                       FontSize="13"
-                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
 
