@@ -51,19 +51,26 @@ Requires Windows and the **.NET 8 SDK**.
 
 The script builds the installer and update packages locally into `Releases/`. Use **the Setup.exe** for testing; the other generated files are inputs to the updater publishing process, not downloads for players.
 
-## Instance library and first run
+## First launch and instance library
 
-1. Install RebornManager using `RebornManager-Setup.exe` from the latest GitHub Release.
-2. On **My Instances**, choose **Add existing game** and point it to your OrbusVR Reborn installation (the folder containing `vrclient.exe`). This only registers the folder.
-3. Click **New Instance**. Give the copy a name and confirm the source installation.
-4. New copies default to `%LOCALAPPDATA%\OrbusRebornModdingInstances`. Click **Change** to choose another drive. The manager remembers your selected location if you leave the checkbox enabled.
-5. Leave **Prepare for mods** checked to install the supported BepInEx loader in your **new copy**, or untick it for a clean copy without the loader.
-6. When prepared for mods, launch the new instance once to let BepInEx generate interop files, then close the game before installing plugins.
-7. Open an instance card to manage its mods, or press the Play icon to launch it. Right-click or press the card's menu icon to open its folder.
+On a **genuinely fresh Windows user profile**, RebornManager opens a welcome screen automatically if there is **no chosen game folder** and **no registered instances**.
 
-The instance library supports searching by name, sorting by recently added or name, and filtering original/existing installations versus manager-created modded copies. **Changing the default location never moves existing game copies.**
+1. Click **Browse** and select the original OrbusVR Reborn Community Edition game folder (containing `vrclient.exe`, `GameAssembly.dll`, and `vrclient_Data`).
+2. See the preselected **instance library** location: `%LOCALAPPDATA%\OrbusRebornModdingInstances`. You can change this to another drive if you want.
+3. Choose **Finish setup** to add the existing installation without copying it, or **Create first instance** to open the separate instance-creation dialog.
+4. In the creation dialog, name the copy and decide whether to **Prepare for mods**. Nothing is copied until you explicitly press **Create instance**.
+5. The game is copied into a named subfolder under the instance library. The manager can install BepInEx into the **new copy only**. Your original game is not modified.
+6. Launch a newly prepared copy once for BepInEx to generate interop files, close OrbusVR, and then install mods from the manager.
 
-New copies are created using the existing safe staging-and-copy routine, exclude the original loader's files, and check free disk space before copying. The original source game files are never deleted during instance creation.
+The library supports search, sorting and filtering. Click a card to manage it, use the Play button to launch it, or the three-dot menu to open its folder and access other actions. Changing the default instance location never moves existing copies.
+
+### Test the new-user experience safely
+
+On an existing installation, open **Settings → Preview first-launch setup**. This plays through the same welcome screen and then opens a **read-only preview** of the Create Instance window. It does **not** update settings, register games, copy files or download the mod loader, even if you select folders in the preview.
+
+A normal uninstall/reinstall does **not** count as a fresh-user test because RebornManager intentionally keeps settings and instance records under `%LOCALAPPDATA%\OrbusRebornManager`. Never delete those folders just to replay onboarding. For a genuine end-to-end fresh-user test, use a separate Windows test account/VM with its own profile and game files.
+
+Clean instance copies use a temporary staging directory, exclude BepInEx files from the source, and check free disk space before copying.
 
 ## Curated catalogue workflow
 
