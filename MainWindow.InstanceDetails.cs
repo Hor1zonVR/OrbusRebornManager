@@ -162,7 +162,7 @@ public partial class MainWindow
         GameInstance? instance = _instanceStore.Load().FirstOrDefault(
             x => string.Equals(Path.GetFullPath(x.Path), path,
                 StringComparison.OrdinalIgnoreCase));
-        var artwork = InstanceArtwork.Load(instance?.CustomIconPath);
+        var artwork = instance == null ? null : InstanceArtwork.Cover(instance);
         SelectedInstanceArtwork.Source = artwork;
         SelectedInstanceArtwork.Visibility = artwork == null
             ? Visibility.Collapsed : Visibility.Visible;
@@ -171,15 +171,19 @@ public partial class MainWindow
 
         // Scale the saved cover framing down for the compact header icon.
         // Keep the original stored image intact so editing stays reversible.
-        SelectedInstanceArtwork.Stretch = instance?.IconFit == true
+        SelectedInstanceArtwork.Stretch = instance?.IconHasCrop != true &&
+            instance?.IconFit == true
             ? Stretch.Uniform : Stretch.UniformToFill;
         SelectedInstanceArtwork.RenderTransformOrigin = new Point(0.5, 0.5);
-        double zoom = Math.Clamp(instance?.IconZoom ?? 1, 1, 2.5);
+        double zoom = instance?.IconHasCrop == true ? 1 :
+            Math.Clamp(instance?.IconZoom ?? 1, 1, 2.5);
         var framing = new TransformGroup();
         framing.Children.Add(new ScaleTransform(zoom, zoom));
         framing.Children.Add(new TranslateTransform(
-            Math.Clamp(instance?.IconOffsetX ?? 0, -80, 80) * (53.0 / 164.0),
-            Math.Clamp(instance?.IconOffsetY ?? 0, -80, 80) * (53.0 / 137.0)));
+            (instance?.IconHasCrop == true ? 0 :
+                Math.Clamp(instance?.IconOffsetX ?? 0, -80, 80)) * (53.0 / 164.0),
+            (instance?.IconHasCrop == true ? 0 :
+                Math.Clamp(instance?.IconOffsetY ?? 0, -80, 80)) * (53.0 / 137.0)));
         SelectedInstanceArtwork.RenderTransform = framing;
         SelectedInstanceName.Text = instance?.Name ?? Path.GetFileName(path);
         SelectedInstanceMeta.Text = (instance?.CreatedByManager == true
