@@ -327,7 +327,7 @@
                             Padding="36" Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="No matching instances"
-                                       FontSize="19" FontWeight="Bold" TextAlignment="Center"/>
+                                       FontSize="16" FontWeight="SemiBold" TextAlignment="Center"/>
                             <TextBlock Text="Try another search or change the filter."
                                        FontSize="13" Foreground="{StaticResource MutedBrush}"
                                        Margin="0,9,0,15" TextAlignment="Center"/>
@@ -396,8 +396,8 @@
 
                                 <TextBlock x:Name="LoaderStatusText"
                                            Text="Select a game"
-                                           FontSize="20"
-                                           FontWeight="Bold"
+                                           FontSize="17"
+                                           FontWeight="SemiBold"
                                            Margin="0,12,0,5"/>
 
                                 <TextBlock Text="BepInEx, installed separately for each game copy."
@@ -424,8 +424,8 @@
 
                                 <TextBlock x:Name="ModsCountText"
                                            Text="0 managed mods"
-                                           FontSize="20"
-                                           FontWeight="Bold"
+                                           FontSize="17"
+                                           FontWeight="SemiBold"
                                            Margin="0,12,0,5"/>
 
                                 <TextBlock Text="Install approved community releases, or test a local DLL."
@@ -450,7 +450,7 @@
 
                     <!-- Launch -->
                     <Border Style="{StaticResource PanelCard}"
-                            Margin="0,16,0,0">
+                            Margin="0,11,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -459,8 +459,8 @@
 
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="Ready to play?"
-                                           FontSize="18"
-                                           FontWeight="Bold"/>
+                                           FontSize="16"
+                                           FontWeight="SemiBold"/>
 
                                 <TextBlock Text="Launch the selected OrbusVR installation."
                                            FontSize="13"
@@ -518,7 +518,7 @@
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
                                                 <TextBlock Text="{Binding Author}" FontSize="12"
-                                                           Foreground="{StaticResource AccentBrush}" Margin="0,5,0,0"/>
+                                                           Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
                                                 <TextBlock Text="{Binding Description}" FontSize="13"
                                                            Foreground="{StaticResource MutedBrush}"
                                                            TextWrapping="Wrap" Margin="0,9,0,0"/>
@@ -537,8 +537,8 @@
                         <Border x:Name="EmptyServerPanel" Style="{StaticResource PanelCard}"
                                 Padding="36" Visibility="Collapsed">
                             <StackPanel>
-                                <TextBlock Text="No server mods found" FontSize="19"
-                                           FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock Text="No server mods found" FontSize="16"
+                                           FontWeight="SemiBold" TextAlignment="Center"/>
                                 <TextBlock Text="Server projects appear here when they're added to the community catalogue."
                                            FontSize="13" Foreground="{StaticResource MutedBrush}"
                                            Margin="0,10,0,0" TextAlignment="Center" TextWrapping="Wrap"/>
@@ -585,12 +585,12 @@
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,0,3,0">
-                        <Border Background="#16322F"
-                                CornerRadius="10"
-                                Padding="14"
+                        <Border Background="{StaticResource CardBrush}"
+                                CornerRadius="8"
+                                Padding="12"
                                 Margin="0,0,0,12">
                             <TextBlock x:Name="CatalogInfo"
-                                       Foreground="#C3E7E0"
+                                       Foreground="{StaticResource MutedBrush}"
                                        FontSize="13"
                                        Text="Approved community mods"/>
                         </Border>
@@ -616,7 +616,7 @@
                                                      two-way binding. Author
                                                      is a read-only property,
                                                      so bind explicitly OneWay. -->
-                                                <TextBlock Foreground="{StaticResource AccentBrush}"
+                                                <TextBlock Foreground="{StaticResource MutedBrush}"
                                                            FontSize="12"
                                                            Margin="0,6,0,0">
                                                     <Run Text="by "/>
@@ -632,7 +632,7 @@
                                                            Margin="0,10,0,0"/>
 
                                                 <TextBlock Text="{Binding Status, Mode=OneWay}"
-                                                           Foreground="#C3D5E5"
+                                                           Foreground="{StaticResource MutedBrush}"
                                                            FontSize="12"
                                                            Margin="0,10,0,0"/>
                                             </StackPanel>
@@ -691,8 +691,8 @@
 
                 <Border Background="{StaticResource CardBrush}"
                         BorderBrush="{StaticResource StrokeBrush}"
-                        BorderThickness="1" CornerRadius="14"
-                        Padding="18" Margin="0,0,0,14">
+                        BorderThickness="1" CornerRadius="10"
+                        Padding="16" Margin="0,0,0,12">
                     <StackPanel>
                         <Button Content="←  Back to instances"
                                 Style="{StaticResource PillButton}"
@@ -748,8 +748,8 @@
 
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Name, Mode=OneWay}"
-                                                           FontSize="18"
-                                                           FontWeight="Bold"/>
+                                                           FontSize="16"
+                                                           FontWeight="SemiBold"/>
 
                                                 <TextBlock Text="{Binding Version, Mode=OneWay}"
                                                            FontSize="12"
@@ -810,11 +810,11 @@
                           Visibility="Collapsed"
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="0,0,3,0">
-                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,16">
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,11">
                         <StackPanel>
                             <TextBlock Text="STORAGE" Style="{StaticResource Eyebrow}"/>
-                            <TextBlock Text="Instance location" FontSize="20"
-                                       FontWeight="Bold" Margin="0,10,0,7"/>
+                            <TextBlock Text="Instance location" FontSize="17"
+                                       FontWeight="SemiBold" Margin="0,10,0,7"/>
                             <TextBlock Text="New game copies are saved here by default."
                                        FontSize="13" Foreground="{StaticResource MutedBrush}"/>
                             <TextBlock x:Name="DefaultInstanceFolderText" FontSize="13"
@@ -833,8 +833,8 @@
                     <Border Style="{StaticResource PanelCard}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="APPLICATION" Style="{StaticResource Eyebrow}"/>
-                            <TextBlock Text="RebornManager updates" FontSize="21"
-                                       FontWeight="Bold" Margin="0,10,0,8"/>
+                            <TextBlock Text="RebornManager updates" FontSize="17"
+                                       FontWeight="SemiBold" Margin="0,10,0,8"/>
                             <TextBlock x:Name="ManagerVersionText" FontSize="13"
                                        Foreground="{StaticResource MutedBrush}"/>
                             <TextBlock x:Name="ManagerUpdateStatusText" FontSize="13"
@@ -859,8 +859,8 @@
                                        Style="{StaticResource Eyebrow}"/>
 
                             <TextBlock Text="Keep your mods up to date"
-                                       FontSize="21"
-                                       FontWeight="Bold"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
                                        Margin="0,10,0,8"/>
 
                             <TextBlock Text="The manager checks approved mods on GitHub when you open it."
@@ -886,8 +886,8 @@
                                        Style="{StaticResource Eyebrow}"/>
 
                             <TextBlock Text="Contact the maintainer"
-                                       FontSize="20"
-                                       FontWeight="Bold"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
                                        Margin="0,9,0,7"/>
 
                             <TextBlock Text="Send your GitHub repository to the maintainer on Discord. Approved mods are added to the catalogue for everyone."
@@ -898,11 +898,11 @@
                     </Border>
 
                     <!-- App installation management -->
-                    <Border Style="{StaticResource PanelCard}" Margin="0,16,0,0">
+                    <Border Style="{StaticResource PanelCard}" Margin="0,11,0,0">
                         <StackPanel>
                             <TextBlock Text="INSTALLATION" Style="{StaticResource Eyebrow}"/>
-                            <TextBlock Text="Remove RebornManager" FontSize="19"
-                                       FontWeight="Bold" Margin="0,10,0,8"/>
+                            <TextBlock Text="Remove RebornManager" FontSize="16"
+                                       FontWeight="SemiBold" Margin="0,10,0,8"/>
                             <TextBlock Text="Uninstall the app while keeping your OrbusVR instances and settings."
                                        FontSize="13" TextWrapping="Wrap"
                                        Foreground="{StaticResource MutedBrush}"/>
@@ -928,10 +928,11 @@
 
             <!-- STATUS BAR -->
             <Border Grid.Row="2"
-                    Background="#142132"
-                    CornerRadius="10"
-                    Padding="14,11"
-                    Margin="0,16,0,0">
+                    Background="Transparent"
+                    BorderBrush="{StaticResource StrokeBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,10,0,0"
+                    Margin="0,12,0,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -946,13 +947,13 @@
                             Visibility="Collapsed"
                             Margin="0,0,12,0" VerticalAlignment="Center"/>
                     <TextBlock x:Name="StatusLine"
-                               Foreground="#B6CADC"
+                               Foreground="{StaticResource MutedBrush}"
                                FontSize="12"
                                Text="Ready"
                                TextTrimming="CharacterEllipsis"/>
 
                     <ProgressBar x:Name="ActivityBar"
-                                 Grid.Column="1"
+                                 Grid.Column="2"
                                  Width="85"
                                  Height="5"
                                  Foreground="{StaticResource AccentBrush}"
