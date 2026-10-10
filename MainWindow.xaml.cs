@@ -31,6 +31,7 @@ public partial class MainWindow : Window
         GamePathText.Text = _settings.GamePath;
         CatalogUrlText.Text = _settings.CatalogUrl;
         AutoUpdatesCheck.IsChecked = _settings.AutoUpdate;
+        InitializeManagerUpdates();
         ShowPanel("instances");
         UpdateDashboard();
     }
@@ -39,6 +40,8 @@ public partial class MainWindow : Window
     {
         RefreshInstanceCards();
         await RefreshCatalogAsync();
+        if (_settings.CheckManagerUpdates)
+            await CheckManagerUpdatesAsync();
     }
 
     private void Log(string message)
@@ -531,6 +534,7 @@ public partial class MainWindow : Window
         }
         _settings.CatalogUrl = url;
         _settings.AutoUpdate = AutoUpdatesCheck.IsChecked == true;
+        _settings.CheckManagerUpdates = CheckManagerUpdatesCheck.IsChecked == true;
         _service.SaveSettings(_settings);
         _initialCatalogCheck = false; // Changing catalogue must not silently auto-install updates.
         await RefreshCatalogAsync();
