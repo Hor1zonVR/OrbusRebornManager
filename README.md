@@ -1,13 +1,9 @@
-# Orbus Reborn Manager — v0.4.2 development
+# Orbus Reborn Manager
 
 A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**.
 This project is not intended for OrbusVR Classic or Preborn.
 
-> This is a development branch. Verify the Windows build and complete a two-version updater test before sharing the installer with the wider community.
-
-## 0.4.2 test candidate
-
-Changes: clicking an instance card opens its detail page; dark and legible right-click actions replace the Windows light popup; the instance detail page has a back button, Play and Add Mods. This release is intended to **test in-app updating from an already-installed v0.4.1**, not to require another manual installer download. Do not publish until the GitHub Pages update feed is configured and the Windows Actions build succeeds.
+> RebornManager is under active development. Published releases contain a Windows installer and receive updates through the in-app updater.
 
 ## Install, uninstall, and update
 
@@ -28,13 +24,18 @@ These packages are needed for the in-app updater even though normal users should
 
 **Enable Pages once** on the GitHub repository: Settings → Pages → Build and deployment → Source → **GitHub Actions**. If Pages is not enabled, the release job will intentionally stop before publishing the public installer. This prevents a public Setup.exe appearing without its updater feed.
 
-When releasing:
+### Publish a new manager update
 
-1. Merge the reviewed development branch after its Windows build passes.
-2. Bump `Version` in `OrbusRebornManager.csproj` to the new release number.
-3. Create and push a `vX.Y.Z` Git tag that matches the project version.
-4. Let GitHub Actions package the app, deploy the update feed to GitHub Pages, and then publish **only `RebornManager-Setup.exe`** to GitHub Releases.
-5. Verify installation and use a subsequent version to test the in-app updater end to end.
+Once the changes you want are on `main` and the **Build and release RebornManager** check is green:
+
+1. Open [GitHub Actions → Publish RebornManager Update](https://github.com/Hor1zonVR/OrbusRebornManager/actions/workflows/publish-update.yml).
+2. Click **Run workflow**, choose the **main** branch, keep **patch** selected (normal updates), and click **Run workflow**.
+3. The workflow verifies the latest main build passed, bumps the project version, commits it, creates the matching tag, and dispatches the existing Windows release workflow.
+4. Watch **Build and release RebornManager** complete. It deploys the Velopack update feed to GitHub Pages and publishes only `RebornManager-Setup.exe` to GitHub Releases.
+
+No local Git commands, manual tag creation or merging is needed **when the approved changes are already on `main`**. For experimental development on branches, someone must first review/merge those changes; the publishing button intentionally does **not** merge unreviewed pull requests.
+
+Choose *minor* for substantial feature releases or *major* for deliberately breaking version changes. Normal changes use *patch*. **Never run the publish workflow just to test unfinished code.**
 
 The Actions test artifact contains just Setup.exe, although GitHub's Actions interface may wrap artifact downloads in a ZIP. The **public Releases page** exposes the executable directly without an extra ZIP.
 
