@@ -69,6 +69,10 @@ public partial class MainWindow
 
             instance.Name = editor.DisplayName;
             instance.CustomIconPath = iconPath;
+            instance.IconFit = editor.IconFit;
+            instance.IconZoom = editor.IconZoom;
+            instance.IconOffsetX = editor.IconOffsetX;
+            instance.IconOffsetY = editor.IconOffsetY;
             _instanceStore.Save(instances);
 
             RefreshInstanceCards();
