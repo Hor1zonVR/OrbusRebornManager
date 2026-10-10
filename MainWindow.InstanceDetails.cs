@@ -168,6 +168,19 @@ public partial class MainWindow
             ? Visibility.Collapsed : Visibility.Visible;
         SelectedInstanceLogo.Visibility = artwork == null
             ? Visibility.Visible : Visibility.Collapsed;
+
+        // Scale the saved cover framing down for the compact header icon.
+        // Keep the original stored image intact so editing stays reversible.
+        SelectedInstanceArtwork.Stretch = instance?.IconFit == true
+            ? Stretch.Uniform : Stretch.UniformToFill;
+        SelectedInstanceArtwork.RenderTransformOrigin = new Point(0.5, 0.5);
+        double zoom = Math.Clamp(instance?.IconZoom ?? 1, 1, 2.5);
+        var framing = new TransformGroup();
+        framing.Children.Add(new ScaleTransform(zoom, zoom));
+        framing.Children.Add(new TranslateTransform(
+            Math.Clamp(instance?.IconOffsetX ?? 0, -80, 80) * (53.0 / 164.0),
+            Math.Clamp(instance?.IconOffsetY ?? 0, -80, 80) * (53.0 / 137.0)));
+        SelectedInstanceArtwork.RenderTransform = framing;
         SelectedInstanceName.Text = instance?.Name ?? Path.GetFileName(path);
         SelectedInstanceMeta.Text = (instance?.CreatedByManager == true
             ? "Modded copy" : "Existing installation") + "  ·  " +
