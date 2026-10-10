@@ -46,7 +46,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="7">
+                                CornerRadius="12">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="False"
                                           Margin="{TemplateBinding Padding}"/>
                         </Border>
@@ -90,7 +90,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="7"
+                                CornerRadius="12"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="Center"
@@ -135,7 +135,7 @@
             <Setter Property="Background" Value="{StaticResource CardBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="CornerRadius" Value="16"/>
             <Setter Property="Padding" Value="22"/>
         </Style>
 
@@ -209,6 +209,57 @@
             </Setter>
         </Style>
 
+        <!-- Decorative, Orbus-inspired arcane geometry.
+             These are original motifs, not exact spellcast glyph transcriptions.
+             Authentic Greater Fireball/Affliction strokes can replace the templates
+             after reference artwork is supplied. -->
+        <DataTemplate x:Key="ArcaneRingMotif">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="280" Height="280">
+                    <Ellipse Canvas.Left="25" Canvas.Top="25" Width="230" Height="230"
+                             Stroke="#B8A0DC" StrokeThickness="3"/>
+                    <Ellipse Canvas.Left="53" Canvas.Top="53" Width="174" Height="174"
+                             Stroke="#B8A0DC" StrokeThickness="2"/>
+                    <Path Stroke="#B8A0DC" StrokeThickness="3"
+                          Data="M 140,15 L 181,96 L 265,140 L 181,184 L 140,265 L 99,184 L 15,140 L 99,96 Z"/>
+                    <Path Stroke="#B8A0DC" StrokeThickness="2"
+                          Data="M 140,54 L 190,140 L 140,226 L 90,140 Z"/>
+                    <Ellipse Canvas.Left="131" Canvas.Top="131" Width="18" Height="18"
+                             Stroke="#B8A0DC" StrokeThickness="2"/>
+                </Canvas>
+            </Viewbox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ArcaneSpiralMotif">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="300" Height="300">
+                    <Ellipse Canvas.Left="38" Canvas.Top="38" Width="224" Height="224"
+                             Stroke="#83C2B5" StrokeThickness="3"/>
+                    <Path Stroke="#83C2B5" StrokeThickness="4" StrokeLineCap="Round"
+                          Data="M 144,40 C 216,29 271,96 245,168 C 227,218 170,251 117,225 C 70,202 67,150 101,116 C 122,94 169,91 190,120 C 207,145 196,177 170,187 C 147,197 123,177 132,156"/>
+                    <Path Stroke="#83C2B5" StrokeThickness="3"
+                          Data="M 150,0 L 150,39 M 150,261 L 150,300 M 0,150 L 39,150 M 261,150 L 300,150"/>
+                    <Path Stroke="#83C2B5" StrokeThickness="2"
+                          Data="M 49,49 L 77,77 M 251,49 L 223,77 M 49,251 L 77,223 M 251,251 L 223,223"/>
+                </Canvas>
+            </Viewbox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ArcaneHexMotif">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="280" Height="280">
+                    <Path Stroke="#C9A1C9" StrokeThickness="3"
+                          Data="M 140,18 L 246,79 L 246,201 L 140,262 L 34,201 L 34,79 Z"/>
+                    <Path Stroke="#C9A1C9" StrokeThickness="2"
+                          Data="M 140,53 L 216,96 L 216,184 L 140,227 L 64,184 L 64,96 Z"/>
+                    <Path Stroke="#C9A1C9" StrokeThickness="3"
+                          Data="M 140,18 L 140,262 M 34,79 L 246,201 M 246,79 L 34,201"/>
+                    <Ellipse Canvas.Left="123" Canvas.Top="123" Width="34" Height="34"
+                             Fill="#C9A1C9" Opacity="0.22"/>
+                </Canvas>
+            </Viewbox>
+        </DataTemplate>
+
         <!-- Native Windows context menus default to a light popup. Provide a
              dark, consistently readable menu for instance cards. -->
         <Style x:Key="InstanceContextMenu" TargetType="{x:Type ContextMenu}">
@@ -225,7 +276,7 @@
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10"
+                                CornerRadius="14"
                                 Padding="{TemplateBinding Padding}">
                             <StackPanel IsItemsHost="True"
                                         KeyboardNavigation.DirectionalNavigation="Cycle"/>
@@ -243,7 +294,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
                         <Border x:Name="HitArea" Background="Transparent"
-                                CornerRadius="6" Margin="3,2" Padding="13,10">
+                                CornerRadius="9" Margin="3,2" Padding="13,10">
                             <ContentPresenter ContentSource="Header"
                                               RecognizesAccessKey="True"
                                               VerticalAlignment="Center"/>
@@ -273,7 +324,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <StackPanel Orientation="Horizontal">
-                            <Border x:Name="CheckSurface" Width="18" Height="18" CornerRadius="4"
+                            <Border x:Name="CheckSurface" Width="18" Height="18" CornerRadius="5"
                                     VerticalAlignment="Center"
                                     Background="#282A31" BorderBrush="#777A82"
                                     BorderThickness="1">
