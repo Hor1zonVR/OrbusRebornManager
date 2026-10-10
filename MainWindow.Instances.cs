@@ -33,6 +33,7 @@ public partial class MainWindow
         UpdateDashboard();
         UpdateInstalledRows();
         UpdateReleaseStatuses();
+        RefreshInstanceCards();
 
         Log("Selected " + _settings.GamePath);
 
