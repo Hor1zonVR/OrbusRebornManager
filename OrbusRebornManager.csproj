@@ -8,9 +8,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>OrbusRebornManager</AssemblyName>
     <RootNamespace>OrbusRebornManager</RootNamespace>
-    <Version>0.3.1</Version>
+    <Version>0.4.0</Version>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <StartupObject>OrbusRebornManager.App</StartupObject>
   </PropertyGroup>
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="catalog/mods.json"
                       LogicalName="OrbusRebornManager.Catalog.json" />
