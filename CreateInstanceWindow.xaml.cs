@@ -24,7 +24,9 @@ public partial class CreateInstanceWindow : Window
         ManagerService manager,
         string sourcePath,
         string storagePath,
-        bool previewOnly = false)
+        bool previewOnly = false,
+        string? suggestedName = null,
+        bool importModList = false)
     {
         InitializeComponent();
         _manager = manager;
@@ -41,12 +43,31 @@ public partial class CreateInstanceWindow : Window
         var names = _store.Load()
             .Select(i => i.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        string name = "Modded Orbus";
+        // Importing can suggest the exported name, but it must still follow
+        // the safe local directory naming rules used by CreateCleanCopyAsync.
+        string baseName = string.IsNullOrWhiteSpace(suggestedName)
+            ? "Modded Orbus"
+            : System.Text.RegularExpressions.Regex.Replace(
+                suggestedName.Trim(), @"[^a-zA-Z0-9 _-]", "").Trim();
+        if (baseName.Length == 0) baseName = "Imported Orbus";
+        if (baseName.Length > 42) baseName = baseName[..42].TrimEnd();
+
+        string name = baseName;
         int index = 2;
         while (names.Contains(name) ||
                Directory.Exists(Path.Combine(StoragePathText.Text, name)))
-            name = "Modded Orbus " + index++;
+            name = baseName + " " + index++;
         NameText.Text = name;
+
+        if (importModList)
+        {
+            Title = "Create imported instance";
+            LoaderCheck.IsChecked = true;
+            LoaderCheck.IsEnabled = false;
+            CreationStatusText.Text =
+                "A new, clean game copy will be made for this imported mod list.";
+            CreateButton.Content = "Create for import";
+        }
 
         if (previewOnly)
         {
