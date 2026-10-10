@@ -279,6 +279,10 @@
                                             <MenuItem Style="{StaticResource InstanceMenuItem}"
                                                       Header="View instance" Tag="{Binding}" Click="InstanceManage_Click"/>
                                             <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="Customize instance" Tag="{Binding}" Click="InstanceCustomize_Click"/>
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
+                                                      Header="Export mod list" Tag="{Binding}" Click="InstanceExport_Click"/>
+                                            <MenuItem Style="{StaticResource InstanceMenuItem}"
                                                       Header="Open folder" Tag="{Binding}" Click="InstanceOpenFolder_Click"/>
                                             <MenuItem Style="{StaticResource InstanceMenuItem}"
                                                       Header="Copy folder path" Tag="{Binding}" Click="InstanceCopyPath_Click"/>
@@ -297,8 +301,32 @@
                                                                 VerticalAlignment="Center"
                                                                 IsHitTestVisible="False"/>
                                                 <ContentControl ContentTemplate="{StaticResource OrbusMark}"
-                                                                Width="77" Height="77" Opacity="0.85"
-                                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                 Width="77" Height="77" Opacity="0.85"
+                                                                 HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                     <ContentControl.Style>
+                                                         <Style TargetType="ContentControl">
+                                                             <Setter Property="Visibility" Value="Visible"/>
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding HasCustomIcon}" Value="True">
+                                                                     <Setter Property="Visibility" Value="Collapsed"/>
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </ContentControl.Style>
+                                                 </ContentControl>
+                                                 <Image Source="{Binding CustomIcon}" Width="105" Height="105"
+                                                        Stretch="UniformToFill" IsHitTestVisible="False">
+                                                     <Image.Style>
+                                                         <Style TargetType="Image">
+                                                             <Setter Property="Visibility" Value="Collapsed"/>
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding HasCustomIcon}" Value="True">
+                                                                     <Setter Property="Visibility" Value="Visible"/>
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </Image.Style>
+                                                 </Image>
                                                 
                                                 <!-- Actual vector paths are rendered by ContentTemplate.
                                                      These work even without Segoe MDL2 glyph support. -->
@@ -725,10 +753,16 @@
                         </Grid.ColumnDefinitions>
                         <Border Width="61" Height="61" CornerRadius="13"
                                 Background="#353947" VerticalAlignment="Center">
-                            <ContentControl ContentTemplate="{StaticResource OrbusMark}"
-                                            Width="47" Height="47"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"/>
+                            <Grid>
+                                <ContentControl x:Name="SelectedInstanceLogo"
+                                                ContentTemplate="{StaticResource OrbusMark}"
+                                                Width="47" Height="47"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"/>
+                                <Image x:Name="SelectedInstanceArtwork"
+                                       Width="53" Height="53" Stretch="UniformToFill"
+                                       Visibility="Collapsed"/>
+                            </Grid>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center"
                                     Margin="14,0,12,0">
@@ -747,6 +781,14 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal"
                                     VerticalAlignment="Center">
+                            <Button Content="Customize"
+                                    Style="{StaticResource PillButton}"
+                                    Click="EditSelectedInstance_Click"
+                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
+                            <Button Content="Export"
+                                    Style="{StaticResource PillButton}"
+                                    Click="ExportSelectedInstance_Click"
+                                    MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
                             <Button Content="Open folder"
                                     Style="{StaticResource PillButton}"
                                     Click="SelectedOpenFolder_Click"
