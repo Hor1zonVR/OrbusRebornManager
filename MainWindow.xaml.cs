@@ -23,7 +23,7 @@ public partial class MainWindow : Window
     public ObservableCollection<ModRow> ServerMods { get; } = new();
 
     public ObservableCollection<ModRow> DiscoverMods { get; } = new();
-    public ObservableCollection<ModRow> InstalledMods { get; } = new();
+    public ObservableCollection<InstanceModRow> InstalledMods { get; } = new();
 
     public MainWindow()
     {
@@ -259,8 +259,9 @@ public partial class MainWindow : Window
                 string.Equals(x.Instance.Path, card.Instance.Path,
                     StringComparison.OrdinalIgnoreCase)) ?? card;
             ShowPanel("installed");
-            PageHeading.Text = card.Name;
-            PageSubtitle.Text = "Manage mods and launch your instance.";
+            PageHeading.Text = "Instance overview";
+            PageSubtitle.Text = "";
+            PageSubtitle.Visibility = Visibility.Collapsed;
             SelectedInstanceName.Text = card.Name;
             SelectedInstanceMeta.Text = card.Kind + "  ·  " + card.ModCount;
             SelectedInstanceLoaderText.Text = card.Readiness;
@@ -560,57 +561,108 @@ public partial class MainWindow : Window
 
     private void UpdateInstalledRows()
     {
-        InstalledMods.Clear();
+        _allInstalledInstanceMods.Clear();
         string? game = GameOrWarn(false);
-        if (game == null) { EmptyInstalledText.Visibility = Visibility.Visible; return; }
-        try
+        if (game != null)
         {
-            foreach (var installed in _service.LoadInstalled(game).Mods)
+            try
             {
-                var definition = _catalog.Mods.FirstOrDefault(m => m.Id.Equals(installed.Id, StringComparison.OrdinalIgnoreCase))
-                    ?? new ModDefinition { Id = installed.Id, Name = installed.Name, Author = installed.Local ? "Local build" : "Unknown publisher", Repository = installed.Repository, Description = "Installed mod" };
-                var row = new ModRow(definition)
+                foreach (var installed in _service.LoadInstalled(game).Mods)
                 {
-                    Version = installed.Version,
-                    Status = installed.Local ? "Local test DLL · " + (installed.Enabled ? "enabled" : "disabled") :
-                        installed.Enabled ? "Enabled" : "Disabled",
-                    Action = installed.Enabled ? "Disable" : "Enable"
-                };
-                InstalledMods.Add(row);
+                    var definition = _catalog.Mods.FirstOrDefault(m =>
+                        m.Id.Equals(installed.Id, StringComparison.OrdinalIgnoreCase))
+                        ?? new ModDefinition
+                        {
+                            Id = installed.Id,
+                            Name = installed.Name,
+                            Author = installed.Local ? "Local build" : "Unknown publisher",
+                            Repository = installed.Repository,
+                            Description = "Installed mod"
+                        };
+
+                    var available = _allDiscover.FirstOrDefault(x =>
+                        x.Definition.Id.Equals(installed.Id, StringComparison.OrdinalIgnoreCase));
+
+                    string directory = _service.GetManagedModPath(
+                        game, installed.Id, installed.Enabled);
+                    // A folder may exist without its plugin DLL after a manual
+                    // deletion. Never report it as healthy in that state.
+                    bool missing = !Directory.Exists(directory) ||
+                        !Directory.EnumerateFiles(directory, "*.dll",
+                            SearchOption.AllDirectories).Any();
+
+                    _allInstalledInstanceMods.Add(new InstanceModRow(
+                        installed, definition, missing, available?.Release,
+                        available?.Asset));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("Cannot read managed mods: " + ex.Message);
             }
         }
-        catch (Exception ex) { Log("Cannot read mods: " + ex.Message); }
-        EmptyInstalledText.Visibility = InstalledMods.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        ApplyInstalledFilters();
+        RefreshSelectedInstanceOverview();
     }
 
     private void InstalledToggle_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button { Tag: ModRow row }) return;
-        string? game = GameOrWarn(); if (game == null) return;
+        if (sender is not Button { Tag: InstanceModRow row }) return;
+        string? game = GameOrWarn();
+        if (game == null) return;
         try
         {
-            var current = _service.FindInstalled(game, row.Definition.Id);
+            var current = _service.FindInstalled(game, row.Installed.Id);
             if (current == null) return;
+            if (row.MissingFiles)
+            {
+                MessageBox.Show(this,
+                    "This mod's managed files are missing. Reinstall the mod or remove its entry first.",
+                    "Mod files missing", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             _service.SetModEnabled(game, current.Id, !current.Enabled);
-            UpdateInstalledRows(); UpdateReleaseStatuses();
+            UpdateInstalledRows();
+            UpdateReleaseStatuses();
+            UpdateDashboard();
+            RefreshInstanceCards();
             Log(row.Name + (current.Enabled ? " disabled." : " enabled."));
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Mod toggle failed", MessageBoxButton.OK, MessageBoxImage.Warning); }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Mod toggle failed",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void InstalledUninstall_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button { Tag: ModRow row }) return;
-        string? game = GameOrWarn(); if (game == null) return;
-        if (MessageBox.Show(this, "Remove managed mod '" + row.Name + "'?\n\nIts BepInEx configuration files are preserved.",
-            "Uninstall mod", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        if (sender is not Button { Tag: InstanceModRow row }) return;
+        string? game = GameOrWarn();
+        if (game == null) return;
+
+        if (MessageBox.Show(this,
+            "Remove managed mod '" + row.Name + "' from this instance?\n\n" +
+            "Its BepInEx configuration files will be preserved. Other installations won't be changed.",
+            "Uninstall mod", MessageBoxButton.YesNo,
+            MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+
         try
         {
-            _service.UninstallMod(game, row.Definition.Id);
-            UpdateInstalledRows(); UpdateReleaseStatuses(); UpdateDashboard();
+            _service.UninstallMod(game, row.Installed.Id);
+            UpdateInstalledRows();
+            UpdateReleaseStatuses();
+            UpdateDashboard();
+            RefreshInstanceCards();
             Log("Uninstalled " + row.Name + ".");
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Uninstall failed", MessageBoxButton.OK, MessageBoxImage.Warning); }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Uninstall failed",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private async void SaveSettings_Click(object sender, RoutedEventArgs e)
