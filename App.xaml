@@ -5,14 +5,14 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <!-- Reborn dark design system -->
-        <SolidColorBrush x:Key="BackgroundBrush" Color="#0A0F19"/>
-        <SolidColorBrush x:Key="SidebarBrush" Color="#0E1522"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#141E2D"/>
-        <SolidColorBrush x:Key="CardAltBrush" Color="#1B293B"/>
-        <SolidColorBrush x:Key="StrokeBrush" Color="#29394D"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#9AAFC4"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#64E2C5"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#F2F7FC"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#0C111B"/>
+        <SolidColorBrush x:Key="SidebarBrush" Color="#111925"/>
+        <SolidColorBrush x:Key="CardBrush" Color="#182332"/>
+        <SolidColorBrush x:Key="CardAltBrush" Color="#223246"/>
+        <SolidColorBrush x:Key="StrokeBrush" Color="#304257"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#9EAFBF"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#68DDC4"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#F2F6FA"/>
 
         <Style TargetType="Window">
             <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
