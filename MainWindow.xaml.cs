@@ -145,6 +145,8 @@ public partial class MainWindow : Window
             _ => ("My Instances", "")
         };
         PageHeading.Text = header;
+        PageHeaderGrid.Visibility = page == "installed"
+            ? Visibility.Collapsed : Visibility.Visible;
         PageSubtitle.Text = sub;
         PageSubtitle.Visibility = string.IsNullOrEmpty(sub) ?
             Visibility.Collapsed : Visibility.Visible;
