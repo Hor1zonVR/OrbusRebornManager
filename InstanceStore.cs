@@ -11,6 +11,12 @@ public sealed class GameInstance
     public string Path { get; set; } = "";
     public bool CreatedByManager { get; set; }
     public string CustomIconPath { get; set; } = "";
+    // Artwork framing uses logical pixels based on a 164x137 library cover.
+    // Defaults are intentionally compatible with instances created before v0.4.11.
+    public bool IconFit { get; set; }
+    public double IconZoom { get; set; } = 1.0;
+    public double IconOffsetX { get; set; }
+    public double IconOffsetY { get; set; }
 }
 
 public sealed class InstanceStore
