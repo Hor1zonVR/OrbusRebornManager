@@ -314,14 +314,48 @@
                                                          </Style>
                                                      </ContentControl.Style>
                                                  </ContentControl>
-                                                 <Image Source="{Binding CustomIcon}" Width="105" Height="105"
-                                                        Stretch="UniformToFill" IsHitTestVisible="False">
+                                                 <!-- Entire art area is a cover, not a 105px icon. -->
+                                                 <Image Source="{Binding CustomIcon}"
+                                                        Width="164" Height="137" Stretch="UniformToFill"
+                                                        Opacity="0.28" IsHitTestVisible="False">
+                                                     <Image.Effect><BlurEffect Radius="10"/></Image.Effect>
                                                      <Image.Style>
                                                          <Style TargetType="Image">
                                                              <Setter Property="Visibility" Value="Collapsed"/>
                                                              <Style.Triggers>
+                                                                 <MultiDataTrigger>
+                                                                     <MultiDataTrigger.Conditions>
+                                                                         <Condition Binding="{Binding HasCustomIcon}" Value="True"/>
+                                                                         <Condition Binding="{Binding IconFit}" Value="True"/>
+                                                                     </MultiDataTrigger.Conditions>
+                                                                     <Setter Property="Visibility" Value="Visible"/>
+                                                                 </MultiDataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </Image.Style>
+                                                 </Image>
+                                                 <Image Source="{Binding CustomIcon}"
+                                                        Width="164" Height="137"
+                                                        RenderTransformOrigin="0.5,0.5"
+                                                        IsHitTestVisible="False">
+                                                     <Image.RenderTransform>
+                                                         <TransformGroup>
+                                                             <ScaleTransform ScaleX="{Binding IconZoom}"
+                                                                             ScaleY="{Binding IconZoom}"/>
+                                                             <TranslateTransform X="{Binding IconOffsetX}"
+                                                                                 Y="{Binding IconOffsetY}"/>
+                                                         </TransformGroup>
+                                                     </Image.RenderTransform>
+                                                     <Image.Style>
+                                                         <Style TargetType="Image">
+                                                             <Setter Property="Visibility" Value="Collapsed"/>
+                                                             <Setter Property="Stretch" Value="UniformToFill"/>
+                                                             <Style.Triggers>
                                                                  <DataTrigger Binding="{Binding HasCustomIcon}" Value="True">
                                                                      <Setter Property="Visibility" Value="Visible"/>
+                                                                 </DataTrigger>
+                                                                 <DataTrigger Binding="{Binding IconFit}" Value="True">
+                                                                     <Setter Property="Stretch" Value="Uniform"/>
                                                                  </DataTrigger>
                                                              </Style.Triggers>
                                                          </Style>
