@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -16,7 +16,7 @@ public sealed class PackagePreviewRow
 
 public partial class ImportPackagePreviewWindow : Window
 {
-    public List<PackagePreviewRow> PackageRows { get; } = new();
+    public ObservableCollection<PackagePreviewRow> PackageRows { get; } = new();
 
     public ImportPackagePreviewWindow(
         ImportedInstancePackage package, CatalogDocument catalog)
