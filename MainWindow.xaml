@@ -177,6 +177,7 @@
 
             <!-- INSTANCE LIBRARY: compact tiles, search and simple filters -->
             <ScrollViewer Grid.Row="1" x:Name="InstancesPanel"
+                          FocusVisualStyle="{x:Null}" Focusable="False"
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="0,0,3,5">
                     <Grid Margin="0,0,0,12">
@@ -252,8 +253,8 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Width="178" MinHeight="217" Margin="0,0,11,11"
-                                        Padding="8" CornerRadius="11" BorderThickness="1"
+                                <Border Width="182" MinHeight="220" Margin="0,0,12,12"
+                                        Padding="9" CornerRadius="16" BorderThickness="1"
                                         Background="{StaticResource CardBrush}"
                                         Tag="{Binding}" ToolTip="{Binding Readiness}"
                                         Cursor="Hand" MouseLeftButtonUp="InstanceCard_Click">
@@ -286,7 +287,7 @@
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     <StackPanel>
-                                        <Border Height="137" CornerRadius="14"
+                                        <Border Height="137" CornerRadius="13"
                                                 Background="{Binding CoverBrush}">
                                             <Grid ClipToBounds="True">
                                                 <ContentControl ContentTemplate="{StaticResource ArcaneHexMotif}"
@@ -299,19 +300,19 @@
                                                                 Width="77" Height="77" Opacity="0.85"
                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 
-                                                <Button Content="&#xE712;" FontFamily="Segoe MDL2 Assets"
-                                                        Style="{StaticResource PillButton}"
-                                                        Padding="7" Width="32" Height="31"
+                                                <!-- Actual vector paths are rendered by ContentTemplate.
+                                                     These work even without Segoe MDL2 glyph support. -->
+                                                <Button Content="More" Style="{StaticResource InstanceMoreButton}"
+                                                        Width="32" Height="32"
                                                         Tag="{Binding}" Click="InstanceOptions_Click"
                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                        Margin="0,6,6,0"
-                                                        ToolTip="More actions"/>
-                                                <Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets"
-                                                        Style="{StaticResource PrimaryButton}"
-                                                        Padding="7" Width="37" Height="35"
+                                                        Margin="0,7,7,0"
+                                                        ToolTip="More instance actions"/>
+                                                <Button Content="Play" Style="{StaticResource InstancePlayButton}"
+                                                        Width="38" Height="37"
                                                         Tag="{Binding}" Click="InstancePlay_Click"
                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                                        Margin="0,0,9,9" ToolTip="Play"/>
+                                                        Margin="0,0,8,8" ToolTip="Play this instance"/>
                                             </Grid>
                                         </Border>
                                         <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
