@@ -79,7 +79,7 @@
                     <TextBlock Text="REBORN COMMUNITY EDITION" FontSize="10"
                                HorizontalAlignment="Center"
                                Foreground="{StaticResource MutedBrush}"/>
-                    <TextBlock Text="v0.4.2 development preview" FontSize="10"
+                    <TextBlock x:Name="SidebarVersionText" Text="RebornManager" FontSize="10"
                                HorizontalAlignment="Center" Foreground="#778BA0"
                                Margin="0,7,0,0"/>
                 </StackPanel>
