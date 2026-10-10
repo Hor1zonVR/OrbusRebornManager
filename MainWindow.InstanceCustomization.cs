@@ -73,6 +73,11 @@ public partial class MainWindow
             instance.IconZoom = editor.IconZoom;
             instance.IconOffsetX = editor.IconOffsetX;
             instance.IconOffsetY = editor.IconOffsetY;
+            instance.IconHasCrop = editor.IconHasCrop;
+            instance.IconCropX = editor.IconCrop.X;
+            instance.IconCropY = editor.IconCrop.Y;
+            instance.IconCropWidth = editor.IconCrop.Width;
+            instance.IconCropHeight = editor.IconCrop.Height;
             _instanceStore.Save(instances);
 
             RefreshInstanceCards();
