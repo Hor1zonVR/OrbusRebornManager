@@ -1,0 +1,15 @@
+# .NET / WPF
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Local development packaging and Velopack artifacts
+publish/
+Releases/
+.tools/
+TestResults/
+
+# Local notes / logs
+*.log

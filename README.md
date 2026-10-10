@@ -1,27 +1,54 @@
-# Orbus Reborn Manager — v0.1 (Windows)
+# Orbus Reborn Manager — v0.4.2 development
 
-A standalone **OrbusVR Reborn Community Edition** client mod installer and curated GitHub mod catalogue. This app is **not** for OrbusVR Classic or Preborn.
+A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**.
+This project is not intended for OrbusVR Classic or Preborn.
 
-> This is source code, not a precompiled executable. It has not yet been compiled or tested on Windows. Build and verify before sharing broadly.
+> This is a development branch. Verify the Windows build and complete a two-version updater test before sharing the installer with the wider community.
 
-## Build a standalone EXE
+## 0.4.2 test candidate
 
-Requires **Windows 10/11 x64** and the **.NET 8 SDK** on the build machine.
+Changes: clicking an instance card opens its detail page; dark and legible right-click actions replace the Windows light popup; the instance detail page has a back button, Play and Add Mods. This release is intended to **test in-app updating from an already-installed v0.4.1**, not to require another manual installer download. Do not publish until the GitHub Pages update feed is configured and the Windows Actions build succeeds.
 
-1. Extract this source folder anywhere.
-2. Open PowerShell in the source folder.
-3. Run `powershell -ExecutionPolicy Bypass -File .\build-windows.ps1` (or open PowerShell and run `.\build-windows.ps1`).
-4. The distributable file is `publish\win-x64\OrbusRebornManager.exe`.
+## Install, uninstall, and update
 
-Build command without the helper script:
+**Player download:** get `RebornManager-Setup.exe` from [GitHub Releases](https://github.com/Hor1zonVR/OrbusRebornManager/releases). Run it to install RebornManager. The user-facing GitHub release has **one attached download only**, with no package archives or updater manifests to sift through.
+
+The installed application can check for newer versions, show an **Update & restart** action, and install the update after user approval.
+
+**Update packages:** The app obtains the `releases.win.json` feed and its matching Velopack `.nupkg` from GitHub Pages, **not** GitHub Releases:
+`https://hor1zonvr.github.io/OrbusRebornManager/updates/`.
+
+These packages are needed for the in-app updater even though normal users should only see Setup.exe on the downloads page. The site hosts the latest full update package so users can jump directly to the newest version; delta updates can be added later.
+
+**Uninstall:** Open RebornManager → Settings → Uninstall RebornManager. The button uses Velopack's Windows uninstaller. It keeps the original OrbusVR installation, your separate modded instances, and saved manager settings so you can reinstall without starting again. You can also uninstall using Windows Installed apps.
+
+**Existing testers:** v0.4.0 used GitHub Releases as its updater source. Since v0.4.1 switches to the separate feed, uninstall the old v0.4.0 through Windows Settings first, then install the new v0.4.1 Setup.exe. Once v0.4.1 is installed, later updates will use the new feed. The new in-app Uninstall button will be available from v0.4.1 onward.
+
+### Developer release prerequisites
+
+**Enable Pages once** on the GitHub repository: Settings → Pages → Build and deployment → Source → **GitHub Actions**. If Pages is not enabled, the release job will intentionally stop before publishing the public installer. This prevents a public Setup.exe appearing without its updater feed.
+
+When releasing:
+
+1. Merge the reviewed development branch after its Windows build passes.
+2. Bump `Version` in `OrbusRebornManager.csproj` to the new release number.
+3. Create and push a `vX.Y.Z` Git tag that matches the project version.
+4. Let GitHub Actions package the app, deploy the update feed to GitHub Pages, and then publish **only `RebornManager-Setup.exe`** to GitHub Releases.
+5. Verify installation and use a subsequent version to test the in-app updater end to end.
+
+The Actions test artifact contains just Setup.exe, although GitHub's Actions interface may wrap artifact downloads in a ZIP. The **public Releases page** exposes the executable directly without an extra ZIP.
+
+This project is currently a development preview. Do not tag a public release until the installer and update path have been validated on Windows.
+
+### Local Windows build
+
+Requires Windows and the **.NET 8 SDK**.
 
 ```powershell
-dotnet publish .\OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\win-x64
+.\build-windows.ps1
 ```
 
-The EXE bundles .NET for **players**, so Jordan won't have to install the SDK or a separate runtime.
-
-The included GitHub Actions workflow can build the Windows EXE after this source is published to a repository.
+The script builds the installer and update packages locally into `Releases/`. Use **the Setup.exe** for testing; the other generated files are inputs to the updater publishing process, not downloads for players.
 
 ## First run and testing
 

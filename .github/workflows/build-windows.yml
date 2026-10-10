@@ -1,52 +1,130 @@
-
-name: Build OrbusRebornManager
+name: Build and release RebornManager
 
 on:
+  pull_request:
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
     tags:
       - "v*"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build:
+  windows:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up .NET
+      - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Build Windows EXE
-        run: >
-          dotnet publish OrbusRebornManager.csproj
-          -c Release
-          -r win-x64
-          --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:DebugType=None
-          -p:DebugSymbols=false
-          -o publish/win-x64
+      - name: Verify tagged version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content -Raw OrbusRebornManager.csproj
+          $version = [string]$project.Project.PropertyGroup.Version
+          if ([string]::IsNullOrWhiteSpace($version)) { throw "Project version missing" }
+          if ($env:GITHUB_REF_TYPE -eq "tag" -and $env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag must match project version v$version"
+          }
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Upload EXE artifact
+      - name: Build application
+        shell: pwsh
+        run: |
+          dotnet publish OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+
+      - name: Install pinned Velopack packager
+        shell: pwsh
+        run: |
+          dotnet tool install --tool-path ./.tools vpk --version 1.2.161
+          if ($LASTEXITCODE -ne 0) { throw "Could not install Velopack CLI" }
+
+      - name: Build installer and update package
+        shell: pwsh
+        run: |
+          & ./.tools/vpk.exe pack --packId Hor1zonVR.OrbusRebornManager `
+            --packVersion $env:APP_VERSION --packDir publish/win-x64 `
+            --mainExe OrbusRebornManager.exe --packTitle "Orbus Reborn Manager" `
+            --channel win --runtime win-x64
+          if ($LASTEXITCODE -ne 0) { throw "Velopack packaging failed" }
+
+          $setup = @(Get-ChildItem -Path Releases -Filter "*-Setup.exe" -File)
+          if ($setup.Count -ne 1) { throw "Expected exactly one Windows setup executable" }
+          New-Item -ItemType Directory -Force -Path distribution | Out-Null
+          Copy-Item -LiteralPath $setup[0].FullName -Destination distribution/RebornManager-Setup.exe
+
+      - name: Upload installer test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OrbusRebornManager-win-x64
-          path: publish/win-x64/OrbusRebornManager.exe
+          name: RebornManager-Setup-win-x64
+          path: distribution/RebornManager-Setup.exe
           if-no-files-found: error
 
-      - name: Publish release
+      - name: Stage update feed (tag releases only)
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        shell: pwsh
+        run: |
+          $pkg = @(Get-ChildItem Releases -Filter "*-full.nupkg" -File)
+          if ($pkg.Count -ne 1) { throw "Expected exactly one full update package" }
+          if (-not (Test-Path Releases/releases.win.json)) { throw "Update manifest missing" }
+          New-Item -ItemType Directory -Force -Path _site/updates | Out-Null
+          Copy-Item -LiteralPath $pkg[0].FullName -Destination _site/updates/
+          Copy-Item -LiteralPath Releases/releases.win.json -Destination _site/updates/
+          New-Item -ItemType File -Force -Path _site/.nojekyll | Out-Null
+
+      - name: Prepare static updater hosting (tag releases only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-pages-artifact@v3
         with:
-          files: publish/win-x64/OrbusRebornManager.exe
-          generate_release_notes: true
+          path: _site
+
+  update-feed:
+    name: Deploy updater packages
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish the update feed
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  release:
+    name: Publish Setup.exe only
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, update-feed]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download the installer
+        uses: actions/download-artifact@v4
+        with:
+          name: RebornManager-Setup-win-x64
+          path: distribution
+
+      - name: Publish user-facing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          test -f distribution/RebornManager-Setup.exe
+          gh release create "$RELEASE_TAG" distribution/RebornManager-Setup.exe \
+            --title "RebornManager $RELEASE_TAG" --generate-notes --verify-tag
