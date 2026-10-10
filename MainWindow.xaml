@@ -79,7 +79,7 @@
                     <TextBlock Text="REBORN COMMUNITY EDITION" FontSize="10"
                                HorizontalAlignment="Center"
                                Foreground="{StaticResource MutedBrush}"/>
-                    <TextBlock Text="v0.4.0 development preview" FontSize="10"
+                    <TextBlock Text="v0.4.1 development preview" FontSize="10"
                                HorizontalAlignment="Center" Foreground="#778BA0"
                                Margin="0,7,0,0"/>
                 </StackPanel>
@@ -744,6 +744,25 @@
                                        Foreground="{StaticResource MutedBrush}"
                                        FontSize="12"
                                        TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- App installation management -->
+                    <Border Style="{StaticResource PanelCard}" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="INSTALLATION" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="Remove RebornManager" FontSize="19"
+                                       FontWeight="Bold" Margin="0,10,0,8"/>
+                            <TextBlock Text="Uninstall the app while keeping your OrbusVR instances and settings."
+                                       FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{StaticResource MutedBrush}"/>
+                            <Button x:Name="UninstallManagerButton"
+                                    Content="Uninstall RebornManager"
+                                    Click="UninstallManager_Click"
+                                    IsEnabled="False"
+                                    HorizontalAlignment="Left"
+                                    Style="{StaticResource PillButton}"
+                                    Margin="0,16,0,0"/>
                         </StackPanel>
                     </Border>
 
