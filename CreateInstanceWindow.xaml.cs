@@ -23,7 +23,8 @@ public partial class CreateInstanceWindow : Window
     public CreateInstanceWindow(
         ManagerService manager,
         string sourcePath,
-        string storagePath)
+        string storagePath,
+        bool previewOnly = false)
     {
         InitializeComponent();
         _manager = manager;
@@ -46,6 +47,16 @@ public partial class CreateInstanceWindow : Window
                Directory.Exists(Path.Combine(StoragePathText.Text, name)))
             name = "Modded Orbus " + index++;
         NameText.Text = name;
+
+        if (previewOnly)
+        {
+            CreateButton.IsEnabled = false;
+            CreateButton.Content = "Preview only";
+            CancelButton.Content = "Close preview";
+            CreationStatusText.Text =
+                "Preview only — no files will be copied or settings changed.";
+        }
+
         Loaded += (_, _) =>
         {
             NameText.Focus();
