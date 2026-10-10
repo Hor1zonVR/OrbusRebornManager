@@ -1,4 +1,4 @@
-name: Build and package RebornManager
+name: Build and release RebornManager
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   windows:
@@ -24,18 +24,18 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Verify release version
+      - name: Verify tagged version
         shell: pwsh
         run: |
           [xml]$project = Get-Content -Raw OrbusRebornManager.csproj
           $version = [string]$project.Project.PropertyGroup.Version
-          if ([string]::IsNullOrWhiteSpace($version)) { throw "Project version is missing." }
-          if ("${{ github.ref_type }}".Replace(" ","") -eq "tag" -and "${{ github.ref_name }}".Replace(" ","") -ne "v$version") {
-            throw "Git tag must match project version v$version."
+          if ([string]::IsNullOrWhiteSpace($version)) { throw "Project version missing" }
+          if ($env:GITHUB_REF_TYPE -eq "tag" -and $env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag must match project version v$version"
           }
           "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Publish Windows app
+      - name: Build application
         shell: pwsh
         run: |
           dotnet publish OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true `
@@ -43,35 +43,13 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
-      - name: Install pinned Velopack CLI
+      - name: Install pinned Velopack packager
         shell: pwsh
         run: |
           dotnet tool install --tool-path ./.tools vpk --version 1.2.161
-          if ($LASTEXITCODE -ne 0) { throw "Velopack CLI installation failed" }
+          if ($LASTEXITCODE -ne 0) { throw "Could not install Velopack CLI" }
 
-      - name: Download previous release for delta generation
-        shell: pwsh
-        env:
-          VPK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $headers = @{
-            Authorization = "Bearer $env:VPK_TOKEN"
-            "User-Agent" = "RebornManager-Release-Build"
-          }
-          $url = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases?per_page=100"
-          $releases = @(Invoke-RestMethod -Uri $url -Headers $headers)
-          $hasVelopackRelease = @($releases | Where-Object {
-            @($_.assets | Where-Object { $_.name -like "*-full.nupkg" }).Count -gt 0
-          }).Count -gt 0
-
-          if ($hasVelopackRelease) {
-            & ./.tools/vpk.exe download github --repoUrl "https://github.com/$env:GITHUB_REPOSITORY" --channel win
-            if ($LASTEXITCODE -ne 0) { throw "Could not retrieve the previous Velopack release" }
-          } else {
-            Write-Host "First Velopack release: build full package without a delta."
-          }
-
-      - name: Package installer and updates
+      - name: Build installer and update package
         shell: pwsh
         run: |
           & ./.tools/vpk.exe pack --packId Hor1zonVR.OrbusRebornManager `
@@ -80,21 +58,73 @@ jobs:
             --channel win --runtime win-x64
           if ($LASTEXITCODE -ne 0) { throw "Velopack packaging failed" }
 
-      - name: Upload installer for testing
+          $setup = @(Get-ChildItem -Path Releases -Filter "*-Setup.exe" -File)
+          if ($setup.Count -ne 1) { throw "Expected exactly one Windows setup executable" }
+          New-Item -ItemType Directory -Force -Path distribution | Out-Null
+          Copy-Item -LiteralPath $setup[0].FullName -Destination distribution/RebornManager-Setup.exe
+
+      - name: Upload installer test artifact
         uses: actions/upload-artifact@v4
         with:
           name: RebornManager-Setup-win-x64
-          path: Releases/**
+          path: distribution/RebornManager-Setup.exe
           if-no-files-found: error
 
-      - name: Publish update packages on version tags
+      - name: Stage update feed (tag releases only)
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
-        env:
-          VPK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          & ./.tools/vpk.exe upload github `
-            --repoUrl "https://github.com/$env:GITHUB_REPOSITORY" `
-            --channel win --publish --tag $env:GITHUB_REF_NAME `
-            --releaseName "RebornManager $env:APP_VERSION"
-          if ($LASTEXITCODE -ne 0) { throw "GitHub release upload failed" }
+          $pkg = @(Get-ChildItem Releases -Filter "*-full.nupkg" -File)
+          if ($pkg.Count -ne 1) { throw "Expected exactly one full update package" }
+          if (-not (Test-Path Releases/releases.win.json)) { throw "Update manifest missing" }
+          New-Item -ItemType Directory -Force -Path _site/updates | Out-Null
+          Copy-Item -LiteralPath $pkg[0].FullName -Destination _site/updates/
+          Copy-Item -LiteralPath Releases/releases.win.json -Destination _site/updates/
+          New-Item -ItemType File -Force -Path _site/.nojekyll | Out-Null
+
+      - name: Prepare static updater hosting (tag releases only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  update-feed:
+    name: Deploy updater packages
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish the update feed
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  release:
+    name: Publish Setup.exe only
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, update-feed]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download the installer
+        uses: actions/download-artifact@v4
+        with:
+          name: RebornManager-Setup-win-x64
+          path: distribution
+
+      - name: Publish user-facing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          test -f distribution/RebornManager-Setup.exe
+          gh release create "$RELEASE_TAG" distribution/RebornManager-Setup.exe \
+            --title "RebornManager $RELEASE_TAG" --generate-notes --verify-tag
