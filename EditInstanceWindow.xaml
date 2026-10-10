@@ -2,8 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="Customize instance"
-        Width="798" Height="690" MinWidth="798" MinHeight="690"
+        Title="Customize instance" Width="765" Height="576"
         ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -22,7 +21,6 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <Border Grid.Row="0" Background="{StaticResource SidebarBrush}"
                     BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1"
                     MouseLeftButtonDown="Title_MouseLeftButtonDown">
@@ -40,64 +38,46 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="1" Margin="24,22,24,18">
+            <Grid Grid.Row="1" Margin="24,20,24,19">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
                 <StackPanel Grid.Row="0" Margin="0,0,0,18">
-                    <TextBlock Text="Make it yours" FontSize="24" FontWeight="SemiBold"
-                               FontFamily="{StaticResource HeadingFont}"/>
-                    <TextBlock Text="Choose your cover, move it into place, and see exactly how it'll appear in the library."
-                               FontSize="13" Foreground="{StaticResource MutedBrush}"
+                    <TextBlock Text="Customize instance" FontSize="23"
+                               FontFamily="{StaticResource HeadingFont}"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Text="Your cover will look exactly like this in your library."
+                               Foreground="{StaticResource MutedBrush}" FontSize="13"
                                Margin="0,5,0,0"/>
                 </StackPanel>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="365"/>
+                        <ColumnDefinition Width="352"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
-                    <!-- The preview art is exactly 2x the library's 164x137 layout. -->
                     <Border Background="{StaticResource CardBrush}"
-                            CornerRadius="16" BorderBrush="{StaticResource StrokeBrush}"
-                            BorderThickness="1" Padding="17">
+                            BorderBrush="{StaticResource StrokeBrush}"
+                            BorderThickness="1" CornerRadius="15" Padding="11">
                         <StackPanel>
-                            <TextBlock Text="LIBRARY PREVIEW" FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource MutedBrush}"
-                                       Margin="0,0,0,12"/>
                             <Border x:Name="PreviewBox" Width="328" Height="274"
-                                    Background="#354253" CornerRadius="13"
-                                    ClipToBounds="True" Cursor="SizeAll"
+                                    CornerRadius="12" ClipToBounds="True"
+                                    Background="#344153"
                                     AllowDrop="True"
-                                    ToolTip="Drag to reposition. Scroll to zoom. You can also drop a PNG, JPG or BMP here."
-                                    MouseLeftButtonDown="Preview_MouseLeftButtonDown"
-                                    MouseLeftButtonUp="Preview_MouseLeftButtonUp"
-                                    MouseMove="Preview_MouseMove"
-                                    MouseWheel="Preview_MouseWheel"
-                                    DragOver="Preview_DragOver"
-                                    Drop="Preview_Drop"
-                                    LostMouseCapture="Preview_LostMouseCapture">
+                                    DragOver="Cover_DragOver" Drop="Cover_Drop">
                                 <Grid ClipToBounds="True">
-                                    <ContentControl x:Name="DefaultIcon" Width="140" Height="140"
+                                    <ContentControl x:Name="DefaultIcon"
                                                     ContentTemplate="{StaticResource OrbusMark}"
+                                                    Width="137" Height="137"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"/>
-                                    <Image x:Name="BlurredPreview" Width="328" Height="274"
-                                           Stretch="UniformToFill" Opacity="0.28"
-                                           Visibility="Collapsed" IsHitTestVisible="False">
-                                        <Image.Effect>
-                                            <BlurEffect Radius="13"/>
-                                        </Image.Effect>
-                                    </Image>
                                     <Image x:Name="CustomIcon" Width="328" Height="274"
-                                           Stretch="UniformToFill" Visibility="Collapsed"
+                                           Stretch="UniformToFill"
                                            RenderTransformOrigin="0.5,0.5"
-                                           IsHitTestVisible="False">
+                                           IsHitTestVisible="False"
+                                           Visibility="Collapsed">
                                         <Image.RenderTransform>
                                             <TransformGroup>
                                                 <ScaleTransform x:Name="PreviewScale"/>
@@ -107,116 +87,66 @@
                                     </Image>
                                 </Grid>
                             </Border>
-
-                            <TextBlock x:Name="PreviewName" Text="My Instance"
-                                       FontSize="16" FontWeight="SemiBold"
-                                       TextTrimming="CharacterEllipsis"
-                                       Margin="3,14,0,0"/>
-                            <TextBlock x:Name="PreviewKind" Text="Modded copy"
-                                       FontSize="12" Foreground="{StaticResource MutedBrush}"
-                                       Margin="3,5,0,0"/>
+                            <TextBlock x:Name="PreviewName" FontSize="15"
+                                       FontWeight="SemiBold" Margin="3,10,0,0"/>
+                            <TextBlock x:Name="PreviewKind" FontSize="12"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       Margin="3,4,0,0"/>
                         </StackPanel>
                     </Border>
 
-                    <StackPanel Grid.Column="1" Margin="22,2,0,0">
-                        <TextBlock Text="Cover artwork" FontSize="16" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="ImageStatusText" Text="Default Orbus cover"
-                                   FontSize="12" Foreground="{StaticResource MutedBrush}"
+                    <StackPanel Grid.Column="1" Margin="21,7,0,0">
+                        <TextBlock Text="Cover artwork" FontSize="16"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock x:Name="ImageStatusText" FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}"
                                    TextTrimming="CharacterEllipsis"
-                                   Margin="0,6,0,13"/>
-
-                        <Button Content="Choose an image"
+                                   Margin="0,7,0,14"/>
+                        <Button Content="Choose image and crop"
                                 Style="{StaticResource PrimaryButton}"
-                                Click="ChooseImage_Click" MinHeight="37"
-                                HorizontalAlignment="Stretch" Margin="0,0,0,9"/>
+                                Click="ChooseImage_Click"
+                                MinHeight="42" Margin="0,0,0,10"/>
+                        <Button x:Name="AdjustCropButton" Content="Adjust current crop"
+                                Style="{StaticResource PillButton}"
+                                Click="AdjustCrop_Click"
+                                MinHeight="37" Margin="0,0,0,10"/>
                         <Button Content="Use default Orbus artwork"
                                 Style="{StaticResource PillButton}"
-                                Click="ClearImage_Click" MinHeight="35"
-                                HorizontalAlignment="Stretch" Margin="0,0,0,17"/>
-
-                        <TextBlock Text="IMAGE SIZE" Style="{StaticResource Eyebrow}"
-                                   Margin="0,0,0,8"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button x:Name="FillButton" Content="Fill cover"
-                                    Tag="Fill" Style="{StaticResource PillButton}"
-                                    Click="Fill_Click" MinHeight="36" Padding="9,7"/>
-                            <Button x:Name="FitButton" Grid.Column="2" Content="Fit image"
-                                    Tag="Fit" Style="{StaticResource PillButton}"
-                                    Click="Fit_Click" MinHeight="36" Padding="9,7"/>
-                        </Grid>
-                        <TextBlock Text="Fill crops the edges. Fit keeps the whole picture visible."
-                                   FontSize="11" TextWrapping="Wrap"
+                                Click="ClearImage_Click"
+                                MinHeight="37"/>
+                        <TextBlock Text="Choosing an image opens the crop tool. You'll see the full photo before deciding what to keep."
+                                   FontSize="12" TextWrapping="Wrap"
                                    Foreground="{StaticResource MutedBrush}"
-                                   Margin="0,8,0,17"/>
-
-                        <TextBlock Text="ZOOM" Style="{StaticResource Eyebrow}"
-                                   Margin="0,0,0,8"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="42"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="42"/>
-                            </Grid.ColumnDefinitions>
-                            <Button x:Name="ZoomOutButton" Content="−" FontSize="20"
-                                    Style="{StaticResource PillButton}"
-                                    Click="ZoomOut_Click" Padding="0"
-                                    MinHeight="36" Height="36"/>
-                            <Border Grid.Column="1" Background="#303139"
-                                    CornerRadius="9" Margin="8,0"
-                                    Height="36">
-                                <TextBlock x:Name="ZoomValue" Text="100%"
-                                           FontSize="14" FontWeight="SemiBold"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                            <Button x:Name="ZoomInButton" Grid.Column="2" Content="+"
-                                    FontSize="20" Style="{StaticResource PillButton}"
-                                    Click="ZoomIn_Click" Padding="0"
-                                    MinHeight="36" Height="36"/>
-                        </Grid>
-                        <TextBlock Text="Drag to move · Scroll to zoom"
-                                   FontSize="12" Foreground="{StaticResource MutedBrush}"
-                                   HorizontalAlignment="Center" Margin="0,9,0,0"/>
-                        <Button Content="Reset crop"
-                                Style="{StaticResource PillButton}"
-                                Click="ResetFraming_Click"
-                                MinHeight="33" Padding="9,6"
-                                HorizontalAlignment="Right" Margin="0,16,0,0"/>
+                                   Margin="0,18,0,0"/>
                     </StackPanel>
                 </Grid>
 
-                <StackPanel Grid.Row="2" Margin="0,16,0,0">
-                    <TextBlock Text="Instance name" FontSize="13" FontWeight="SemiBold"
-                               Margin="0,0,0,7"/>
+                <StackPanel Grid.Row="2" Margin="0,15,0,0">
+                    <TextBlock Text="Instance name" FontSize="13"
+                               FontWeight="SemiBold" Margin="0,0,0,7"/>
                     <TextBox x:Name="NameText" MinHeight="39" MaxLength="50"
                              TextChanged="NameText_TextChanged"
-                             VerticalContentAlignment="Center" Padding="12,8"/>
+                             Padding="12,8" VerticalContentAlignment="Center"/>
                 </StackPanel>
             </Grid>
 
             <Border Grid.Row="2" Background="{StaticResource SidebarBrush}"
-                    BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,1,0,0"
-                    Padding="24,13">
+                    BorderBrush="{StaticResource StrokeBrush}"
+                    BorderThickness="0,1,0,0" Padding="24,13">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Changes affect this instance only."
-                               FontSize="12" Foreground="{StaticResource MutedBrush}"
-                               VerticalAlignment="Center"/>
+                    <TextBlock Text="Your original game and source image stay unchanged."
+                               VerticalAlignment="Center" FontSize="12"
+                               Foreground="{StaticResource MutedBrush}"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button Content="Cancel" Click="Cancel_Click"
                                 Style="{StaticResource PillButton}"
-                                Margin="0,0,9,0" MinWidth="85"/>
+                                MinWidth="85" Margin="0,0,9,0"/>
                         <Button Content="Save changes" Click="Save_Click"
-                                Style="{StaticResource PrimaryButton}"
-                                MinWidth="132"/>
+                                Style="{StaticResource PrimaryButton}" MinWidth="132"/>
                     </StackPanel>
                 </Grid>
             </Border>
