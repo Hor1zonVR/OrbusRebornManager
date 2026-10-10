@@ -72,6 +72,21 @@ A normal uninstall/reinstall does **not** count as a fresh-user test because Reb
 
 Clean instance copies use a temporary staging directory, exclude BepInEx files from the source, and check free disk space before copying.
 
+## Manage a modded instance
+
+Select an instance card from **Library** to open its management page. This page acts only on the selected game's managed mods.
+
+- **Play** starts that instance; **Open folder** opens the game folder, and **Plugins folder** opens the BepInEx plugin directory when present.
+- **Add mods** opens the curated client catalogue for the currently selected instance. **Import local DLL** remains an explicit local-test action.
+- Each installed mod shows its name, source (or local-build status), installed version, and whether it is enabled, disabled, or has missing managed DLL files.
+- Use the search field or **All / Enabled / Disabled / Updates** filters. The **Updates** filter only shows approved releases already checked against GitHub.
+- **Check updates** retrieves available curated releases; **Update** appears only when a matching different release is available and there is a valid downloadable asset.
+- **Enable / Disable** uses the existing safe folder move, and **Remove** unregisters that one managed mod. BepInEx config files and unrelated plugin directories are preserved.
+- If a managed folder or its DLLs are missing, the overview warns about it and the toggle is disabled to avoid misleading results.
+- The game must be closed to install, update, enable, disable, or remove mods.
+
+The manager does not automatically discover arbitrary BepInEx plugins added manually outside of the managed-mod registry. Such plugins remain on disk and are never deleted by this screen.
+
 ## Curated catalogue workflow
 
 RebornManager uses an explicitly curated catalogue, rather than crawling arbitrary GitHub repositories.
