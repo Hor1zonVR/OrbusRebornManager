@@ -18,6 +18,7 @@
         <SolidColorBrush x:Key="TextBrush" Color="#F4F5F7"/>
 
         <Style TargetType="Window">
+            <Setter Property="Icon" Value="pack://application:,,,/Assets/OrbusRebornManager.ico"/>
             <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
             <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
             <Setter Property="FontFamily" Value="{StaticResource InterfaceFont}"/>
