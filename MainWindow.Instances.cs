@@ -153,7 +153,10 @@ public partial class MainWindow
             // Register the original installation, but never modify or copy it
             // until the player explicitly confirms creation in the next window.
             var registered = _instanceStore.AddExisting(
-                _instanceStore.Load(), welcome.SelectedGamePath);
+                _instanceStore.Load(), welcome.SelectedGamePath,
+                GameClientLayout.IsRenewed(welcome.SelectedGamePath)
+                    ? "Orbus Renewed"
+                    : "Original installation");
             _settings.GamePath = registered.Path;
             _settings.DefaultInstanceDirectory = welcome.SelectedStoragePath;
             _service.SaveSettings(_settings);
