@@ -80,7 +80,7 @@
                                     VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
-                    <TextBlock Text="Select the folder containing vrclient.exe. Your original game won't be modified."
+                    <TextBlock Text="Choose an extracted Reborn Community Edition or Renewed PC client. Your original game won't be modified."
                                FontSize="12" Foreground="{StaticResource MutedBrush}"
                                TextWrapping="Wrap" Margin="2,7,0,0"/>
 
