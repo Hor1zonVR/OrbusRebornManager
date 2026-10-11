@@ -1,7 +1,15 @@
 # Orbus Reborn Manager
 
-A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**.
+A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**, including compatible **Orbus Renewed** PC clients.
 This project is not intended for OrbusVR Classic or Preborn.
+
+### Using Orbus Renewed
+
+Extract the [Orbus Renewed PC client](https://github.com/FourOfSpades4/reborn-server/releases/tag/v0.6.1-alpha) into its own folder. In RebornManager, choose **Add existing game**, select the **extracted game folder**, then select its library card and choose **New instance**. RM copies **that selected client** into a separate modded instance, keeps BepInEx isolated to the copy, and launches the executable belonging to that edition. You can keep original Reborn and Renewed side by side.
+
+If you import an `.orbuspack`, first select the intended Reborn/Renewed base in the library. Import makes a separate copy of the selected game. Do not mix Reborn and Renewed binaries or drop either edition over an existing installation.
+
+**Compatibility note:** Mod loader and plugin compatibility depend on the fork's underlying Unity/IL2CPP build and the individual mods. A recognised folder and successful copy **do not guarantee** that a mod built for standard Reborn will run on Renewed. Renewed's large release ZIP has not been tested end to end; only extracted PC layouts containing a recognised Orbus executable, `GameAssembly.dll` and its matching `_Data` folder are accepted.
 
 > RebornManager is under active development. Published releases contain a Windows installer and receive updates through the in-app updater.
 
