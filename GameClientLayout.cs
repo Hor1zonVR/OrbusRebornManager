@@ -15,6 +15,9 @@ public static class GameClientLayout
     private static readonly string[] ExecutableNames =
     {
         "vrclient.exe",
+        // Confirmed in FourOfSpades4/reborn-server v0.6.1-alpha:
+        // New-Client/OrbusVR.exe + OrbusVR_Data/ + GameAssembly.dll.
+        "OrbusVR.exe",
         "OrbusVRRenewed.exe",
         "OrbusVR Renewed.exe",
         "OrbusRenewed.exe"
@@ -45,6 +48,20 @@ public static class GameClientLayout
                 "Choose the extracted OrbusVR Reborn or Renewed game folder.");
 
         path = Path.GetFullPath(path);
+
+        // Renewed v0.6.1-alpha wraps the client in New-Client/ within its
+        // archive. Accept choosing either that folder or the outer extracted
+        // folder, but never recurse through arbitrary subdirectories.
+        string nested = Path.Combine(path, "New-Client");
+        if (!File.Exists(Path.Combine(path, "GameAssembly.dll")) &&
+            Directory.Exists(nested) &&
+            File.Exists(Path.Combine(nested, "GameAssembly.dll")) &&
+            File.Exists(Path.Combine(nested, "OrbusVR.exe")) &&
+            Directory.Exists(Path.Combine(nested, "OrbusVR_Data")))
+        {
+            path = nested;
+        }
+
         FindExecutable(path);
         return path;
     }
