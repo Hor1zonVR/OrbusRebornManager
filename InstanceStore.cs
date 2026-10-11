@@ -139,11 +139,9 @@ public sealed class InstanceStore
             throw new InvalidOperationException(
                 "Choose an existing destination folder.");
 
-        if (!File.Exists(
-                System.IO.Path.Combine(source, "vrclient.exe")))
-            throw new InvalidOperationException(
-                "Choose an existing OrbusVR Reborn " +
-                "installation as the source.");
+        // Reborn and Renewed use the same safe copy path once their PC
+        // Unity player layout has been verified; never assume vrclient.exe.
+        GameClientLayout.FindExecutable(source);
 
         string destination =
             System.IO.Path.Combine(destinationParent, name);
