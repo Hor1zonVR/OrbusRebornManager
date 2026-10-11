@@ -90,7 +90,7 @@ public partial class CreateInstanceWindow : Window
         if (_busy) return;
         var dialog = new OpenFolderDialog
         {
-            Title = "Choose the OrbusVR Reborn installation to copy"
+            Title = "Choose the Reborn or Renewed installation to copy"
         };
         if (dialog.ShowDialog(this) != true) return;
 
