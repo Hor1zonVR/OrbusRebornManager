@@ -43,29 +43,14 @@ public sealed class ManagerService
     }
     public void SaveSettings(ManagerSettings settings) => SaveJson(Path.Combine(DataRoot, "settings.json"), settings);
 
-    public string NormalizeGamePath(string selection)
-    {
-        string path = selection.Trim().Trim('"');
-        if (File.Exists(path) && Path.GetFileName(path).Equals("vrclient.exe", StringComparison.OrdinalIgnoreCase))
-            path = Path.GetDirectoryName(path)!;
-        if (!Directory.Exists(path)) throw new InvalidOperationException("Choose the folder containing vrclient.exe.");
-        path = Path.GetFullPath(path);
-        if (!File.Exists(Path.Combine(path, "vrclient.exe")) ||
-            !File.Exists(Path.Combine(path, "GameAssembly.dll")) ||
-            !Directory.Exists(Path.Combine(path, "vrclient_Data")))
-            throw new InvalidOperationException("This doesn't look like OrbusVR Reborn Community Edition. Select its game folder containing vrclient.exe, GameAssembly.dll and vrclient_Data.");
-        return path;
-    }
+    public string NormalizeGamePath(string selection) =>
+        GameClientLayout.NormalizeFolder(selection);
 
     public bool IsBepInExInstalled(string game) =>
         File.Exists(Path.Combine(game, "winhttp.dll")) &&
         File.Exists(Path.Combine(game, "BepInEx", "core", "BepInEx.Unity.IL2CPP.dll"));
 
-    public bool IsGameRunning()
-    {
-        try { return Process.GetProcessesByName("vrclient").Length > 0; }
-        catch { return false; }
-    }
+    public bool IsGameRunning() => GameClientLayout.IsClientRunning();
 
     public string GameManagerRoot(string game) => Path.Combine(game, "OrbusRebornManager");
     private string StatePath(string game)
@@ -613,7 +598,7 @@ public sealed class ManagerService
     {
         Process.Start(new ProcessStartInfo
         {
-            FileName = Path.Combine(game, "vrclient.exe"),
+            FileName = GameClientLayout.FindExecutable(game),
             WorkingDirectory = game,
             UseShellExecute = true
         });
