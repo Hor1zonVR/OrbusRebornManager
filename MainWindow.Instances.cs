@@ -12,7 +12,7 @@ public partial class MainWindow
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "Choose an existing OrbusVR Reborn installation"
+            Title = "Choose an OrbusVR Reborn or Renewed installation"
         };
         if (dialog.ShowDialog(this) != true) return;
 
@@ -43,9 +43,14 @@ public partial class MainWindow
     {
         var existing = _instanceStore.Load();
 
-        // Prefer the original installation over an already-modded copy.
-        string source = existing.FirstOrDefault(i => !i.CreatedByManager)?.Path
-            ?? _settings.GamePath;
+        // Always begin with the game the player selected in the library.
+        // Reborn and Renewed can coexist: choosing the first original game
+        // instead could silently copy the wrong client build.
+        string source = !string.IsNullOrWhiteSpace(_settings.GamePath)
+            ? _settings.GamePath
+            : existing.FirstOrDefault(i => !i.CreatedByManager)?.Path
+              ?? existing.FirstOrDefault()?.Path
+              ?? "";
 
         await CreateInstanceFromSourceAsync(source);
     }
