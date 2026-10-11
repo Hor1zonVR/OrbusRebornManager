@@ -53,8 +53,13 @@ public partial class MainWindow
             }
 
             var existing = _instanceStore.Load();
-            string source = existing.FirstOrDefault(i => !i.CreatedByManager)?.Path
-                ?? _settings.GamePath;
+            // Import into a brand-new copy of the currently selected build,
+            // never an unrelated Reborn/Renewed game picked by registry order.
+            string source = !string.IsNullOrWhiteSpace(_settings.GamePath)
+                ? _settings.GamePath
+                : existing.FirstOrDefault(i => !i.CreatedByManager)?.Path
+                  ?? existing.FirstOrDefault()?.Path
+                  ?? "";
 
             // Reuse the same safe copy, source selection and storage UI used
             // for ordinary instance creation. Loader is mandatory here.
