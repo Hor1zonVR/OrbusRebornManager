@@ -5,7 +5,7 @@ This project is not intended for OrbusVR Classic or Preborn.
 
 ### Using Orbus Renewed
 
-Extract the [Orbus Renewed PC client](https://github.com/FourOfSpades4/reborn-server/releases/tag/v0.6.1-alpha) into its own folder. In RebornManager, choose **Add existing game**, select the **extracted game folder**, then select its library card and choose **New instance**. RM copies **that selected client** into a separate modded instance, keeps BepInEx isolated to the copy, and launches the executable belonging to that edition. You can keep original Reborn and Renewed side by side.
+Extract the [Orbus Renewed PC client](https://github.com/FourOfSpades4/reborn-server/releases/tag/v0.6.1-alpha) into its own folder. The release contains `New-Client/OrbusVR.exe`, `New-Client/GameAssembly.dll` and `New-Client/OrbusVR_Data/`. In RebornManager, choose **Add existing game**, select the extracted **`New-Client` folder** (or its containing folder), then select the Renewed library card and choose **New instance**. RM copies **that selected client** into a separate modded instance, keeps BepInEx isolated to the copy, and launches the executable belonging to that edition. You can keep original Reborn and Renewed side by side.
 
 If you import an `.orbuspack`, first select the intended Reborn/Renewed base in the library. Import makes a separate copy of the selected game. Do not mix Reborn and Renewed binaries or drop either edition over an existing installation.
 
