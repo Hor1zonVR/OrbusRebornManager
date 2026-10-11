@@ -39,7 +39,7 @@ public partial class FirstRunWindow : Window
     private void RefreshLocationLabels()
     {
         GameLocationText.Text = string.IsNullOrWhiteSpace(SelectedGamePath)
-            ? "Choose the folder containing vrclient.exe"
+            ? "Choose your extracted Reborn or Renewed client"
             : Path.GetFileName(Path.TrimEndingDirectorySeparator(SelectedGamePath));
         GameLocationText.ToolTip = SelectedGamePath;
 
@@ -60,7 +60,7 @@ public partial class FirstRunWindow : Window
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "Select your existing OrbusVR Reborn Community Edition folder"
+            Title = "Select your OrbusVR Reborn or Renewed PC game folder"
         };
         if (dialog.ShowDialog(this) != true) return;
 
