@@ -46,7 +46,10 @@ public partial class CreateInstanceWindow : Window
         // Importing can suggest the exported name, but it must still follow
         // the safe local directory naming rules used by CreateCleanCopyAsync.
         string baseName = string.IsNullOrWhiteSpace(suggestedName)
-            ? "Modded Orbus"
+            ? (!string.IsNullOrWhiteSpace(sourcePath) && Directory.Exists(sourcePath) &&
+               GameClientLayout.IsRenewed(_manager.NormalizeGamePath(sourcePath))
+                ? "Modded Orbus Renewed"
+                : "Modded Orbus")
             : System.Text.RegularExpressions.Regex.Replace(
                 suggestedName.Trim(), @"[^a-zA-Z0-9 _-]", "").Trim();
         if (baseName.Length == 0) baseName = "Imported Orbus";
