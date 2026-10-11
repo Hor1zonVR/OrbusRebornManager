@@ -20,8 +20,13 @@ public partial class MainWindow
         {
             string game = _service.NormalizeGamePath(dialog.FolderName);
             var list = _instanceStore.Load();
+            // Renewed's release folder is called "New-Client"; show the
+            // edition in the library instead of that internal ZIP name.
+            string displayName = GameClientLayout.IsRenewed(game)
+                ? "Orbus Renewed"
+                : Path.GetFileName(game);
             var instance = _instanceStore.AddExisting(
-                list, game, Path.GetFileName(game));
+                list, game, displayName);
 
             _settings.GamePath = instance.Path;
             _service.SaveSettings(_settings);
