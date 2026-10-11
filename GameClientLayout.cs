@@ -88,6 +88,12 @@ public static class GameClientLayout
             "not the server files or the ZIP itself.");
     }
 
+    // Player-facing labels use the detected executable rather than the ZIP
+    // wrapper folder name (which is simply "New-Client" for Renewed).
+    public static bool IsRenewed(string folder) =>
+        !Path.GetFileName(FindExecutable(folder)).Equals(
+            "vrclient.exe", StringComparison.OrdinalIgnoreCase);
+
     public static bool IsClientRunning()
     {
         try
