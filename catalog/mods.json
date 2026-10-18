@@ -1,4 +1,3 @@
-
 {
   "schemaVersion": 1,
   "mods": [
@@ -9,6 +8,16 @@
       "description": "Desktop creator camera for OrbusVR Reborn with an F2 control panel, POV, third-person, selfie and static recording modes, adjustable FOV, smoothness and distance, and optional local avatar visibility.",
       "repository": "https://github.com/Hor1zonVR/OrbusRebornCamera",
       "assetPattern": "BetterMirror.dll"
+    },
+    {
+      "id": "orbusquesthelper",
+      "name": "OrbusQuestHelper",
+      "author": "Hor1zonVR",
+      "description": "Experimental client-side OrbusVR quest helper. Early builds inspect mission and journal UI; planned features include region-grouped missions, quest tracking, event alerts and fishing guidance.",
+      "repository": "https://github.com/Hor1zonVR/OrbusQuestHelper",
+      "assetPattern": "OrbusQuestHelper.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
