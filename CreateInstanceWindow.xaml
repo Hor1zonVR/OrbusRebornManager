@@ -64,10 +64,12 @@
 
                 <TextBlock Text="Game edition" FontSize="13" FontWeight="SemiBold" Margin="0,15,0,7"/>
                 <ComboBox x:Name="EditionChoice" SelectedIndex="0" SelectionChanged="EditionChoice_Changed"
-                          MinHeight="38" Padding="10,7">
-                    <ComboBoxItem Content="OrbusVR Community Edition — download latest"/>
-                    <ComboBoxItem Content="Orbus Renewed by FourOfSpades — download latest"/>
-                    <ComboBoxItem Content="Use an existing game installation"/>
+                          MinHeight="38" Padding="10,7" FontSize="13" FontWeight="SemiBold"
+                          Foreground="#17212B" Background="#E7F1FC" BorderBrush="#788DA4"
+                          ToolTip="Choose Community Edition, FourOfSpades Renewed, or an existing installation">
+                    <ComboBoxItem Foreground="#17212B" Content="OrbusVR Community Edition — download latest"/>
+                    <ComboBoxItem Foreground="#17212B" Content="Orbus Renewed by FourOfSpades — download latest"/>
+                    <ComboBoxItem Foreground="#17212B" Content="Use an existing game installation"/>
                 </ComboBox>
                 <TextBlock x:Name="EditionInfo" FontSize="12" Foreground="{StaticResource MutedBrush}"
                            TextWrapping="Wrap" Margin="0,7,0,0"
