@@ -94,7 +94,7 @@ public partial class MainWindow
 
     private async void UpdateGame_Click(object sender, RoutedEventArgs e)
     {
-        if (_gameUpdateBusy || _jobs > 0) return;
+        if (_gameUpdateBusy || _checkingGameUpdates || _jobs > 0) return;
         var instance = CurrentGameInstance();
         if (!CanUpdateGame(instance) || instance == null ||
             !_latestGameReleases.TryGetValue(instance.Edition, out var latest) ||
@@ -119,7 +119,9 @@ public partial class MainWindow
             return;
 
         _gameUpdateBusy = true;
+        _jobs++;
         _gameUpdateCancellation = new CancellationTokenSource();
+        GameUpdateCancelButton.IsEnabled = true;
         GameUpdateProgress.Value = 0;
         GameUpdateProgress.Visibility = Visibility.Visible;
         GameUpdateStatusText.Text = "Preparing update...";
@@ -158,6 +160,8 @@ public partial class MainWindow
             _gameUpdateCancellation.Dispose();
             _gameUpdateCancellation = null;
             _gameUpdateBusy = false;
+            _jobs--;
+            GameUpdateCancelButton.IsEnabled = true;
             GameUpdateProgress.Visibility = Visibility.Collapsed;
             RefreshInstanceCards();
             RefreshGameUpdateControls();
@@ -188,6 +192,7 @@ public partial class MainWindow
             return;
 
         _gameUpdateBusy = true;
+        _jobs++;
         RefreshGameUpdateControls();
         try
         {
@@ -209,6 +214,7 @@ public partial class MainWindow
         finally
         {
             _gameUpdateBusy = false;
+            _jobs--;
             RefreshGameUpdateControls();
         }
     }
