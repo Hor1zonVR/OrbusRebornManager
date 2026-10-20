@@ -94,7 +94,7 @@ public sealed class ModRow : INotifyPropertyChanged
     private string _version = "";
     private bool _working;
 
-    public string Name => Definition.Name;
+    public string Name => ModPresentation.Name(Definition.Id, Definition.Name);
     public string Author => Definition.Author;
     public string Description => Definition.Description;
     public string Repository => Definition.Repository;
