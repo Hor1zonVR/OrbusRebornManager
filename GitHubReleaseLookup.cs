@@ -251,7 +251,7 @@ internal static class GitHubReleaseLookup
             throw new InvalidOperationException(
                 "GitHub's anonymous API rate limit has been reached. " +
                 "Release checks can resume around " + reset + ". " +
-                "Leave RM open or try again later. If you've already signed in " +
+                "Try checking for updates after that time. If you've already signed in " +
                 "using the GitHub CLI (gh), RM can use that login for read-only release checks.");
         }
         finally { gate.Release(); }
