@@ -6,7 +6,7 @@ dotnet new console -n Smoke -o $project -f net8.0 --force
 if ($LASTEXITCODE -ne 0) { throw "Could not create test project" }
 
 $projectFile = Join-Path $project "Smoke.csproj"
-$refs = @("InstanceStore.cs", "GameClientLayout.cs", "GameReleaseDownloadService.cs", "GameUpdateService.cs")
+$refs = @("InstanceStore.cs", "GameClientLayout.cs", "GitHubReleaseLookup.cs", "GameReleaseDownloadService.cs", "GameUpdateService.cs")
 $links = ($refs | ForEach-Object {
     '    <Compile Include="' + (Join-Path $env:GITHUB_WORKSPACE $_) + '" Link="' + $_ + '" />'
 }) -join [Environment]::NewLine
