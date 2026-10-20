@@ -13,15 +13,6 @@ namespace OrbusRebornManager;
 // time; we don't change or accidentally index the underlying mod database.
 public sealed class InstanceModRow
 {
-    private static readonly Brush[] Backgrounds =
-    {
-        new SolidColorBrush(Color.FromRgb(63, 69, 91)),
-        new SolidColorBrush(Color.FromRgb(54, 86, 77)),
-        new SolidColorBrush(Color.FromRgb(84, 61, 91)),
-        new SolidColorBrush(Color.FromRgb(90, 72, 53)),
-        new SolidColorBrush(Color.FromRgb(53, 76, 97)),
-    };
-
     public InstalledMod Installed { get; }
     public ModDefinition Definition { get; }
     public string Name => ModPresentation.Name(Installed.Id, Installed.Name);
@@ -31,9 +22,7 @@ public sealed class InstanceModRow
         : Installed.AssetName;
     public string Author => Installed.Local ? "Local DLL" :
         string.IsNullOrWhiteSpace(Definition.Author) ? "Community mod" : Definition.Author;
-    public string IconLetter => string.IsNullOrWhiteSpace(Name) ? "M" :
-        Name.Trim()[0].ToString().ToUpperInvariant();
-    public Brush IconBrush { get; }
+    public ImageSource IconSource => ModArtwork.For(Installed.Id);
     public bool MissingFiles { get; }
     public bool CanModify => !MissingFiles;
     public bool CanUpdate => UpdateAvailable && Release != null && Asset != null && !Installed.Local;
@@ -63,10 +52,6 @@ public sealed class InstanceModRow
             !string.Equals(installed.Version, release.TagName,
                 StringComparison.OrdinalIgnoreCase);
 
-        uint hash = 2166136261;
-        foreach (char c in installed.Id.ToUpperInvariant())
-            hash = unchecked((hash ^ c) * 16777619);
-        IconBrush = Backgrounds[(int)(hash % (uint)Backgrounds.Length)];
     }
 }
 
