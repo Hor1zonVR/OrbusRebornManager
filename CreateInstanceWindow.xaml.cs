@@ -128,6 +128,7 @@ public partial class CreateInstanceWindow : Window
     private void UpdateEditionCardAppearance()
     {
         Button[] cards = { CommunityEditionCard, RenewedEditionCard, LocalEditionCard };
+        TextBlock[] indicators = { CommunityEditionIndicator, RenewedEditionIndicator, LocalEditionIndicator };
         for (int i = 0; i < cards.Length; i++)
         {
             bool selected = EditionChoice.SelectedIndex == i;
@@ -136,6 +137,8 @@ public partial class CreateInstanceWindow : Window
             cards[i].BorderBrush = new SolidColorBrush(
                 selected ? Color.FromRgb(87, 217, 172) : Color.FromRgb(57, 59, 68));
             cards[i].BorderThickness = new Thickness(selected ? 2 : 1);
+            indicators[i].Text = selected ? "✓" : "›";
+            indicators[i].Foreground = new SolidColorBrush(selected ? Color.FromRgb(87, 217, 172) : Color.FromRgb(184, 194, 207));
             cards[i].IsEnabled = !_busy && !_previewOnly && !_importModList;
         }
     }
