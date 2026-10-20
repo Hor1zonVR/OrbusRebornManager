@@ -82,7 +82,7 @@
                             Click="EditionCard_Click" Padding="14,10" Margin="0,0,0,6"
                             Background="#273E3A" BorderBrush="#57D9AC">
                         <DockPanel LastChildFill="True">
-                            <TextBlock Text="✓" FontSize="17" FontWeight="Bold"
+                            <TextBlock x:Name="CommunityEditionIndicator" Text="✓" FontSize="17" FontWeight="Bold"
                                        Foreground="#57D9AC" DockPanel.Dock="Right"
                                        Margin="10,0,0,0" VerticalAlignment="Center"/>
                             <StackPanel>
@@ -97,7 +97,7 @@
                             Style="{StaticResource PillButton}" HorizontalContentAlignment="Stretch"
                             Click="EditionCard_Click" Padding="14,10" Margin="0,0,0,6">
                         <DockPanel LastChildFill="True">
-                            <TextBlock Text="›" FontSize="20" Foreground="#B8C2CF"
+                            <TextBlock x:Name="RenewedEditionIndicator" Text="›" FontSize="20" Foreground="#B8C2CF"
                                        DockPanel.Dock="Right" Margin="10,0,0,0"/>
                             <StackPanel>
                                 <TextBlock Text="Orbus Renewed · FourOfSpades" FontSize="14"
@@ -111,7 +111,7 @@
                             Style="{StaticResource PillButton}" HorizontalContentAlignment="Stretch"
                             Click="EditionCard_Click" Padding="14,10">
                         <DockPanel LastChildFill="True">
-                            <TextBlock Text="›" FontSize="20" Foreground="#B8C2CF"
+                            <TextBlock x:Name="LocalEditionIndicator" Text="›" FontSize="20" Foreground="#B8C2CF"
                                        DockPanel.Dock="Right" Margin="10,0,0,0"/>
                             <StackPanel>
                                 <TextBlock Text="Existing installation" FontSize="14"
