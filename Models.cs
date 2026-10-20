@@ -96,6 +96,7 @@ public sealed class ModRow : INotifyPropertyChanged
 
     public string Name => ModPresentation.Name(Definition.Id, Definition.Name);
     public string Author => Definition.Author;
+    public System.Windows.Media.ImageSource IconSource => ModArtwork.For(Definition.Id);
     public string Description => Definition.Description;
     public string Repository => Definition.Repository;
 
