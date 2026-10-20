@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Create instance"
-        Width="624" Height="610"
+        Width="624" Height="670"
         ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -54,7 +54,7 @@
             <StackPanel Grid.Row="1" Margin="25,20,25,0">
                 <TextBlock Text="Create an instance" FontSize="23" FontWeight="SemiBold"
                            FontFamily="{StaticResource HeadingFont}"/>
-                <TextBlock Text="Set up a separate copy of OrbusVR."
+                <TextBlock Text="Download or copy an isolated OrbusVR PC installation."
                            FontSize="13" Foreground="{StaticResource MutedBrush}"
                            Margin="0,4,0,18"/>
 
@@ -62,10 +62,21 @@
                 <TextBox x:Name="NameText" MaxLength="50" Text="Modded Orbus"
                          FontSize="13.5" Padding="11,8" MinHeight="38"/>
 
-                <Grid Margin="0,16,0,7">
+                <TextBlock Text="Game edition" FontSize="13" FontWeight="SemiBold" Margin="0,15,0,7"/>
+                <ComboBox x:Name="EditionChoice" SelectedIndex="0" SelectionChanged="EditionChoice_Changed"
+                          MinHeight="38" Padding="10,7">
+                    <ComboBoxItem Content="OrbusVR Community Edition — download latest"/>
+                    <ComboBoxItem Content="Orbus Renewed by FourOfSpades — download latest"/>
+                    <ComboBoxItem Content="Use an existing game installation"/>
+                </ComboBox>
+                <TextBlock x:Name="EditionInfo" FontSize="12" Foreground="{StaticResource MutedBrush}"
+                           TextWrapping="Wrap" Margin="0,7,0,0"
+                           Text="RM will download the official PC game release directly from GitHub."/>
+                <Grid x:Name="ExistingSourceHeading" Margin="0,16,0,7" Visibility="Collapsed">
                     <TextBlock Text="Copy from" FontWeight="SemiBold" FontSize="13"/>
                 </Grid>
-                <Border Background="{StaticResource CardBrush}" CornerRadius="15"
+                <Border x:Name="ExistingSourcePanel" Visibility="Collapsed"
+                        Background="{StaticResource CardBrush}" CornerRadius="15"
                         BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
                         Padding="13,10">
                     <Grid>
@@ -114,7 +125,7 @@
                     <StackPanel>
                         <CheckBox x:Name="LoaderCheck" Content="Prepare for mods"
                                   IsChecked="True" FontWeight="SemiBold" FontSize="13"/>
-                        <TextBlock Text="Install BepInEx in the new copy, not the original game."
+                        <TextBlock x:Name="LoaderInfo" Text="Install BepInEx only in the newly created instance."
                                    FontSize="12" Foreground="{StaticResource MutedBrush}"
                                    Margin="22,4,0,0"/>
                     </StackPanel>

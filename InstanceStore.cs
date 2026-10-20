@@ -10,6 +10,8 @@ public sealed class GameInstance
     public string Name { get; set; } = "";
     public string Path { get; set; } = "";
     public bool CreatedByManager { get; set; }
+    public string Edition { get; set; } = "";
+    public string GameVersion { get; set; } = "";
     public string CustomIconPath { get; set; } = "";
     // Artwork framing uses logical pixels based on a 164x137 library cover.
     // Defaults are intentionally compatible with instances created before v0.4.11.
