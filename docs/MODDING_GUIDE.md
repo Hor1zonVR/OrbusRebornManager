@@ -55,3 +55,13 @@ For bugs in RM itself, use [Report a bug](https://github.com/Hor1zonVR/OrbusRebo
 Rebuild or retest plugins if a game's Unity, IL2CPP or API layout changes. Keep old game instances until updated plugins have been confirmed working. Installing the newest BepInEx or the newest mod does not automatically solve all build incompatibilities.
 
 **Note:** The Community Edition licence grants specific modification rights, including content and mods directories, but limits reverse engineering of compiled software. Review upstream licences/permissions before distributing patches or modified game binaries.
+
+## 7. RebornMenu — shared in-game VR configuration (planned)
+
+[RebornMenu](https://github.com/Hor1zonVR/OrbusRebornMenu) will be a core companion that RebornManager installs with BepInEx **after** a tested runtime DLL is released. It is **not available or automatically installed yet**.
+
+Mods already using standard `Config.Bind(...)` settings can be discovered by the planned generic editor without requiring a dependency or writing their own menu. Developers may optionally add a [declarative `rebornmenu.json` page](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md); advanced live previews and controller-driven HUD placement require a separate, opt-in runtime provider contract, to be finalised after in-game testing.
+
+**Important:** Your plugin must work normally even when RebornMenu is missing or disabled. RebornManager's own installation, mod management and game updating must also continue to work independently.
+
+See [RebornMenu's architecture](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/ARCHITECTURE.md), [developer example](https://github.com/Hor1zonVR/OrbusRebornMenu/tree/main/examples/CastMetrics) and [RM companion installation plan](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/RM_INTEGRATION.md).
