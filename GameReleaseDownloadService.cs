@@ -55,10 +55,9 @@ public static class GameReleaseDownloadService
         };
 
         string api = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
-        using var response = await Client.GetAsync(api, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var release = await JsonSerializer.DeserializeAsync<Release>(stream, Json, cancellationToken)
+        var lookup = await GitHubReleaseLookup.GetAsync(
+            Client, api, cancellationToken: cancellationToken);
+        var release = JsonSerializer.Deserialize<Release>(lookup.Json, Json)
             ?? throw new InvalidOperationException("GitHub returned an empty release.");
         if (release.Draft || string.IsNullOrWhiteSpace(release.Tag))
             throw new InvalidOperationException("No published PC release was found.");

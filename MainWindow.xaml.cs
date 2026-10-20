@@ -499,7 +499,7 @@ public partial class MainWindow : Window
         });
     }
 
-    private async Task CheckReleasesAsync(bool autoUpdate)
+    private async Task CheckReleasesAsync(bool autoUpdate, bool forceRefresh = false)
     {
         string? game = ModBrowseGameOrNull();
         foreach (var row in _allDiscover)
@@ -508,13 +508,14 @@ public partial class MainWindow : Window
             row.Status = "Checking GitHub Releases...";
             try
             {
-                var result = await _service.GetLatestAsync(row.Definition);
+                var result = await _service.GetLatestAsync(row.Definition, forceRefresh);
                 row.Release = result.Release;
                 row.Asset = result.Asset;
-                row.Version = "Latest " + result.Release.TagName;
+                row.ReleaseIsStale = result.Stale;
+                row.Version = (result.Stale ? "Last checked " : "Latest ") + result.Release.TagName;
                 var installed = game == null ? null : _service.FindInstalled(game, row.Definition.Id);
                 bool update = installed != null && !installed.Local && installed.Version != result.Release.TagName;
-                if (autoUpdate && update && game != null && _service.IsBepInExInstalled(game) && !_service.IsGameRunning())
+                if (autoUpdate && !result.Stale && update && game != null && _service.IsBepInExInstalled(game) && !_service.IsGameRunning())
                 {
                     Log("Updating " + row.Name + " to " + result.Release.TagName + "...");
                     await _service.InstallReleaseAsync(game, row.Definition, result.Release, result.Asset);
@@ -524,6 +525,7 @@ public partial class MainWindow : Window
             catch (Exception ex)
             {
                 row.Version = "Release unavailable";
+                row.ReleaseIsStale = false;
                 row.Status = ex.Message;
             }
             finally { row.Working = false; }
@@ -559,6 +561,8 @@ public partial class MainWindow : Window
             else if (mod.Local) { row.Status = "Local test build installed"; row.Action = "Local build"; }
             else if (mod.Version != row.Release.TagName) { row.Status = "Update available · installed " + mod.Version; row.Action = "Update"; }
             else { row.Status = mod.Enabled ? "Installed and up to date" : "Installed · disabled"; row.Action = "Installed"; }
+            if (row.ReleaseIsStale)
+                row.Status = "GitHub rate-limited/offline · last known release (may be outdated)";
         }
     }
 
@@ -588,7 +592,7 @@ public partial class MainWindow : Window
 
     private void SearchText_Changed(object sender, TextChangedEventArgs e) { if (DiscoverMods != null) FilterMods(); }
     private async void RefreshCatalog_Click(object sender, RoutedEventArgs e) => await RefreshCatalogAsync();
-    private async void CheckUpdates_Click(object sender, RoutedEventArgs e) => await RunAsync(() => CheckReleasesAsync(false));
+    private async void CheckUpdates_Click(object sender, RoutedEventArgs e) => await RunAsync(() => CheckReleasesAsync(false, forceRefresh: true));
 
     private async void ModAction_Click(object sender, RoutedEventArgs e)
     {
