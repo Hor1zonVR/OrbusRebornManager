@@ -13,6 +13,14 @@ If you import an `.orbuspack`, first select the intended Reborn/Renewed base in 
 
 > RebornManager is under active development. Published releases contain a Windows installer and receive updates through the in-app updater.
 
+## Planned in-game RebornMenu
+
+Our [OrbusRebornMenu](https://github.com/Hor1zonVR/OrbusRebornMenu) project will provide a shared **VR-first mod configuration editor**. Every loaded BepInEx plugin with normal `Config.Bind(...)` settings will get basic controls; mod authors can optionally define polished custom pages and safe HUD placement.
+
+Once RebornMenu has a tested compiled release, RM will install it as an **optional, repairable core companion** when preparing BepInEx in an instance. **This auto-install feature has not shipped yet** — both RM and all other mods must continue working without it.
+
+See [RebornMenu architecture and design](docs/REBORNMENU_SPEC.md) and [its developer contract](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md).
+
 ## Install, uninstall, and update
 
 **Player download:** get `RebornManager-Setup.exe` from [GitHub Releases](https://github.com/Hor1zonVR/OrbusRebornManager/releases). Run it to install RebornManager. The user-facing GitHub release has **one attached download only**, with no package archives or updater manifests to sift through.
