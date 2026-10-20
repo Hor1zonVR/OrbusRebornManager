@@ -58,6 +58,16 @@
       "assetPattern": "OrbusAbilityLabels.dll",
       "target": "client",
       "category": "Quality of Life"
+    },
+    {
+      "id": "orbuspaladinrangefix",
+      "name": "OrbusPaladinRangeFix",
+      "author": "Hor1zonVR",
+      "description": "Experimental read-only Paladin hammer teleport and mount/combat diagnostics. Captures local rig and nearby mechanic objects with F8/F9/F10/F11; does not yet change teleport or summoning.",
+      "repository": "https://github.com/Hor1zonVR/OrbusPaladinRangeFix",
+      "assetPattern": "OrbusPaladinRangeFix.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
