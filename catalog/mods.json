@@ -53,7 +53,7 @@
       "id": "orbusabilitylabels",
       "name": "OrbusAbilityLabels",
       "author": "Hor1zonVR",
-      "description": "Small floating VR ability labels. Experimental visual preview: Musketeer SH/RN/GR/BH above recognized orbs; Bard temporary instrument ID markers; editable BepInEx settings.",
+      "description": "Small floating labels above Bard and Musketeer abilities. Eight mapped Bard mesh abbreviations (GH, CW, IJ, HA, PR, IN, SP, DF) and compact text. Optional Bard mesh debug panel, off by default.",
       "repository": "https://github.com/Hor1zonVR/OrbusAbilityLabels",
       "assetPattern": "OrbusAbilityLabels.dll",
       "target": "client",
