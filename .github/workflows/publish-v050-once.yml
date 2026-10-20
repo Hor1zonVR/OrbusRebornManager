@@ -17,7 +17,7 @@ jobs:
       - name: Verify current main passed its Windows build
         shell: bash
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           status="missing"
@@ -41,7 +41,7 @@ jobs:
       - name: Request minor-version public release
         shell: bash
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           gh workflow run publish-update.yml \
