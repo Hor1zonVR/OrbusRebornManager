@@ -423,9 +423,13 @@
                                         <TextBlock Text="{Binding ModCount}" FontSize="13"
                                                    Foreground="{StaticResource MutedBrush}"
                                                    Margin="3,5,3,0" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding Kind}" FontSize="13"
+                                        <TextBlock Text="{Binding Kind}" FontSize="12"
                                                    Foreground="{StaticResource MutedBrush}"
-                                                   Margin="3,4,3,5" TextTrimming="CharacterEllipsis"/>
+                                                   Margin="3,4,3,0" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding GameUpdateLabel}" FontSize="12"
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   FontWeight="SemiBold" Margin="3,4,3,5"
+                                                   TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -898,6 +902,48 @@
                         </StackPanel>
                     </Grid>
 
+                    <StackPanel x:Name="GameUpdateControls" Margin="0,14,0,1"
+                                Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="GameUpdateStatusText"
+                                           Text="Checking for game updates..."
+                                           FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{StaticResource AccentBrush}"/>
+                                <TextBlock Text="Keeps mods and settings. Previous files retained for rollback."
+                                           FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                        VerticalAlignment="Center" Margin="12,0,0,0">
+                                <Button x:Name="GameUpdateCheckButton" Content="Check for updates"
+                                        Style="{StaticResource PillButton}"
+                                        MinHeight="35" Padding="11,7" Margin="0,0,7,0"
+                                        Click="CheckGameUpdates_Click"/>
+                                <Button x:Name="GameRollbackButton" Content="Rollback"
+                                        Style="{StaticResource PillButton}"
+                                        Visibility="Collapsed"
+                                        MinHeight="35" Padding="11,7" Margin="0,0,7,0"
+                                        Click="RollbackGame_Click"/>
+                                <Button x:Name="GameUpdateButton" Content="Update game"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Visibility="Collapsed"
+                                        MinHeight="35" Padding="11,7" Click="UpdateGame_Click"/>
+                                <Button x:Name="GameUpdateCancelButton" Content="Cancel"
+                                        Style="{StaticResource PillButton}"
+                                        Visibility="Collapsed"
+                                        MinHeight="35" Padding="11,7"
+                                        Click="CancelGameUpdate_Click"/>
+                            </StackPanel>
+                        </Grid>
+                        <ProgressBar x:Name="GameUpdateProgress" Maximum="100"
+                                     Height="4" Visibility="Collapsed" Margin="0,12,0,0"
+                                     Foreground="{StaticResource AccentBrush}"/>
+                    </StackPanel>
                     <TextBlock x:Name="SelectedInstancePathText" Visibility="Collapsed"/>
                     <TextBlock x:Name="SelectedInstanceWarning"
                                FontSize="12" Foreground="#F0C79C"
