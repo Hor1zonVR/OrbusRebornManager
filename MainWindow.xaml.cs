@@ -598,6 +598,13 @@ public partial class MainWindow : Window
 
         GameInstance? target;
         string? game = ModBrowseGameOrNull();
+        if (_modBrowseInstancePath != null && game == null)
+        {
+            MessageBox.Show(this,
+                "The instance you opened Mods from is no longer available. Return to the Library and open a valid instance.",
+                "Pinned instance unavailable", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
         if (game == null)
         {
             // Global browsing ALWAYS asks, even if another instance was
@@ -663,9 +670,9 @@ public partial class MainWindow : Window
 
         string operation = installed == null ? "Install" : "Update";
         string warning = operation + " " + row.Name + " " + row.Release.TagName +
-            " into the following instance?\\n\\n" + target.Name + "\\n" + game + "\\n\\n" +
+            " into the following instance?\n\n" + target.Name + "\n" + game + "\n\n" +
             (installed == null
-                ? "BepInEx plugins can execute code inside the game. Install only trusted publishers.\\n" +
+                ? "BepInEx plugins can execute code inside the game. Install only trusted publishers.\n" +
                   (_settings.AutoUpdate ? "Automatic future mod updates are enabled." : "Automatic mod updates are disabled.")
                 : "Current mod version: " + installed.Version);
         if (MessageBox.Show(this, warning, "Confirm " + operation.ToLowerInvariant(),
