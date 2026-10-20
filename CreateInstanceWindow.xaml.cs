@@ -163,9 +163,9 @@ public partial class CreateInstanceWindow : Window
         }
         else if (EditionChoice.SelectedIndex == 1)
         {
-            EditionInfo.Text = "Downloads the latest PC release from FourOfSpades4/reborn-server. Mod loader compatibility is experimental.";
-            LoaderInfo.Text = "Experimental on Renewed: test BepInEx before installing camera mods.";
-            LoaderCheck.IsChecked = false;
+            EditionInfo.Text = "Downloads the latest PC release from FourOfSpades4/reborn-server. Mods depend on the installed release version.";
+            LoaderInfo.Text = "BepInEx and RebornCam were tested on Renewed v0.12.0-alpha. Newer releases may need retesting.";
+            LoaderCheck.IsChecked = true;
             if (!_importModList) NameText.Text = AvailableName("My Orbus Renewed");
         }
         else
