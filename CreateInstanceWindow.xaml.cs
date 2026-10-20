@@ -14,6 +14,8 @@ public partial class CreateInstanceWindow : Window
     private readonly InstanceStore _store = new();
     private CancellationTokenSource? _copyCancellation;
     private bool _busy;
+    private bool _importModList;
+    private bool _previewOnly;
 
     public GameInstance? CreatedInstance { get; private set; }
     public bool InstallLoader { get; private set; }
@@ -30,6 +32,18 @@ public partial class CreateInstanceWindow : Window
     {
         InitializeComponent();
         _manager = manager;
+        _importModList = importModList;
+        _previewOnly = previewOnly;
+        if (importModList)
+        {
+            EditionChoice.SelectedIndex = 2;
+            EditionChoice.IsEnabled = false;
+        }
+        else
+        {
+            EditionChoice.SelectedIndex = 0;
+        }
+        UpdateEditionChoice();
         SourcePathText.Text = sourcePath;
         StoragePathText.Text = string.IsNullOrWhiteSpace(storagePath)
             ? Path.Combine(
@@ -87,9 +101,43 @@ public partial class CreateInstanceWindow : Window
         };
     }
 
+    private void EditionChoice_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (EditionInfo == null || ExistingSourcePanel == null) return;
+        UpdateEditionChoice();
+    }
+
+    private void UpdateEditionChoice()
+    {
+        if (EditionInfo == null || ExistingSourcePanel == null || NameText == null) return;
+        bool existing = EditionChoice.SelectedIndex == 2;
+        ExistingSourcePanel.Visibility = existing ? Visibility.Visible : Visibility.Collapsed;
+        ExistingSourceHeading.Visibility = existing ? Visibility.Visible : Visibility.Collapsed;
+        if (existing)
+        {
+            EditionInfo.Text = "Copy a previously installed game. Your original folder is never modified.";
+            LoaderInfo.Text = "Install BepInEx only in your newly created copy.";
+        }
+        else if (EditionChoice.SelectedIndex == 1)
+        {
+            EditionInfo.Text = "Downloads the latest PC release from FourOfSpades4/reborn-server. Mod loader compatibility is experimental.";
+            LoaderInfo.Text = "Experimental on Renewed: test BepInEx before installing camera mods.";
+            LoaderCheck.IsChecked = false;
+            if (!_importModList) NameText.Text = "My Orbus Renewed";
+        }
+        else
+        {
+            EditionInfo.Text = "Downloads the latest official Community Edition PC release from GitHub.";
+            LoaderInfo.Text = "Install BepInEx only in your newly created instance.";
+            LoaderCheck.IsChecked = true;
+            if (!_importModList) NameText.Text = "My Orbus Community";
+        }
+    }
+
     private void BrowseSource_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
+        EditionChoice.SelectedIndex = 2;
         var dialog = new OpenFolderDialog
         {
             Title = "Choose the Reborn or Renewed installation to copy"
@@ -172,42 +220,57 @@ public partial class CreateInstanceWindow : Window
 
         try
         {
-            string source = _manager.NormalizeGamePath(SourcePathText.Text);
+            bool existing = EditionChoice.SelectedIndex == 2;
+            string source = existing ? _manager.NormalizeGamePath(SourcePathText.Text) : "";
             string parent = Path.GetFullPath(StoragePathText.Text);
             string name = NameText.Text.Trim();
 
             if (name.Length == 0)
                 throw new InvalidOperationException("Choose a name for your instance.");
 
-            // Never create an instance directory inside the source game folder.
-            // Validate before creating the parent to leave the source unchanged.
-            if (IsWithin(source, parent) ||
-                IsWithin(source, Path.Combine(parent, name)))
-            {
+            if (existing &&
+                (IsWithin(source, parent) || IsWithin(source, Path.Combine(parent, name))))
                 throw new InvalidOperationException(
                     "Instances cannot be stored inside the original OrbusVR game folder.");
-            }
 
             if (_manager.IsGameRunning())
-                throw new InvalidOperationException(
-                    "Close OrbusVR before creating a new instance.");
+                throw new InvalidOperationException("Close OrbusVR before creating a new instance.");
 
             _busy = true;
             CreateButton.IsEnabled = false;
+            EditionChoice.IsEnabled = false;
             CopyProgress.Visibility = Visibility.Visible;
-            CreationStatusText.Text = "Preparing your game copy...";
+            CreationStatusText.Text = existing ? "Preparing a clean game copy..." :
+                "Preparing to download the game from GitHub...";
             _copyCancellation = new CancellationTokenSource();
             Directory.CreateDirectory(parent);
 
-            var progress = new Progress<(int Done, int Total)>(p =>
+            GameInstance copy;
+            if (existing)
             {
-                CopyProgress.Value = p.Total == 0 ? 0 : p.Done * 100.0 / p.Total;
-                CreationStatusText.Text =
-                    $"Copying game files: {p.Done:N0} of {p.Total:N0}";
-            });
-
-            GameInstance copy = await _store.CreateCleanCopyAsync(
-                source, parent, name, progress, _copyCancellation.Token);
+                var progress = new Progress<(int Done, int Total)>(p =>
+                {
+                    CopyProgress.Value = p.Total == 0 ? 0 : p.Done * 100.0 / p.Total;
+                    CreationStatusText.Text = $"Copying game files: {p.Done:N0} of {p.Total:N0}";
+                });
+                copy = await _store.CreateCleanCopyAsync(
+                    source, parent, name, progress, _copyCancellation.Token);
+                copy.Edition = GameClientLayout.IsRenewed(source)
+                    ? GameReleaseDownloadService.Renewed : GameReleaseDownloadService.Community;
+            }
+            else
+            {
+                string edition = EditionChoice.SelectedIndex == 1
+                    ? GameReleaseDownloadService.Renewed
+                    : GameReleaseDownloadService.Community;
+                var progress = new Progress<GameReleaseDownloadService.Status>(p =>
+                {
+                    CopyProgress.Value = p.Percent;
+                    CreationStatusText.Text = p.Message;
+                });
+                copy = await GameReleaseDownloadService.InstallLatestAsync(
+                    edition, parent, name, progress, _copyCancellation.Token);
+            }
 
             var items = _store.Load();
             items.Add(copy);
@@ -234,6 +297,7 @@ public partial class CreateInstanceWindow : Window
             _copyCancellation?.Dispose();
             _copyCancellation = null;
             CreateButton.IsEnabled = true;
+            EditionChoice.IsEnabled = !_importModList && !_previewOnly;
             CancelButton.IsEnabled = true;
             CopyProgress.Visibility = Visibility.Collapsed;
         }
@@ -243,7 +307,7 @@ public partial class CreateInstanceWindow : Window
     {
         if (_busy)
         {
-            CreationStatusText.Text = "Cancelling copy...";
+            CreationStatusText.Text = "Cancelling operation...";
             _copyCancellation?.Cancel();
             CancelButton.IsEnabled = false;
             return;
@@ -259,6 +323,6 @@ public partial class CreateInstanceWindow : Window
         if (!_busy || CreatedInstance != null) return;
         e.Cancel = true;
         _copyCancellation?.Cancel();
-        CreationStatusText.Text = "Cancelling copy...";
+        CreationStatusText.Text = "Cancelling operation...";
     }
 }
