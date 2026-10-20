@@ -1,0 +1,44 @@
+name: One-time RebornManager v0.5.1 UI hotfix publication
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-v051-once.yml
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  publish-hotfix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for matching successful main Windows build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          state="pending"
+          for attempt in $(seq 1 60); do
+            state="$(gh run list --repo "$GITHUB_REPOSITORY"               --workflow build-windows.yml --branch main --limit 25               --json headSha,conclusion,event               | jq -r --arg sha "$GITHUB_SHA"                 '[.[] | select(.headSha == $sha and .event == "push")][0].conclusion // "pending"')"
+            if [ "$state" = "success" ]; then break; fi
+            if [ "$state" = "failure" ] || [ "$state" = "cancelled" ]; then
+              echo "::error::The Windows build did not pass. Publishing aborted."
+              exit 1
+            fi
+            sleep 15
+          done
+          if [ "$state" != "success" ]; then
+            echo "::error::Matching Windows build not successful: $state"
+            exit 1
+          fi
+      - name: Request public patch update
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run publish-update.yml             --repo "$GITHUB_REPOSITORY" --ref main --field bump=patch
+          echo "Public patch release requested after successful Windows build." >> "$GITHUB_STEP_SUMMARY"
