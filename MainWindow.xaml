@@ -80,6 +80,14 @@
                                 <TextBlock Text="Submit a mod" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
+                        <Button x:Name="NavCommunity" Style="{StaticResource SidebarButton}"
+                                Click="Community_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE902;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17" Margin="0,0,13,0"/>
+                                <TextBlock Text="Community &amp; Help" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="NavSettings" Style="{StaticResource SidebarButton}"
                                 Click="SimpleSettings_Click">
                             <StackPanel Orientation="Horizontal">
@@ -134,14 +142,35 @@
 
             <!-- Sparse, decorative Orbus-inspired sigils. These never accept input and
                  remain behind cards/controls; at 4–6% opacity they're atmosphere only. -->
-            <Canvas Grid.RowSpan="3" IsHitTestVisible="False"
-                    ClipToBounds="True" Opacity="0.055">
-                <ContentControl ContentTemplate="{StaticResource ArcaneRingMotif}"
-                                Width="330" Height="330" Canvas.Right="-75" Canvas.Top="-35"/>
-                <ContentControl ContentTemplate="{StaticResource ArcaneSpiralMotif}"
-                                Width="285" Height="285" Canvas.Left="80" Canvas.Bottom="-120"/>
-                <ContentControl ContentTemplate="{StaticResource ArcaneHexMotif}"
-                                Width="165" Height="165" Canvas.Right="90" Canvas.Bottom="85"/>
+            <!-- Traced from the player's real in-game rune pillar screenshots.
+                 Transparent vectors replace the generic fantasy motif shapes. -->
+            <Canvas Grid.RowSpan="3" IsHitTestVisible="False" ClipToBounds="True"
+                    Opacity="0.07">
+                <Viewbox Width="250" Height="230" Canvas.Right="-50" Canvas.Top="-15">
+                    <Canvas Width="110" Height="110">
+                        <Path Data="M 20,12 L 22,98 M 22,12 L 85,44 L 22,65 L 90,87"
+                              Stroke="#8CD2B2" StrokeThickness="7"
+                              StrokeLineJoin="Round" StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" Fill="Transparent"/>
+                    </Canvas>
+                </Viewbox>
+                <Viewbox Width="180" Height="170" Canvas.Left="35" Canvas.Bottom="-35">
+                    <Canvas Width="110" Height="110">
+                        <Path Data="M 12,30 L 89,10 L 43,59 C 94,42 106,100 52,102
+                                    C 34,102 26,97 21,90"
+                              Stroke="#8CD2B2" StrokeThickness="7"
+                              StrokeLineJoin="Round" StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" Fill="Transparent"/>
+                    </Canvas>
+                </Viewbox>
+                <Viewbox Width="155" Height="155" Canvas.Right="105" Canvas.Bottom="65">
+                    <Canvas Width="110" Height="110">
+                        <Path Data="M 55,12 L 91,44 L 43,81 L 13,61 Z M 14,94 L 42,79 L 77,99"
+                              Stroke="#8CD2B2" StrokeThickness="7"
+                              StrokeLineJoin="Round" StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" Fill="Transparent"/>
+                    </Canvas>
+                </Viewbox>
             </Canvas>
 
             <!-- Page heading -->
@@ -680,12 +709,18 @@
                     <StackPanel Margin="0,0,3,0">
                         <Border Background="{StaticResource CardBrush}"
                                 CornerRadius="14"
-                                Padding="12"
+                                Padding="13"
                                 Margin="0,0,0,12">
-                            <TextBlock x:Name="CatalogInfo"
-                                       Foreground="{StaticResource MutedBrush}"
-                                       FontSize="13"
-                                       Text="Approved community mods"/>
+                            <StackPanel>
+                                <TextBlock x:Name="ModBrowseScopeText"
+                                           Text="GLOBAL MOD LIBRARY · Choose an instance when installing"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="12" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="CatalogInfo"
+                                           Foreground="{StaticResource MutedBrush}"
+                                           FontSize="12" Margin="0,6,0,0"
+                                           Text="Approved community mods"/>
+                            </StackPanel>
                         </Border>
 
                         <ItemsControl ItemsSource="{Binding DiscoverMods}">
@@ -1143,6 +1178,78 @@
                     <TextBlock x:Name="SelectedModSummary" Visibility="Collapsed"/>
                 </Grid>
             </Grid>
+
+            <!-- COMMUNITY / SUPPORT: visible in primary navigation, not buried in Settings. -->
+            <ScrollViewer Grid.Row="1" x:Name="CommunityPanel" Visibility="Collapsed"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,5,10">
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Need help or want to contribute?" FontSize="19"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="Bug reports and community mods help us make Orbus Reborn better. These options open our public GitHub pages."
+                                       FontSize="13" TextWrapping="Wrap"
+                                       Foreground="{StaticResource MutedBrush}" Margin="0,8,0,14"/>
+                            <WrapPanel>
+                                <Button Content="Report a bug" Style="{StaticResource PrimaryButton}"
+                                        Tag="https://github.com/Hor1zonVR/OrbusRebornManager/issues/new"
+                                        Click="SupportLink_Click" Margin="0,0,9,8"/>
+                                <Button Content="Submit a mod" Style="{StaticResource PillButton}"
+                                        Click="SubmitMod_Click" Margin="0,0,9,8"/>
+                                <Button Content="Developer guide" Style="{StaticResource PillButton}"
+                                        Tag="https://github.com/Hor1zonVR/OrbusRebornManager/blob/main/docs/MODDING_GUIDE.md"
+                                        Click="SupportLink_Click" Margin="0,0,9,8"/>
+                                <Button Content="RebornManager GitHub" Style="{StaticResource PillButton}"
+                                        Tag="https://github.com/Hor1zonVR/OrbusRebornManager"
+                                        Click="SupportLink_Click" Margin="0,0,0,8"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Text="Frequently asked questions" FontSize="18" FontWeight="SemiBold"
+                               Margin="0,7,0,12"/>
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,9">
+                        <StackPanel>
+                            <TextBlock Text="Which version of OrbusVR should I choose?"
+                                       FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Community Edition is the original community client. Orbus Renewed is maintained by FourOfSpades and includes additional fixes and features. Both can be installed separately."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap" Margin="0,7,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,9">
+                        <StackPanel>
+                            <TextBlock Text="Where will the mod be installed?"
+                                       FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="From the main Mods page, RM asks you to choose an instance. From an instance's Browse mods button, installation targets that instance only. Server mods never install into a PC game."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap" Margin="0,7,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,9">
+                        <StackPanel>
+                            <TextBlock Text="Can I install a mod on both Community and Renewed?"
+                                       FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Mods must be compatible with the exact client build. BepInEx working does not guarantee every plugin works. Keep separate game instances and test experimental mods before sharing them."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap" Margin="0,7,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,9">
+                        <StackPanel>
+                            <TextBlock Text="How do I make my own mod?"
+                                       FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Use the appropriate Unity IL2CPP BepInEx setup, build against the selected game's generated interop references, publish a compiled release, and submit its GitHub repository for catalogue review. Read the developer guide for the full process."
+                                       FontSize="13" Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap" Margin="0,7,0,12"/>
+                            <Button Content="Read the modding guide" Style="{StaticResource PillButton}"
+                                    Tag="https://github.com/Hor1zonVR/OrbusRebornManager/blob/main/docs/MODDING_GUIDE.md"
+                                    Click="SupportLink_Click" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Text="Discord support links can be added when an official invite or support channel URL is provided."
+                               FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="5,7,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
 
             <!-- SETTINGS -->
             <ScrollViewer Grid.Row="1"

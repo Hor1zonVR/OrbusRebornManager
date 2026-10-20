@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace OrbusRebornManager;
 
@@ -114,6 +116,33 @@ public partial class CreateInstanceWindow : Window
         return name;
     }
 
+    private void EditionCard_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy || _importModList || _previewOnly || sender is not Button { Tag: string tag } ||
+            !int.TryParse(tag, out int edition))
+            return;
+        EditionChoice.SelectedIndex = edition;
+        UpdateEditionChoice();
+    }
+
+    private void UpdateEditionCardAppearance()
+    {
+        Button[] cards = { CommunityEditionCard, RenewedEditionCard, LocalEditionCard };
+        TextBlock[] indicators = { CommunityEditionIndicator, RenewedEditionIndicator, LocalEditionIndicator };
+        for (int i = 0; i < cards.Length; i++)
+        {
+            bool selected = EditionChoice.SelectedIndex == i;
+            cards[i].Background = new SolidColorBrush(
+                selected ? Color.FromRgb(39, 62, 58) : Color.FromRgb(37, 38, 45));
+            cards[i].BorderBrush = new SolidColorBrush(
+                selected ? Color.FromRgb(87, 217, 172) : Color.FromRgb(57, 59, 68));
+            cards[i].BorderThickness = new Thickness(selected ? 2 : 1);
+            indicators[i].Text = selected ? "✓" : "›";
+            indicators[i].Foreground = new SolidColorBrush(selected ? Color.FromRgb(87, 217, 172) : Color.FromRgb(184, 194, 207));
+            cards[i].IsEnabled = !_busy && !_previewOnly && !_importModList;
+        }
+    }
+
     private void EditionChoice_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (EditionInfo == null || ExistingSourcePanel == null) return;
@@ -123,6 +152,7 @@ public partial class CreateInstanceWindow : Window
     private void UpdateEditionChoice()
     {
         if (EditionInfo == null || ExistingSourcePanel == null || NameText == null) return;
+        UpdateEditionCardAppearance();
         bool existing = EditionChoice.SelectedIndex == 2;
         ExistingSourcePanel.Visibility = existing ? Visibility.Visible : Visibility.Collapsed;
         ExistingSourceHeading.Visibility = existing ? Visibility.Visible : Visibility.Collapsed;
@@ -252,6 +282,7 @@ public partial class CreateInstanceWindow : Window
             _busy = true;
             CreateButton.IsEnabled = false;
             EditionChoice.IsEnabled = false;
+            UpdateEditionCardAppearance();
             CopyProgress.Visibility = Visibility.Visible;
             CreationStatusText.Text = existing ? "Preparing a clean game copy..." :
                 "Preparing to download the game from GitHub...";
@@ -311,6 +342,7 @@ public partial class CreateInstanceWindow : Window
             _copyCancellation = null;
             CreateButton.IsEnabled = true;
             EditionChoice.IsEnabled = !_importModList && !_previewOnly;
+            UpdateEditionCardAppearance();
             CancelButton.IsEnabled = true;
             CopyProgress.Visibility = Visibility.Collapsed;
         }
