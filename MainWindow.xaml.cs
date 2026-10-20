@@ -194,6 +194,27 @@ public partial class MainWindow : Window
 
     private void Community_Click(object sender, RoutedEventArgs e) => ShowPanel("community");
 
+    private void SupportLink_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string url }) return;
+        try
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                uri.Scheme != Uri.UriSchemeHttps ||
+                uri.Host != "github.com" ||
+                !uri.AbsolutePath.StartsWith("/Hor1zonVR/OrbusRebornManager",
+                    StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Unexpected support URL.");
+            Process.Start(new ProcessStartInfo { FileName = uri.AbsoluteUri, UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Could not open support page",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+
     private string? ModBrowseGameOrNull()
     {
         if (string.IsNullOrWhiteSpace(_modBrowseInstancePath)) return null;
