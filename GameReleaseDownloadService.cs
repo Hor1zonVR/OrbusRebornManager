@@ -40,6 +40,129 @@ public static class GameReleaseDownloadService
 
     public readonly record struct Status(string Message, double Percent);
 
+    public sealed record GameReleaseInfo(
+        string Edition, string Version, string Url, string Sha256, long Size);
+
+    /// <summary>Read the source developer's latest published PC release.</summary>
+    public static async Task<GameReleaseInfo> GetLatestAsync(
+        string edition, CancellationToken cancellationToken = default)
+    {
+        var (owner, repo, assetName) = edition switch
+        {
+            Community => ("OrbusVR-Community", "reborn-server", "OrbusVR-Reborn-Community-PC.zip"),
+            Renewed => ("FourOfSpades4", "reborn-server", "OrbusVRRenewed.zip"),
+            _ => throw new InvalidOperationException("Unsupported edition.")
+        };
+
+        string api = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
+        using var response = await Client.GetAsync(api, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var release = await JsonSerializer.DeserializeAsync<Release>(stream, Json, cancellationToken)
+            ?? throw new InvalidOperationException("GitHub returned an empty release.");
+        if (release.Draft || string.IsNullOrWhiteSpace(release.Tag))
+            throw new InvalidOperationException("No published PC release was found.");
+
+        var matches = release.Assets.Where(x => x.Name.Equals(assetName, StringComparison.OrdinalIgnoreCase)).ToList();
+        if (matches.Count != 1)
+            throw new InvalidOperationException("The latest release has no unambiguous PC game archive.");
+
+        Asset asset = matches[0];
+        string hash = asset.Digest?.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) == true
+            ? asset.Digest[7..].ToLowerInvariant() : "";
+        if (asset.Size <= 0 || asset.Size > MaxArchiveBytes ||
+            !Regex.IsMatch(hash, "^[a-f0-9]{64}$"))
+            throw new InvalidOperationException("The published PC ZIP is missing a supported SHA-256 digest.");
+
+        if (!Uri.TryCreate(asset.Url, UriKind.Absolute, out var uri) ||
+            uri.Scheme != Uri.UriSchemeHttps || uri.Host != "github.com" ||
+            !uri.AbsolutePath.StartsWith($"/{owner}/{repo}/releases/download/", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Untrusted game release download address.");
+
+        return new GameReleaseInfo(edition, release.Tag, asset.Url, hash, asset.Size);
+    }
+
+    public static async Task<string> GetCachedArchiveAsync(
+        GameReleaseInfo release, IProgress<Status>? progress, CancellationToken cancellationToken)
+    {
+        if (!Regex.IsMatch(release.Sha256, "^[0-9a-fA-F]{64}$") ||
+            release.Size <= 0 || release.Size > MaxArchiveBytes ||
+            release.Edition is not (Community or Renewed))
+            throw new InvalidOperationException("Invalid game release metadata.");
+
+        string root = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "OrbusRebornManager", "GameDownloadCache");
+        Directory.CreateDirectory(root);
+        if ((File.GetAttributes(root) & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidOperationException("The game download cache must not be a directory link.");
+
+        string target = Path.Combine(root, release.Edition + "-" + release.Sha256.ToLowerInvariant() + ".zip");
+        if (File.Exists(target))
+        {
+            progress?.Report(new Status("Checking cached game archive...", 3));
+            if (await VerifyArchiveAsync(target, release.Size, release.Sha256, cancellationToken))
+            {
+                progress?.Report(new Status("Reusing verified game download (no new ZIP needed).", 65));
+                return target;
+            }
+            File.Delete(target);
+        }
+
+        string temporary = Path.Combine(root, ".download-" + Guid.NewGuid().ToString("N") + ".tmp");
+        try
+        {
+            await DownloadVerifiedAsync(release.Url, temporary, release.Size, release.Sha256,
+                progress, cancellationToken);
+            if (!File.Exists(target))
+                File.Move(temporary, target);
+            else
+                File.Delete(temporary);
+            return target;
+        }
+        finally
+        {
+            try { if (File.Exists(temporary)) File.Delete(temporary); }
+            catch { /* Leave only an incomplete cache file, never touch a game instance. */ }
+        }
+    }
+
+    private static async Task<bool> VerifyArchiveAsync(
+        string path, long expectedSize, string expectedHash, CancellationToken token)
+    {
+        if (new FileInfo(path).Length != expectedSize) return false;
+        await using var file = new FileStream(path, FileMode.Open, FileAccess.Read,
+            FileShare.Read, 1024 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        byte[] buffer = new byte[1024 * 1024];
+        int count;
+        while ((count = await file.ReadAsync(buffer, token)) != 0)
+            digest.AppendData(buffer, 0, count);
+        return Convert.ToHexString(digest.GetHashAndReset())
+            .Equals(expectedHash, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Safely unpack a cached release into a fresh staging directory.</summary>
+    public static async Task<string> ExtractReleaseAsync(
+        GameReleaseInfo release, string stagingFolder,
+        IProgress<Status>? progress, CancellationToken token)
+    {
+        string zip = await GetCachedArchiveAsync(release, progress, token);
+        string extracted = Path.Combine(stagingFolder, "extracted");
+        if (Directory.Exists(extracted))
+            throw new InvalidOperationException("Update staging folder already contains files.");
+        Directory.CreateDirectory(extracted);
+        await ExtractSafelyAsync(zip, extracted, progress, token);
+        token.ThrowIfCancellationRequested();
+        string root = FindGameRoot(extracted);
+        string exe = GameClientLayout.FindExecutable(root);
+        if (GameClientLayout.IsRenewed(root) != (release.Edition == Renewed))
+            throw new InvalidOperationException("Downloaded game edition doesn't match the selected instance.");
+        return root;
+    }
+
+
+
     private static HttpClient CreateClient()
     {
         var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
@@ -52,12 +175,9 @@ public static class GameReleaseDownloadService
         string edition, string destinationParent, string instanceName,
         IProgress<Status>? progress, CancellationToken cancellationToken)
     {
-        var (owner, repo, assetName) = edition switch
-        {
-            Community => ("OrbusVR-Community", "reborn-server", "OrbusVR-Reborn-Community-PC.zip"),
-            Renewed => ("FourOfSpades4", "reborn-server", "OrbusVRRenewed.zip"),
-            _ => throw new InvalidOperationException("Choose a supported game edition.")
-        };
+        var release = await GetLatestAsync(edition, cancellationToken);
+        long releaseSize = release.Size;
+        string releaseTag = release.Version;
 
         if (string.IsNullOrWhiteSpace(instanceName) ||
             !Regex.IsMatch(instanceName, @"^[a-zA-Z0-9][a-zA-Z0-9 _-]{0,49}$") ||
@@ -76,38 +196,11 @@ public static class GameReleaseDownloadService
         if ((File.GetAttributes(destinationParent) & FileAttributes.ReparsePoint) != 0)
             throw new InvalidOperationException("Choose a normal, non-linked instance storage directory.");
 
-        progress?.Report(new Status("Checking the developer's GitHub release...", 0));
-        string api = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
-        using var response = await Client.GetAsync(api, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        Release release = await JsonSerializer.DeserializeAsync<Release>(responseStream, Json, cancellationToken)
-            ?? throw new InvalidOperationException("GitHub returned an empty release.");
-        if (release.Draft || string.IsNullOrWhiteSpace(release.Tag))
-            throw new InvalidOperationException("No published game release was found.");
-
-        var matches = release.Assets.Where(a => a.Name.Equals(assetName, StringComparison.OrdinalIgnoreCase)).ToList();
-        if (matches.Count != 1)
-            throw new InvalidOperationException($"Release {release.Tag} does not contain exactly one {assetName}.");
-
-        Asset asset = matches[0];
-        if (asset.Size <= 0 || asset.Size > MaxArchiveBytes)
-            throw new InvalidOperationException("The game archive is missing or exceeds the safety size limit.");
-        string expectedHash = asset.Digest?.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) == true
-            ? asset.Digest[7..].ToLowerInvariant() : "";
-        if (!Regex.IsMatch(expectedHash, "^[a-f0-9]{64}$"))
-            throw new InvalidOperationException("GitHub did not provide a valid SHA-256 checksum for this release.");
-
-        if (!Uri.TryCreate(asset.Url, UriKind.Absolute, out var download) ||
-            download.Scheme != Uri.UriSchemeHttps || download.Host != "github.com" ||
-            !download.AbsolutePath.StartsWith($"/{owner}/{repo}/releases/download/", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Unexpected game download URL; refusing the file.");
-
         // The ZIP and extracted game coexist until the install is verified.
         try
         {
             var drive = new DriveInfo(Path.GetPathRoot(destinationParent)!);
-            long needed = checked(asset.Size * 3 + 256L * 1024 * 1024);
+            long needed = checked(releaseSize * 3 + 256L * 1024 * 1024);
             if (drive.IsReady && drive.AvailableFreeSpace < needed)
                 throw new InvalidOperationException("Not enough free disk space for the download, extraction and safety margin. Choose another drive.");
         }
@@ -115,18 +208,11 @@ public static class GameReleaseDownloadService
         catch (IOException) { /* Report a real write error during installation. */ }
 
         string working = Path.Combine(destinationParent, ".orbus-download-" + Guid.NewGuid().ToString("N"));
-        string archive = Path.Combine(working, "client.zip");
         string extracted = Path.Combine(working, "extracted");
         Directory.CreateDirectory(working);
         try
         {
-            await DownloadVerifiedAsync(asset.Url, archive, asset.Size, expectedHash, progress, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            Directory.CreateDirectory(extracted);
-            await ExtractSafelyAsync(archive, extracted, progress, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string source = FindGameRoot(extracted);
+            string source = await ExtractReleaseAsync(release, working, progress, cancellationToken);
             GameClientLayout.FindExecutable(source);
             if (Directory.Exists(destination) || File.Exists(destination))
                 throw new InvalidOperationException("Another folder with this instance name was created during download.");
@@ -141,7 +227,7 @@ public static class GameReleaseDownloadService
                 Path = destination,
                 CreatedByManager = true,
                 Edition = edition,
-                GameVersion = release.Tag
+                GameVersion = releaseTag
             };
         }
         finally

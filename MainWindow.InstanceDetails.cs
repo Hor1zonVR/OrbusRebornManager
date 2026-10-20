@@ -156,6 +156,7 @@ public partial class MainWindow
             SelectedInstanceWarning.Text = "";
             SelectedInstanceWarning.Visibility = Visibility.Collapsed;
             SelectedLoaderButton.Visibility = Visibility.Collapsed;
+            GameUpdateControls.Visibility = Visibility.Collapsed;
             return;
         }
 
@@ -186,9 +187,15 @@ public partial class MainWindow
                 Math.Clamp(instance?.IconOffsetY ?? 0, -80, 80)) * (53.0 / 137.0)));
         SelectedInstanceArtwork.RenderTransform = framing;
         SelectedInstanceName.Text = instance?.Name ?? Path.GetFileName(path);
-        SelectedInstanceMeta.Text = (instance?.CreatedByManager == true
-            ? "Modded copy" : "Existing installation") + "  ·  " +
-            (_allInstalledInstanceMods.Count == 1 ? "1 managed mod" :
+        string edition = instance?.Edition switch
+        {
+            GameReleaseDownloadService.Renewed => "Orbus Renewed",
+            GameReleaseDownloadService.Community => "Community Edition",
+            _ => instance?.CreatedByManager == true ? "Modded copy" : "Existing installation"
+        };
+        SelectedInstanceMeta.Text = edition +
+            (string.IsNullOrWhiteSpace(instance?.GameVersion) ? "" : " · " + instance.GameVersion) +
+            "  ·  " + (_allInstalledInstanceMods.Count == 1 ? "1 managed mod" :
             _allInstalledInstanceMods.Count + " managed mods");
         SelectedInstancePathText.Text = path;
         SelectedInstancePathText.ToolTip = path;
@@ -215,6 +222,7 @@ public partial class MainWindow
         SelectedModSummary.Text = missing == 0
             ? "Manage the plugins installed in this instance."
             : "Missing files are shown below; existing untracked files are never removed.";
+        RefreshGameUpdateControls();
     }
 
     private void SelectedOpenFolder_Click(object sender, RoutedEventArgs e)

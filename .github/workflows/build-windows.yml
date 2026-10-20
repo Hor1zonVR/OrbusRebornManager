@@ -43,6 +43,12 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
+      - name: Smoke-test game updates and rollback
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File tests/GameUpdateSmoke.ps1
+          if ($LASTEXITCODE -ne 0) { throw "Game update smoke test failed" }
+
       - name: Install pinned Velopack packager
         shell: pwsh
         run: |

@@ -64,6 +64,7 @@ public partial class MainWindow : Window
 
         RefreshInstanceCards();
         await RefreshCatalogAsync();
+        await CheckGameUpdatesAsync();
         if (_settings.CheckManagerUpdates)
             await CheckManagerUpdatesAsync();
     }
@@ -277,7 +278,9 @@ public partial class MainWindow : Window
 
                 bool selected = string.Equals(instance.Path, _settings.GamePath,
                     StringComparison.OrdinalIgnoreCase);
-                _allInstanceCards.Add(new InstanceCard(instance, count, status, selected));
+                _latestGameReleases.TryGetValue(instance.Edition, out var latestGame);
+                _allInstanceCards.Add(new InstanceCard(instance, count, status, selected,
+                    latestGame?.Version));
             }
         }
         catch (Exception ex)
@@ -866,7 +869,21 @@ public sealed class InstanceCard
 
     public GameInstance Instance { get; }
     public string Name => Instance.Name;
-    public string Kind => Instance.CreatedByManager ? "Modded copy" : "Existing installation";
+    public string Kind
+    {
+        get
+        {
+            string edition = Instance.Edition switch
+            {
+                GameReleaseDownloadService.Renewed => "Orbus Renewed",
+                GameReleaseDownloadService.Community => "Community Edition",
+                _ => Instance.CreatedByManager ? "Modded copy" : "Existing installation"
+            };
+            return string.IsNullOrWhiteSpace(Instance.GameVersion)
+                ? edition : edition + " · " + Instance.GameVersion;
+        }
+    }
+    public string GameUpdateLabel { get; }
     public string ModCount { get; }
     public string Readiness { get; }
     public bool IsSelected { get; }
@@ -879,9 +896,14 @@ public sealed class InstanceCard
     public double IconOffsetY => Instance.IconHasCrop ? 0 : Math.Clamp(Instance.IconOffsetY, -80, 80);
 
     public InstanceCard(GameInstance instance, string modCount,
-        string readiness, bool isSelected)
+        string readiness, bool isSelected, string? latestGameVersion = null)
     {
         Instance = instance;
+        GameUpdateLabel = instance.CreatedByManager &&
+            !string.IsNullOrWhiteSpace(instance.GameVersion) &&
+            !string.IsNullOrWhiteSpace(latestGameVersion) &&
+            !string.Equals(instance.GameVersion, latestGameVersion, StringComparison.OrdinalIgnoreCase)
+                ? "Update available → " + latestGameVersion : "";
         CustomIcon = InstanceArtwork.Cover(instance);
         ModCount = modCount;
         Readiness = readiness;
