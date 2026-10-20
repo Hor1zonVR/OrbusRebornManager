@@ -190,15 +190,12 @@ public sealed class ManagerService
         return (owner, name);
     }
 
-    public async Task<(GitHubRelease Release, GitHubAsset Asset)> GetLatestAsync(ModDefinition mod)
+    public async Task<(GitHubRelease Release, GitHubAsset Asset, bool Stale)> GetLatestAsync(ModDefinition mod, bool forceRefresh = false)
     {
         var repo = GetRepoParts(mod.Repository);
         string address = $"https://api.github.com/repos/{repo.Owner}/{repo.Repository}/releases/latest";
-        using var response = await Client.GetAsync(address);
-        if (response.StatusCode == HttpStatusCode.NotFound)
-            throw new InvalidOperationException("No published stable GitHub Release found. Upload a .dll or .zip release asset first.");
-        response.EnsureSuccessStatusCode();
-        var release = JsonSerializer.Deserialize<GitHubRelease>(await response.Content.ReadAsStringAsync(), Json)
+        var lookup = await GitHubReleaseLookup.GetAsync(Client, address, forceRefresh);
+        var release = JsonSerializer.Deserialize<GitHubRelease>(lookup.Json, Json)
             ?? throw new InvalidOperationException("Invalid GitHub release.");
         if (release.Draft || release.Prerelease || string.IsNullOrWhiteSpace(release.TagName))
             throw new InvalidOperationException("Only published stable releases are available.");
@@ -213,7 +210,7 @@ public sealed class ManagerService
         if (download.Scheme != "https" || download.Host != "github.com" ||
             !download.AbsolutePath.StartsWith($"/{repo.Owner}/{repo.Repository}/releases/download/", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Unexpected GitHub release download URL.");
-        return (release, asset);
+        return (release, asset, lookup.Stale);
     }
 
     /// <summary>
@@ -232,16 +229,9 @@ public sealed class ManagerService
 
         var repo = GetRepoParts(mod.Repository);
         string address = $"https://api.github.com/repos/{repo.Owner}/{repo.Repository}/releases/tags/{Uri.EscapeDataString(tag)}";
-        using var response = await Client.GetAsync(address);
-
-        if (response.StatusCode == HttpStatusCode.NotFound)
-            throw new InvalidOperationException("Version " + tag +
-                " is no longer published as a stable GitHub release.");
-
-        response.EnsureSuccessStatusCode();
-
+        var lookup = await GitHubReleaseLookup.GetAsync(Client, address);
         var release = JsonSerializer.Deserialize<GitHubRelease>(
-            await response.Content.ReadAsStringAsync(), Json)
+            lookup.Json, Json)
             ?? throw new InvalidOperationException("Invalid GitHub release.");
 
         if (release.Draft || release.Prerelease ||
