@@ -1,0 +1,49 @@
+name: Publish RebornManager v0.7.2 icon update once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-v072-once.yml
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  publish-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful Windows icon build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="pending"
+          for attempt in $(seq 1 60); do
+            result="$(gh run list --repo "$GITHUB_REPOSITORY" \
+              --workflow build-windows.yml --branch main --limit 35 \
+              --json headSha,conclusion,event \
+              | jq -r --arg sha "$GITHUB_SHA" \
+                '[.[] | select(.headSha == $sha and .event == "push")][0].conclusion // "pending"')"
+            if [ "$result" = "success" ]; then break; fi
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "::error::Windows build failed. Icon update release aborted."
+              exit 1
+            fi
+            sleep 15
+          done
+          if [ "$result" != "success" ]; then
+            echo "::error::Windows build not confirmed as successful: $result"
+            exit 1
+          fi
+      - name: Publish patch through official update workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run publish-update.yml --repo "$GITHUB_REPOSITORY" \
+            --ref main --field bump=patch
+          echo "Queued v0.7.2 mod icon release after passing Windows tests." >> "$GITHUB_STEP_SUMMARY"
