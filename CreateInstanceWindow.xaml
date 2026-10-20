@@ -28,8 +28,13 @@
                  It is decorative and never overlaps input hit targets. -->
             <Canvas Grid.Row="1" IsHitTestVisible="False" ClipToBounds="True"
                     Opacity="0.042">
-                <ContentControl ContentTemplate="{StaticResource ArcaneRingMotif}"
-                                Width="240" Height="240" Canvas.Top="-65" Canvas.Right="-45"/>
+                <Viewbox Width="215" Height="215" Canvas.Top="-45" Canvas.Right="-30">
+                    <Canvas Width="110" Height="110">
+                        <Path Data="M 20,12 L 22,98 M 22,12 L 85,44 L 22,65 L 90,87"
+                              Stroke="#8CD2B2" StrokeThickness="7"
+                              StrokeLineJoin="Round" Fill="Transparent"/>
+                    </Canvas>
+                </Viewbox>
             </Canvas>
 
             <Border Grid.Row="0" Background="#202127" BorderBrush="#393A43"
