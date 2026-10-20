@@ -43,6 +43,12 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
+      - name: Smoke-test GitHub release caching and throttling
+        shell: pwsh
+        run: |
+          dotnet run --project tests/GitHubReleaseLookupSmoke.csproj -c Release
+          if ($LASTEXITCODE -ne 0) { throw "GitHub release lookup smoke test failed" }
+
       - name: Smoke-test game updates and rollback
         shell: pwsh
         run: |
