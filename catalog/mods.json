@@ -38,6 +38,16 @@
       "assetPattern": "OrbusGoblinTimer.dll",
       "target": "client",
       "category": "Quality of Life"
+    },
+    {
+      "id": "orbusrebornmenu",
+      "name": "RebornMenu",
+      "author": "Hor1zonVR",
+      "description": "Experimental in-game VR parchment mod menu prototype. Wrist rune and controller pointer are being tested; generic configuration editing is still in development. Optional BepInEx client plugin.",
+      "repository": "https://github.com/Hor1zonVR/OrbusRebornMenu",
+      "assetPattern": "OrbusRebornMenu.dll",
+      "target": "client",
+      "category": "Utilities"
     }
   ]
 }
