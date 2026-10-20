@@ -113,9 +113,9 @@ public static class GameUpdateService
 
         cancellationToken.ThrowIfCancellationRequested();
         string swap = Path.Combine(parent, ".orbus-swap-" + Guid.NewGuid().ToString("N"));
-        bool movedCurrent = false, movedBackup = false;
         await Task.Run(() =>
         {
+            bool movedCurrent = false, movedBackup = false, completedSwap = false;
             try
             {
                 Directory.Move(game, swap);
@@ -123,14 +123,28 @@ public static class GameUpdateService
                 Directory.Move(backup, game);
                 movedBackup = true;
                 Directory.Move(swap, backup);
+                completedSwap = true;
                 SaveVersion(game, selected.BackupGameVersion, backup, selected.GameVersion);
             }
             catch
             {
-                if (movedBackup && Directory.Exists(game) && !Directory.Exists(backup))
-                    Directory.Move(game, backup);
-                if (movedCurrent && Directory.Exists(swap) && !Directory.Exists(game))
-                    Directory.Move(swap, game);
+                // If saving registry metadata failed after the full swap, put
+                // BOTH game folders back into their exact pre-rollback spots.
+                if (completedSwap && Directory.Exists(game) && Directory.Exists(backup))
+                {
+                    string recovery = Path.Combine(parent,
+                        ".orbus-recover-" + Guid.NewGuid().ToString("N"));
+                    Directory.Move(game, recovery);
+                    Directory.Move(backup, game);
+                    Directory.Move(recovery, backup);
+                }
+                else
+                {
+                    if (movedBackup && Directory.Exists(game) && !Directory.Exists(backup))
+                        Directory.Move(game, backup);
+                    if (movedCurrent && Directory.Exists(swap) && !Directory.Exists(game))
+                        Directory.Move(swap, game);
+                }
                 throw;
             }
         });
