@@ -53,7 +53,7 @@
       "id": "orbusabilitylabels",
       "name": "OrbusAbilityLabels",
       "author": "Hor1zonVR",
-      "description": "Experimental Bard and Musketeer ability orb diagnostics. Read-only Ctrl+Shift+L snapshot; visible ability labels pending mapping.",
+      "description": "Small floating VR ability labels. Experimental visual preview: Musketeer SH/RN/GR/BH above recognized orbs; Bard temporary instrument ID markers; editable BepInEx settings.",
       "repository": "https://github.com/Hor1zonVR/OrbusAbilityLabels",
       "assetPattern": "OrbusAbilityLabels.dll",
       "target": "client",
