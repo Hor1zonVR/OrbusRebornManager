@@ -1,3 +1,13 @@
+## GitHub release rate limits (v0.7.3)
+
+GitHub limits anonymous API calls (usually **60 per hour per public IP address**). RebornManager's mod and upstream-client update checks previously queried the releases API repeatedly, causing `403 (rate limit exceeded)` and obscuring newly published mods.
+
+Version 0.7.3 reduces requests using a local **15-minute cache**, GitHub ETag conditional requests and a one-minute guard on manual refresh. If a 403 limit occurs, RM tries a **read-only public release query using the GitHub CLI (`gh`) if already installed and authenticated**. It doesn't request, display or store a GitHub token, or change the GitHub account. Without `gh`, the UI labels previously verified cached release data as **last known** instead of claiming it just checked. Auto-updates are not executed from stale metadata. With no cache, RM shows the rate-limit explanation and suggested reset time.
+
+Release DLL downloads still come directly from curated GitHub release assets with existing URL, size and optional SHA-256 validation. The cache contains only public release metadata under `%LOCALAPPDATA%\OrbusRebornManager\ReleaseMetadataCache`.
+
+**If you're on RM v0.7.2 and see this:** wait for GitHub's limit to reset, then refresh. RebornCam's published DLL isn't broken; repeated refresh clicks won't help. RM v0.7.3 is intended to fix repeated release polling.
+
 # Orbus Reborn Manager
 
 A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**, including compatible **Orbus Renewed** PC clients.
