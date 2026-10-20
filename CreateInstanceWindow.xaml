@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Create instance"
-        Width="624" Height="670"
+        Width="624" Height="800"
         ResizeMode="NoResize" WindowStyle="None" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -63,14 +63,60 @@
                          FontSize="13.5" Padding="11,8" MinHeight="38"/>
 
                 <TextBlock Text="Game edition" FontSize="13" FontWeight="SemiBold" Margin="0,15,0,7"/>
-                <ComboBox x:Name="EditionChoice" SelectedIndex="0" SelectionChanged="EditionChoice_Changed"
-                          MinHeight="38" Padding="10,7" FontSize="13" FontWeight="SemiBold"
-                          Foreground="#17212B" Background="#E7F1FC" BorderBrush="#788DA4"
-                          ToolTip="Choose Community Edition, FourOfSpades Renewed, or an existing installation">
-                    <ComboBoxItem Foreground="#17212B" Content="OrbusVR Community Edition — download latest"/>
-                    <ComboBoxItem Foreground="#17212B" Content="Orbus Renewed by FourOfSpades — download latest"/>
-                    <ComboBoxItem Foreground="#17212B" Content="Use an existing game installation"/>
+                <!-- The native Windows ComboBox popup ignored theme colours.
+                     Use fully themed, keyboard-accessible cards instead. -->
+                <ComboBox x:Name="EditionChoice" Visibility="Collapsed"
+                          SelectedIndex="0" SelectionChanged="EditionChoice_Changed">
+                    <ComboBoxItem Content="Community"/>
+                    <ComboBoxItem Content="Renewed"/>
+                    <ComboBoxItem Content="Existing"/>
                 </ComboBox>
+                <StackPanel>
+                    <Button x:Name="CommunityEditionCard" Tag="0"
+                            Style="{StaticResource PillButton}" HorizontalContentAlignment="Stretch"
+                            Click="EditionCard_Click" Padding="14,10" Margin="0,0,0,6"
+                            Background="#273E3A" BorderBrush="#57D9AC">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock Text="✓" FontSize="17" FontWeight="Bold"
+                                       Foreground="#57D9AC" DockPanel.Dock="Right"
+                                       Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Text="Community Edition" FontSize="14"
+                                           FontWeight="SemiBold" Foreground="#F4F5F7"/>
+                                <TextBlock Text="Original community game · download latest"
+                                           FontSize="12" Foreground="#B8C2CF" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Button>
+                    <Button x:Name="RenewedEditionCard" Tag="1"
+                            Style="{StaticResource PillButton}" HorizontalContentAlignment="Stretch"
+                            Click="EditionCard_Click" Padding="14,10" Margin="0,0,0,6">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock Text="›" FontSize="20" Foreground="#B8C2CF"
+                                       DockPanel.Dock="Right" Margin="10,0,0,0"/>
+                            <StackPanel>
+                                <TextBlock Text="Orbus Renewed · FourOfSpades" FontSize="14"
+                                           FontWeight="SemiBold" Foreground="#F4F5F7"/>
+                                <TextBlock Text="Enhanced client · download latest"
+                                           FontSize="12" Foreground="#B8C2CF" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Button>
+                    <Button x:Name="LocalEditionCard" Tag="2"
+                            Style="{StaticResource PillButton}" HorizontalContentAlignment="Stretch"
+                            Click="EditionCard_Click" Padding="14,10">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock Text="›" FontSize="20" Foreground="#B8C2CF"
+                                       DockPanel.Dock="Right" Margin="10,0,0,0"/>
+                            <StackPanel>
+                                <TextBlock Text="Existing installation" FontSize="14"
+                                           FontWeight="SemiBold" Foreground="#F4F5F7"/>
+                                <TextBlock Text="Create a clean copy of your installed game"
+                                           FontSize="12" Foreground="#B8C2CF" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Button>
+                </StackPanel>
                 <TextBlock x:Name="EditionInfo" FontSize="12" Foreground="{StaticResource MutedBrush}"
                            TextWrapping="Wrap" Margin="0,7,0,0"
                            Text="RM will download the official PC game release directly from GitHub."/>
