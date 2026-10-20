@@ -60,9 +60,9 @@ public partial class CreateInstanceWindow : Window
         // Importing can suggest the exported name, but it must still follow
         // the safe local directory naming rules used by CreateCleanCopyAsync.
         string baseName = string.IsNullOrWhiteSpace(suggestedName)
-            ? (File.Exists(Path.Combine(sourcePath, "OrbusVR.exe"))
-                ? "Modded Orbus Renewed"
-                : "Modded Orbus")
+            ? (importModList
+                ? (File.Exists(Path.Combine(sourcePath, "OrbusVR.exe")) ? "Modded Orbus Renewed" : "Modded Orbus")
+                : "My Orbus Community")
             : System.Text.RegularExpressions.Regex.Replace(
                 suggestedName.Trim(), @"[^a-zA-Z0-9 _-]", "").Trim();
         if (baseName.Length == 0) baseName = "Imported Orbus";
@@ -101,6 +101,19 @@ public partial class CreateInstanceWindow : Window
         };
     }
 
+    private string AvailableName(string name)
+    {
+        if (_store == null || StoragePathText == null) return name;
+        var existing = _store.Load().Select(x => x.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        string original = name;
+        int number = 2;
+        while (existing.Contains(name) ||
+               Directory.Exists(Path.Combine(StoragePathText.Text, name)))
+            name = original + " " + number++;
+        return name;
+    }
+
     private void EditionChoice_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (EditionInfo == null || ExistingSourcePanel == null) return;
@@ -123,14 +136,14 @@ public partial class CreateInstanceWindow : Window
             EditionInfo.Text = "Downloads the latest PC release from FourOfSpades4/reborn-server. Mod loader compatibility is experimental.";
             LoaderInfo.Text = "Experimental on Renewed: test BepInEx before installing camera mods.";
             LoaderCheck.IsChecked = false;
-            if (!_importModList) NameText.Text = "My Orbus Renewed";
+            if (!_importModList) NameText.Text = AvailableName("My Orbus Renewed");
         }
         else
         {
             EditionInfo.Text = "Downloads the latest official Community Edition PC release from GitHub.";
             LoaderInfo.Text = "Install BepInEx only in your newly created instance.";
             LoaderCheck.IsChecked = true;
-            if (!_importModList) NameText.Text = "My Orbus Community";
+            if (!_importModList) NameText.Text = AvailableName("My Orbus Community");
         }
     }
 
