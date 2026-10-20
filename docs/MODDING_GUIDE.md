@@ -65,3 +65,11 @@ Mods already using standard `Config.Bind(...)` settings can be discovered by the
 **Important:** Your plugin must work normally even when RebornMenu is missing or disabled. RebornManager's own installation, mod management and game updating must also continue to work independently.
 
 See [RebornMenu's architecture](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/ARCHITECTURE.md), [developer example](https://github.com/Hor1zonVR/OrbusRebornMenu/tree/main/examples/CastMetrics) and [RM companion installation plan](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/RM_INTEGRATION.md).
+
+## RebornMenu: shared in-game VR configuration (planned)
+
+[RebornMenu](https://github.com/Hor1zonVR/OrbusRebornMenu) is a core companion planned for RebornManager. It is **not yet a working plugin**, and auto-installation with BepInEx has not shipped.
+
+Mod developers can keep using normal BepInEx `Config.Bind(...)` entries: the planned universal editor will discover them without requiring a RebornMenu SDK. An optional [declarative page manifest](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md) allows custom grouping, labels and widgets. Controller-driven HUD placement will require an explicit opt-in runtime provider, to be implemented and validated later.
+
+Mods and RebornManager itself must continue working normally when RebornMenu is missing or disabled. Read its [architecture](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/ARCHITECTURE.md), [roadmap](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/ROADMAP.md), and [RM installation contract](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/RM_INTEGRATION.md).
