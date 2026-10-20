@@ -48,6 +48,16 @@
       "assetPattern": "OrbusRebornMenu.dll",
       "target": "client",
       "category": "Utilities"
+    },
+    {
+      "id": "orbusabilitylabels",
+      "name": "OrbusAbilityLabels",
+      "author": "Hor1zonVR",
+      "description": "Experimental Bard and Musketeer ability orb diagnostics. Read-only Ctrl+Shift+L snapshot; visible ability labels pending mapping.",
+      "repository": "https://github.com/Hor1zonVR/OrbusAbilityLabels",
+      "assetPattern": "OrbusAbilityLabels.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
