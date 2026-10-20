@@ -17,6 +17,8 @@ public partial class MainWindow : Window
     private CatalogDocument _catalog = new();
     private readonly List<ModRow> _allDiscover = new();
     private bool _initialCatalogCheck = true;
+    // Null means global Mods browsing: no implicit last-used target.
+    private string? _modBrowseInstancePath;
     private int _jobs;
     private readonly InstanceStore _instanceStore = new();
     public ObservableCollection<InstanceCard> InstanceCards { get; } = new();
@@ -133,15 +135,19 @@ public partial class MainWindow : Window
         ServerPanel.Visibility = page == "server" ? Visibility.Visible : Visibility.Collapsed;
         InstalledPanel.Visibility = page == "installed" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = page == "settings" ? Visibility.Visible : Visibility.Collapsed;
+        CommunityPanel.Visibility = page == "community" ? Visibility.Visible : Visibility.Collapsed;
 
         (string header, string sub) = page switch
         {
             "instances" => ("Library", ""),
             "dashboard" => ("Instance Overview", "Your selected OrbusVR installation."),
-            "discover" => ("Client Mods", "Discover and install community client mods."),
+            "discover" => ("Client Mods", _modBrowseInstancePath == null
+                ? "Browse all mods. You choose an instance when you install."
+                : "Browsing mods for your selected instance."),
             "server" => ("Server Mods", "Find projects for community server operators."),
             "installed" => ("Installed Mods", "Manage mods for your selected instance."),
             "settings" => ("Settings", "Manage your preferences."),
+            "community" => ("Community & Support", "Guides, reporting bugs and contributing mods."),
             _ => ("My Instances", "")
         };
         PageHeading.Text = header;
@@ -158,15 +164,48 @@ public partial class MainWindow : Window
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavServer.Background = page == "server" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
+        NavCommunity.Background = page == "community" ?
+            new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavSettings.Background = page == "settings" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         if (page == "instances") RefreshInstanceCards();
         if (page == "installed") UpdateInstalledRows();
+        if (page == "discover")
+        {
+            ModBrowseScopeText.Text = _modBrowseInstancePath == null
+                ? "GLOBAL MOD LIBRARY  ·  Choose an instance when installing"
+                : "INSTALLING TO  ·  " + (_instanceStore.Load().FirstOrDefault(x =>
+                    string.Equals(x.Path, _modBrowseInstancePath, StringComparison.OrdinalIgnoreCase))?.Name
+                    ?? "Selected instance");
+        }
     }
 
     private void Instances_Click(object sender, RoutedEventArgs e) => ShowPanel("instances");
     private void Dashboard_Click(object sender, RoutedEventArgs e) => ShowPanel("dashboard");
-    private void Discover_Click(object sender, RoutedEventArgs e) => ShowPanel("discover");
+    private void Discover_Click(object sender, RoutedEventArgs e)
+    {
+        // Sidebar opens global browsing. The instance page's Browse mods buttons
+        // pin a specific installation, never relying on the last-used setting later.
+        _modBrowseInstancePath = ReferenceEquals(sender, NavBrowse)
+            ? null : GameOrWarn(false);
+        ShowPanel("discover");
+        UpdateReleaseStatuses();
+    }
+
+    private void Community_Click(object sender, RoutedEventArgs e) => ShowPanel("community");
+
+    private string? ModBrowseGameOrNull()
+    {
+        if (string.IsNullOrWhiteSpace(_modBrowseInstancePath)) return null;
+        try
+        {
+            if (!_instanceStore.Load().Any(x => string.Equals(
+                    x.Path, _modBrowseInstancePath, StringComparison.OrdinalIgnoreCase)))
+                return null;
+            return _service.NormalizeGamePath(_modBrowseInstancePath);
+        }
+        catch { return null; }
+    }
     private void ServerMods_Click(object sender, RoutedEventArgs e) => ShowPanel("server");
     private void Installed_Click(object sender, RoutedEventArgs e) => ShowPanel("installed");
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowPanel("settings");
@@ -438,7 +477,7 @@ public partial class MainWindow : Window
 
     private async Task CheckReleasesAsync(bool autoUpdate)
     {
-        string? game = GameOrWarn(false);
+        string? game = ModBrowseGameOrNull();
         foreach (var row in _allDiscover)
         {
             row.Working = true;
@@ -472,7 +511,7 @@ public partial class MainWindow : Window
 
     private void UpdateReleaseStatuses()
     {
-        string? game = GameOrWarn(false);
+        string? game = ModBrowseGameOrNull();
         foreach (var row in _allDiscover)
         {
             if (row.Release == null)
@@ -487,7 +526,12 @@ public partial class MainWindow : Window
                 try { mod = _service.FindInstalled(game, row.Definition.Id); }
                 catch { /* Dashboard surfaces state errors. */ }
             }
-            if (mod == null) { row.Status = "Ready to install"; row.Action = "Install"; }
+            if (game == null)
+            {
+                row.Status = "Choose an instance to install or update";
+                row.Action = "Choose instance";
+            }
+            else if (mod == null) { row.Status = "Ready to install to this instance"; row.Action = "Install"; }
             else if (mod.Local) { row.Status = "Local test build installed"; row.Action = "Local build"; }
             else if (mod.Version != row.Release.TagName) { row.Status = "Update available · installed " + mod.Version; row.Action = "Update"; }
             else { row.Status = mod.Enabled ? "Installed and up to date" : "Installed · disabled"; row.Action = "Installed"; }
@@ -525,34 +569,100 @@ public partial class MainWindow : Window
     private async void ModAction_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: ModRow row }) return;
-        string? game = GameOrWarn();
-        if (game == null) return;
         if (row.Release == null || row.Asset == null)
         {
             MessageBox.Show(this, "This mod has no matching stable GitHub release yet.", "Release unavailable");
             return;
         }
-        InstalledMod? installed = _service.FindInstalled(game, row.Definition.Id);
-        if (installed != null && installed.Version == row.Release.TagName) { ShowPanel("installed"); return; }
+
+        GameInstance? target;
+        string? game = ModBrowseGameOrNull();
+        if (game == null)
+        {
+            // Global browsing ALWAYS asks, even if another instance was
+            // selected or played earlier in this app session.
+            var registered = _instanceStore.Load()
+                .Where(x =>
+                {
+                    try { _service.NormalizeGamePath(x.Path); return true; }
+                    catch { return false; }
+                }).ToList();
+            if (registered.Count == 0)
+            {
+                MessageBox.Show(this, "No valid installations are registered. Create an OrbusVR instance first.",
+                    "Create an instance", MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowPanel("instances");
+                return;
+            }
+            var picker = new SelectModInstanceWindow(row.Name, registered) { Owner = this };
+            if (picker.ShowDialog() != true || picker.SelectedInstance == null) return;
+            target = picker.SelectedInstance;
+            try { game = _service.NormalizeGamePath(target.Path); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Instance unavailable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+        }
+        else
+        {
+            target = _instanceStore.Load().FirstOrDefault(x => string.Equals(
+                x.Path, game, StringComparison.OrdinalIgnoreCase));
+            if (target == null)
+            {
+                MessageBox.Show(this, "The selected instance is no longer registered.", "Instance unavailable");
+                return;
+            }
+        }
+
+        InstalledMod? installed;
+        try { installed = _service.FindInstalled(game, row.Definition.Id); }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Cannot read this instance", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        if (installed != null && installed.Version == row.Release.TagName)
+        {
+            SelectInstance(new InstanceCard(target, "", "", true));
+            ShowPanel("installed");
+            return;
+        }
         if (!_service.IsBepInExInstalled(game))
         {
-            MessageBox.Show(this, "Install BepInEx from the Dashboard first.", "Loader required");
-            ShowPanel("dashboard"); return;
+            if (MessageBox.Show(this,
+                "The mod loader is not installed in '" + target.Name + "'. Open its overview to prepare BepInEx?",
+                "BepInEx required", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                SelectInstance(new InstanceCard(target, "", "", true));
+                ShowPanel("dashboard");
+            }
+            return;
         }
-        string warning = installed == null ?
-            "Install " + row.Name + " " + row.Release.TagName + " from this approved GitHub release?\n\n" +
-            "BepInEx plugins can execute code inside your game. Only install mods whose publisher you trust.\n\n" +
-            (_settings.AutoUpdate ? "Automatic future release updates are ENABLED." : "Automatic updates are disabled.") :
-            "Update " + row.Name + " from " + installed.Version + " to " + row.Release.TagName + "?";
-        if (MessageBox.Show(this, warning, "Confirm mod installation", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+
+        string operation = installed == null ? "Install" : "Update";
+        string warning = operation + " " + row.Name + " " + row.Release.TagName +
+            " into the following instance?\\n\\n" + target.Name + "\\n" + game + "\\n\\n" +
+            (installed == null
+                ? "BepInEx plugins can execute code inside the game. Install only trusted publishers.\\n" +
+                  (_settings.AutoUpdate ? "Automatic future mod updates are enabled." : "Automatic mod updates are disabled.")
+                : "Current mod version: " + installed.Version);
+        if (MessageBox.Show(this, warning, "Confirm " + operation.ToLowerInvariant(),
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+
+        string pinnedGame = game; // Immutable installation target across await.
         await RunAsync(async () =>
         {
             row.Working = true;
             try
             {
-                await _service.InstallReleaseAsync(game, row.Definition, row.Release, row.Asset, m => Dispatcher.Invoke(() => Log(m)));
-                Log(row.Name + " installed successfully.");
-                UpdateDashboard(); UpdateReleaseStatuses(); UpdateInstalledRows();
+                await _service.InstallReleaseAsync(pinnedGame, row.Definition, row.Release, row.Asset,
+                    m => Dispatcher.Invoke(() => Log(m)));
+                Log(row.Name + " installed to " + target.Name + ".");
+                UpdateDashboard();
+                UpdateReleaseStatuses();
+                UpdateInstalledRows();
             }
             finally { row.Working = false; }
         });
