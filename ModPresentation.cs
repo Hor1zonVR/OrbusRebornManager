@@ -16,6 +16,7 @@ public static class ModPresentation
             "orbusrebornmenu" => "RebornMenu",
             "orbusrebornautomount" => "AutoMount",
             "castmetrics" => "CastMetrics",
+            "orbusabilitylabels" => "AbilityLabels",
             _ => string.IsNullOrWhiteSpace(publishedName) ? "Unnamed Mod" : publishedName.Trim()
         };
     }
