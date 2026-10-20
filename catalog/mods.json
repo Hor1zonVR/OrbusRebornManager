@@ -28,6 +28,16 @@
       "assetPattern": "CastMetrics.dll",
       "target": "client",
       "category": "Quality of Life"
+    },
+    {
+      "id": "orbusgoblintimer",
+      "name": "OrbusGoblinTimer",
+      "author": "Hor1zonVR",
+      "description": "Experimental Trickster Goblin countdown for Community and Spades. Uses observed spawn announcements or a manual sync; never tracks the goblin's location.",
+      "repository": "https://github.com/Hor1zonVR/OrbusGoblinTimer",
+      "assetPattern": "OrbusGoblinTimer.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
