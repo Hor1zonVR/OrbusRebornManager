@@ -147,4 +147,4 @@ One compact status line per instance: **BepInEx installed**, **RebornMenu ready 
 - Replacing native Orbus menus or changing the XR rig.
 - Requiring other mod developers to install an SDK for basic settings.
 
-See [Developer API / manifest contract](REBORNMENU_DEVELOPER_API.md) for integration details, examples and compatibility rules.
+See [Developer API / manifest contract](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md) for integration details, examples and compatibility rules.
