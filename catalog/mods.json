@@ -18,6 +18,16 @@
       "assetPattern": "OrbusQuestHelper.dll",
       "target": "client",
       "category": "Quality of Life"
+    },
+    {
+      "id": "castmetrics",
+      "name": "CastMetrics",
+      "author": "Hor1zonVR",
+      "description": "Experimental Runemage casts-per-second wand HUD for Community and Spades. Community cast event probe; Spades casting and DPS require validation. Configurable text scale and position.",
+      "repository": "https://github.com/Hor1zonVR/CastMetrics",
+      "assetPattern": "CastMetrics.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
