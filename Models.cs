@@ -133,6 +133,8 @@ public sealed class ModRow : INotifyPropertyChanged
 
     public GitHubRelease? Release { get; set; }
     public GitHubAsset? Asset { get; set; }
+    // True when latest release metadata came from an older cache during an API rate limit.
+    public bool ReleaseIsStale { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
