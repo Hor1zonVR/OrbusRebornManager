@@ -10,8 +10,11 @@ namespace OrbusRebornManager;
 /// </summary>
 public static class GameUpdateService
 {
+    // Doorstop's IL2CPP BepInEx bootstrap requires dotnet/coreclr.dll and
+    // the managed runtime libraries shipped with the original mod-loader.
+    // Preserve these alongside BepInEx and winhttp.dll across game updates.
     private static readonly string[] PreservedDirectories =
-        { "BepInEx", "OrbusRebornManager", "Mods", "UserData" };
+        { "BepInEx", "dotnet", "OrbusRebornManager", "Mods", "UserData" };
     private static readonly string[] PreservedFiles =
         { "winhttp.dll", "doorstop_config.ini", ".doorstop_version" };
 
