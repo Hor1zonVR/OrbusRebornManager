@@ -62,6 +62,12 @@ static class Smoke
             File.WriteAllText(Path.Combine(bepinex, "config", "camera.cfg"), "settings");
             File.WriteAllText(Path.Combine(bepinex, "interop", "old-generated.dll"), "stale");
             File.WriteAllText(Path.Combine(game, "winhttp.dll"), "loader");
+            // Regression: a Spades 1.13 -> 1.14 update previously lost the
+            // IL2CPP BepInEx runtime because only BepInEx and winhttp were kept.
+            string runtime = Path.Combine(game, "dotnet");
+            Directory.CreateDirectory(runtime);
+            File.WriteAllText(Path.Combine(runtime, "coreclr.dll"), "original-coreclr");
+            File.WriteAllText(Path.Combine(runtime, "System.Private.CoreLib.dll"), "original-corlib");
 
             var old = new GameInstance {
                 Name = "My Renewed", Path = game, CreatedByManager = true,
@@ -104,6 +110,10 @@ static class Smoke
             Assert(File.ReadAllText(Path.Combine(game, "BepInEx", "plugins", "RebornCam.dll")) == "plugin", "mod lost");
             Assert(File.ReadAllText(Path.Combine(game, "BepInEx", "config", "camera.cfg")) == "settings", "config lost");
             Assert(!File.Exists(Path.Combine(game, "BepInEx", "interop", "old-generated.dll")), "stale interop kept");
+            Assert(File.ReadAllText(Path.Combine(game, "dotnet", "coreclr.dll")) == "original-coreclr",
+                "update lost IL2CPP coreclr runtime; BepInEx would not start");
+            Assert(File.ReadAllText(Path.Combine(game, "dotnet", "System.Private.CoreLib.dll")) == "original-corlib",
+                "update lost managed runtime libraries");
             Assert(Directory.Exists(updated.BackupPath), "rollback folder not created");
             Assert(File.ReadAllText(Path.Combine(updated.BackupPath, "OrbusVR.exe")) == "v1", "backup incorrect");
 
@@ -112,11 +122,15 @@ static class Smoke
             Assert(restored.GameVersion == "v1", "rollback version not recorded");
             Assert(File.ReadAllText(Path.Combine(game, "OrbusVR.exe")) == "v1", "rollback failed");
             Assert(File.ReadAllText(Path.Combine(game, "BepInEx", "interop", "old-generated.dll")) == "stale", "original not restored");
+            Assert(File.ReadAllText(Path.Combine(game, "dotnet", "coreclr.dll")) == "original-coreclr",
+                "rollback lost IL2CPP runtime");
             Assert(File.ReadAllText(Path.Combine(restored.BackupPath, "OrbusVR.exe")) == "v2", "newer build lost");
 
             await GameUpdateService.RollbackAsync(restored);
             Assert(store.Load().Single().GameVersion == "v2", "redo version not recorded");
-            Console.WriteLine("PASS: cancellation, SHA-256 cache, preserved mods/config, interop regeneration, update and two-way rollback");
+            Assert(File.ReadAllText(Path.Combine(game, "dotnet", "coreclr.dll")) == "original-coreclr",
+                "reapply lost IL2CPP runtime");
+            Console.WriteLine("PASS: cancellation, SHA-256 cache, preserved mods/config/dotnet runtime, interop regeneration, update and two-way rollback");
         }
         finally
         {
