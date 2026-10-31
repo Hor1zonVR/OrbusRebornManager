@@ -30,16 +30,6 @@
       "category": "Quality of Life"
     },
     {
-      "id": "orbusgoblintimer",
-      "name": "OrbusGoblinTimer",
-      "author": "Hor1zonVR",
-      "description": "Experimental Trickster Goblin countdown for Community and Spades. Uses observed spawn announcements or a manual sync; never tracks the goblin's location.",
-      "repository": "https://github.com/Hor1zonVR/OrbusGoblinTimer",
-      "assetPattern": "OrbusGoblinTimer.dll",
-      "target": "client",
-      "category": "Quality of Life"
-    },
-    {
       "id": "orbusrebornmenu",
       "name": "RebornMenu",
       "author": "Hor1zonVR",
@@ -56,16 +46,6 @@
       "description": "Readable floating Bard and Musketeer ability abbreviations. Bright white, higher-contrast labels with improved VR text size; eight verified Bard mesh mappings and optional debug inspector (off by default).",
       "repository": "https://github.com/Hor1zonVR/OrbusAbilityLabels",
       "assetPattern": "OrbusAbilityLabels.dll",
-      "target": "client",
-      "category": "Quality of Life"
-    },
-    {
-      "id": "orbuspaladinrangefix",
-      "name": "OrbusPaladinRangeFix",
-      "author": "Hor1zonVR",
-      "description": "Experimental read-only Paladin hammer teleport and mount/combat diagnostics. Captures local rig and nearby mechanic objects with F8/F9/F10/F11; does not yet change teleport or summoning.",
-      "repository": "https://github.com/Hor1zonVR/OrbusPaladinRangeFix",
-      "assetPattern": "OrbusPaladinRangeFix.dll",
       "target": "client",
       "category": "Quality of Life"
     }
