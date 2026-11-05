@@ -43,7 +43,7 @@
       "id": "orbusweaponadjustments",
       "name": "OrbusWeaponAdjustments",
       "author": "Hor1zonVR",
-      "description": "Experimental native Orbus Weapon Presets interface beneath Adjust Weapon Grip. Per-class named Save/Load, protected original-grip import, backups, recovery Trash and confirmation before deletion. First live testing stage; existing diagnostics retained.",
+      "description": "Class-specific named weapon-grip presets with Save/Load/Rename/Delete, protected originals, backups and recoverable Trash. Dedicated in-game interface under RebornMenu > Mods (requires RebornMenu v0.2.11+).",
       "repository": "https://github.com/Hor1zonVR/OrbusWeaponAdjustments",
       "assetPattern": "OrbusWeaponAdjustments.dll",
       "target": "client",
