@@ -48,6 +48,16 @@
       "assetPattern": "OrbusWeaponAdjustments.dll",
       "target": "client",
       "category": "Quality of Life"
+    },
+    {
+      "id": "orbusautomount",
+      "name": "OrbusAutoMount",
+      "author": "Hor1zonVR",
+      "description": "Experimental client-side auto-mount after leaving combat. Invokes Orbus's normal equipped-mount summon once per combat exit; includes RebornMenu enable/delay controls and starts disabled for safety. First in-game validation pending.",
+      "repository": "https://github.com/Hor1zonVR/OrbusAutoMount",
+      "assetPattern": "OrbusAutoMount.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
