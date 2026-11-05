@@ -43,7 +43,7 @@
       "id": "orbusweaponadjustments",
       "name": "OrbusWeaponAdjustments",
       "author": "Hor1zonVR",
-      "description": "Experimental read-only diagnostics for Orbus weapon adjustment and native Settings UI. No presets, adjustment editing, or import/export yet. Manual snapshots use Ctrl+Alt+J, Ctrl+Alt+K, and Ctrl+Alt+U; may briefly hitch in VR.",
+      "description": "Experimental native Orbus Weapon Presets interface beneath Adjust Weapon Grip. Per-class named Save/Load, protected original-grip import, backups, recovery Trash and confirmation before deletion. First live testing stage; existing diagnostics retained.",
       "repository": "https://github.com/Hor1zonVR/OrbusWeaponAdjustments",
       "assetPattern": "OrbusWeaponAdjustments.dll",
       "target": "client",
