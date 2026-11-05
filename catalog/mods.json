@@ -38,26 +38,6 @@
       "assetPattern": "OrbusAbilityLabels.dll",
       "target": "client",
       "category": "Quality of Life"
-    },
-    {
-      "id": "orbusweaponadjustments",
-      "name": "OrbusWeaponAdjustments",
-      "author": "Hor1zonVR",
-      "description": "Class-specific named weapon-grip presets with Save/Load/Rename/Delete, protected originals, backups and recoverable Trash. Dedicated in-game interface under RebornMenu > Mods (requires RebornMenu v0.2.11+).",
-      "repository": "https://github.com/Hor1zonVR/OrbusWeaponAdjustments",
-      "assetPattern": "OrbusWeaponAdjustments.dll",
-      "target": "client",
-      "category": "Quality of Life"
-    },
-    {
-      "id": "orbusautomount",
-      "name": "OrbusAutoMount",
-      "author": "Hor1zonVR",
-      "description": "Experimental client-side auto-mount after leaving combat. Invokes Orbus's normal equipped-mount summon once per combat exit; includes RebornMenu enable/delay controls and starts disabled for safety. First in-game validation pending.",
-      "repository": "https://github.com/Hor1zonVR/OrbusAutoMount",
-      "assetPattern": "OrbusAutoMount.dll",
-      "target": "client",
-      "category": "Quality of Life"
     }
   ]
 }
