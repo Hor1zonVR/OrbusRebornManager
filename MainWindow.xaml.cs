@@ -36,7 +36,7 @@ public partial class MainWindow : Window
         DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
         CatalogUrlText.Text = _settings.CatalogUrl;
         AutoUpdatesCheck.IsChecked = _settings.AutoUpdate;
-        ServerPathText.Text = _settings.ServerPath;
+        InitializeServerLibrary();
         SidebarVersionText.Text = "v" + (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "unknown");
         InitializeManagerUpdates();
         ShowPanel("instances");
@@ -134,8 +134,8 @@ public partial class MainWindow : Window
         InstancesPanel.Visibility = page == "instances" ? Visibility.Visible : Visibility.Collapsed;
         DashboardPanel.Visibility = page == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         DiscoverPanel.Visibility = page == "discover" ? Visibility.Visible : Visibility.Collapsed;
-        ServerPanel.Visibility = page == "server" ? Visibility.Visible : Visibility.Collapsed;
-        ServerControlPanel.Visibility = page == "servers" ? Visibility.Visible : Visibility.Collapsed;
+        ServerLibraryPanel.Visibility = page == "servers" ? Visibility.Visible : Visibility.Collapsed;
+        ServerControlPanel.Visibility = page == "serverdetail" ? Visibility.Visible : Visibility.Collapsed;
         InstalledPanel.Visibility = page == "installed" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = page == "settings" ? Visibility.Visible : Visibility.Collapsed;
         CommunityPanel.Visibility = page == "community" ? Visibility.Visible : Visibility.Collapsed;
@@ -147,15 +147,15 @@ public partial class MainWindow : Window
             "discover" => ("Client Mods", _modBrowseInstancePath == null
                 ? "Browse all mods. You choose an instance when you install."
                 : "Browsing mods for your selected instance."),
-            "server" => ("Server Mods", "Install and manage server-side components."),
-            "servers" => ("Servers", "Start, stop and configure your own Orbus server."),
+            "serverdetail" => ("", ""),
+            "servers" => ("My Servers", "Choose a server to see its overview, mods and console."),
             "installed" => ("Installed Mods", "Manage mods for your selected instance."),
             "settings" => ("Settings", "Manage your preferences."),
             "community" => ("Community & Support", "Guides, reporting bugs and contributing mods."),
             _ => ("My Instances", "")
         };
         PageHeading.Text = header;
-        PageHeaderGrid.Visibility = page == "installed"
+        PageHeaderGrid.Visibility = page == "installed" || page == "serverdetail"
             ? Visibility.Collapsed : Visibility.Visible;
         PageSubtitle.Text = sub;
         PageSubtitle.Visibility = string.IsNullOrEmpty(sub) ?
@@ -166,9 +166,9 @@ public partial class MainWindow : Window
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavBrowse.Background = page == "discover" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
-        NavServers.Background = page == "servers" ?
+        NavServers.Background = page == "servers" || (page == "serverdetail" && _serverTab != "mods") ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
-        NavServer.Background = page == "server" ?
+        NavServer.Background = page == "serverdetail" && _serverTab == "mods" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavCommunity.Background = page == "community" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
@@ -233,11 +233,7 @@ public partial class MainWindow : Window
         }
         catch { return null; }
     }
-    private void ServerMods_Click(object sender, RoutedEventArgs e)
-    {
-        ShowPanel("server");
-        RefreshServerComponentRows();
-    }
+    private void ServerMods_Click(object sender, RoutedEventArgs e) => OpenServerModLibrary();
     private void Installed_Click(object sender, RoutedEventArgs e) => ShowPanel("installed");
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowPanel("settings");
 

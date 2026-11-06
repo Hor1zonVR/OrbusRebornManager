@@ -177,7 +177,7 @@ public partial class MainWindow
         }
     }
 
-    private async void DetectServer_Click(object sender, RoutedEventArgs e)
+    private void DetectServer_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -240,6 +240,7 @@ public partial class MainWindow
             ?? System.IO.Path.GetFileName(_selectedServerPath);
         SelectedServerPathText.Text = _selectedServerPath;
         _serverStatusKnown = false;
+        _serverRunning = false;
         SetServerStatusUnknown();
         ShowPanel("serverdetail");
         ShowServerTab(tab);
@@ -259,6 +260,8 @@ public partial class MainWindow
         ServerModsTabButton.Background = tab == "mods" ? selected : normal;
         ConsoleTabButton.Background = tab == "console" ? selected : normal;
         NavServer.Background = tab == "mods"
+            ? new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
+        NavServers.Background = tab != "mods"
             ? new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         if (tab == "mods") RefreshServerComponentRows();
         if (tab == "console") _ = RefreshConsoleAsync(force: true);
