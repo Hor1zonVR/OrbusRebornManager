@@ -102,10 +102,15 @@ public sealed class ManagerService
             if (!ids.Add(mod.Id)) throw new InvalidOperationException("Duplicate catalogue ID: " + mod.Id);
             if (string.IsNullOrWhiteSpace(mod.Name)) throw new InvalidOperationException("Unnamed mod: " + mod.Id);
             GetRepoParts(mod.Repository);
-            if (string.IsNullOrWhiteSpace(mod.AssetPattern) ||
-                (!mod.AssetPattern.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) &&
-                 !mod.AssetPattern.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)))
-                throw new InvalidOperationException("Mod asset pattern must end in .dll or .zip: " + mod.Id);
+            bool server = string.Equals(mod.Target, "server", StringComparison.OrdinalIgnoreCase);
+            if (!server && !string.Equals(mod.Target, "client", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Target must be client or server: " + mod.Id);
+            bool valid = server
+                ? mod.AssetPattern.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
+                : mod.AssetPattern.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
+                  mod.AssetPattern.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrWhiteSpace(mod.AssetPattern) || !valid)
+                throw new InvalidOperationException("Invalid " + mod.Target + " asset pattern for " + mod.Id);
         }
         return doc;
     }
@@ -214,8 +219,10 @@ public sealed class ManagerService
             ?? throw new InvalidOperationException("Invalid GitHub release.");
         if (release.Draft || release.Prerelease || string.IsNullOrWhiteSpace(release.TagName))
             throw new InvalidOperationException("Only published stable releases are available.");
+        bool serverTarget = string.Equals(mod.Target, "server", StringComparison.OrdinalIgnoreCase);
         var matches = release.Assets.Where(a =>
-            (a.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) &&
+            (serverTarget ? a.Name.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
+                : (a.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))) &&
             GlobMatches(mod.AssetPattern, a.Name)).ToList();
         if (matches.Count != 1)
             throw new InvalidOperationException($"Release {release.TagName} has {matches.Count} assets matching '{mod.AssetPattern}'. A curator must choose a unique asset pattern.");
