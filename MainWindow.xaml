@@ -526,13 +526,13 @@
                                            FontWeight="SemiBold"
                                            Margin="0,12,0,5"/>
 
-                                <TextBlock Text="BepInEx, installed separately for each game copy."
+                                <TextBlock Text="BepInEx + ModCore companion, installed for each game copy."
                                            FontSize="13"
                                            Foreground="{StaticResource MutedBrush}"
                                            TextWrapping="Wrap"/>
 
                                 <Button x:Name="InstallLoaderButton"
-                                        Content="Install BepInEx"
+                                        Content="Install BepInEx + ModCore"
                                         Click="InstallLoader_Click"
                                         Style="{StaticResource PrimaryButton}"
                                         HorizontalAlignment="Left"
@@ -901,7 +901,7 @@
                                     Click="SelectedOpenModsFolder_Click"
                                     MinHeight="36" Padding="12,8" Margin="0,0,9,0"/>
                             <Button x:Name="SelectedLoaderButton"
-                                    Content="Install BepInEx"
+                                    Content="Install BepInEx + ModCore"
                                     Style="{StaticResource PillButton}"
                                     Click="InstallLoader_Click"
                                     Visibility="Collapsed"

@@ -106,7 +106,10 @@ public partial class MainWindow
 
             if (window.InstallLoader && _service.IsBepInExInstalled(created.Path))
             {
-                Log("Instance ready. Launch OrbusVR once to finish preparing BepInEx.");
+                bool hasModCore = _service.FindInstalled(created.Path, ManagerService.ModCoreId)?.Enabled == true;
+                Log(hasModCore
+                    ? "Instance ready with BepInEx + ModCore. Launch OrbusVR once to finish setup."
+                    : "BepInEx ready. ModCore auto-install was skipped; install it later from Client Mods.");
             }
             else
             {

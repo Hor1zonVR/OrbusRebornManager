@@ -15,6 +15,21 @@ public sealed class ManagerService
 {
     public const string LoaderVersion = "6.0.0-be.788";
     public const string LoaderUrl = "https://builds.bepinex.dev/projects/bepinex_be/788/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.788%2B5b766a3.zip";
+    // ModCore is the former RebornMenu: keep its catalogue/registry ID and binary
+    // name stable so existing instances, config files and third-party plugins survive.
+    public const string ModCoreId = "orbusrebornmenu";
+    private static ModDefinition ModCoreCompanion => new()
+    {
+        Id = ModCoreId,
+        Name = "ModCore",
+        Author = "Hor1zonVR",
+        Description = "Universal in-game Mods settings tab and client ModCore foundation.",
+        Repository = "https://github.com/Hor1zonVR/OrbusRebornMenu",
+        AssetPattern = "OrbusRebornMenu.dll",
+        Target = "client",
+        Category = "Core"
+    };
+
     private const long MaxLoaderBytes = 160L * 1024 * 1024;
     private const long MaxModBytes = 100L * 1024 * 1024;
     private static readonly JsonSerializerOptions Json = new()
@@ -395,6 +410,57 @@ public sealed class ManagerService
             throw;
         }
         finally { try { File.Delete(archive); } catch { } }
+
+        // The loader is fully installed before the companion download starts.
+        // GitHub/rate-limit/network errors must never roll BepInEx back or
+        // pretend that a working game copy has failed to prepare.
+        try
+        {
+            await EnsureModCoreAsync(game, log);
+        }
+        catch (Exception ex)
+        {
+            log?.Invoke("BepInEx is ready, but ModCore automatic installation was skipped: " + ex.Message);
+            log?.Invoke("You can retry later from Client Mods > ModCore.");
+        }
+    }
+
+    /// <summary>
+    /// Install the published ModCore client companion into a freshly prepared
+    /// instance, without overwriting manual installs or user-disabled mods.
+    /// This uses the same validated release pipeline as ordinary RM mods.
+    /// </summary>
+    public async Task<bool> EnsureModCoreAsync(string game, Action<string>? log = null)
+    {
+        if (!IsBepInExInstalled(game))
+            throw new InvalidOperationException("Install BepInEx before ModCore.");
+        if (IsGameRunning())
+            throw new InvalidOperationException("Close OrbusVR before modifying plugins.");
+
+        InstalledMod? existing = FindInstalled(game, ModCoreId);
+        if (existing != null)
+        {
+            log?.Invoke(existing.Enabled
+                ? "ModCore is already managed by RebornManager; preserving its installed version."
+                : "ModCore was disabled by the player; preserving their choice.");
+            return existing.Enabled;
+        }
+
+        // Do not attempt a second copy when the user already installed the
+        // legacy DLL manually (outside RM's own managed-mod folder).
+        string plugins = Path.Combine(game, "BepInEx", "plugins");
+        if (Directory.Exists(plugins) &&
+            Directory.EnumerateFiles(plugins, "OrbusRebornMenu.dll", SearchOption.AllDirectories).Any())
+        {
+            log?.Invoke("Found an existing OrbusRebornMenu.dll. ModCore was not duplicated or overwritten.");
+            return true;
+        }
+
+        var (release, asset, stale) = await GetLatestAsync(ModCoreCompanion);
+        if (stale)
+            log?.Invoke("Using last verified ModCore release metadata (latest version could not be confirmed).");
+        await InstallReleaseAsync(game, ModCoreCompanion, release, asset, log);
+        return true;
     }
 
     private static string ModFolder(string game, string id, bool enabled)

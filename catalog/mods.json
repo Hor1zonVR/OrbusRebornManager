@@ -21,13 +21,13 @@
     },
     {
       "id": "orbusrebornmenu",
-      "name": "RebornMenu",
+      "name": "ModCore",
       "author": "Hor1zonVR",
-      "description": "Experimental in-game VR parchment mod menu prototype. Wrist rune and controller pointer are being tested; generic configuration editing is still in development. Optional BepInEx client plugin.",
+      "description": "Core client companion installed with BepInEx by RebornManager. Provides the native Orbus Mods settings tab, automatic BepInEx configuration discovery and custom mod pages. Formerly RebornMenu; existing settings and DLL compatibility preserved.",
       "repository": "https://github.com/Hor1zonVR/OrbusRebornMenu",
       "assetPattern": "OrbusRebornMenu.dll",
       "target": "client",
-      "category": "Utilities"
+      "category": "Core"
     },
     {
       "id": "orbusabilitylabels",

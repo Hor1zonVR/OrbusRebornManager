@@ -432,7 +432,7 @@ public partial class MainWindow : Window
         string? game = GameOrWarn();
         if (game == null) return;
         if (MessageBox.Show(this,
-            "Install official BepInEx Unity IL2CPP Windows x64 build 788 into this OrbusVR Reborn folder?\n\n" +
+            "Install official BepInEx Unity IL2CPP Windows x64 build 788 and the ModCore companion into this OrbusVR Reborn folder?\n\n" +
             game + "\n\nThe game must be closed. Files already present inside BepInEx are backed up before replacement.",
             "Install BepInEx", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         await RunAsync(async () =>
@@ -441,8 +441,13 @@ public partial class MainWindow : Window
             UpdateDashboard();
             UpdateInstalledRows();
             RefreshInstanceCards();
+            var modCore = _service.FindInstalled(game, ManagerService.ModCoreId);
+            string companionNotice = modCore?.Enabled == true
+                ? "ModCore was installed automatically, giving you the native Mods settings tab."
+                : "ModCore was not automatically installed. You can add it from Client Mods > ModCore.";
             MessageBox.Show(this,
-                "BepInEx installed! Launch OrbusVR once and let it generate its IL2CPP interop files. The first launch may be slow.",
+                "BepInEx installed! " + companionNotice +
+                "\n\nLaunch OrbusVR once to generate its IL2CPP interop files. The first launch may be slow.",
                 "Loader ready", MessageBoxButton.OK, MessageBoxImage.Information);
         });
     }

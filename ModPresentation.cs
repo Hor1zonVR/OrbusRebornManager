@@ -13,7 +13,7 @@ public static class ModPresentation
             "orbusreborncamera" => "RebornCam",
             "orbusquesthelper" => "QuestHelper",
             "orbusgoblintimer" => "GoblinTimer",
-            "orbusrebornmenu" => "RebornMenu",
+            "orbusrebornmenu" => "ModCore",
             "orbusrebornautomount" => "AutoMount",
             "castmetrics" => "CastMetrics",
             "orbusabilitylabels" => "AbilityLabels",

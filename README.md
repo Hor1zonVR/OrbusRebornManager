@@ -23,21 +23,18 @@ If you import an `.orbuspack`, first select the intended Reborn/Renewed base in 
 
 > RebornManager is under active development. Published releases contain a Windows installer and receive updates through the in-app updater.
 
-## Planned in-game RebornMenu
+## ModCore installed with BepInEx
 
-Our [OrbusRebornMenu](https://github.com/Hor1zonVR/OrbusRebornMenu) project will provide a shared **VR-first mod configuration editor**. Every loaded BepInEx plugin with normal `Config.Bind(...)` settings will get basic controls; mod authors can optionally define polished custom pages and safe HUD placement.
+[ModCore](https://github.com/Hor1zonVR/OrbusRebornMenu), previously named **RebornMenu**, is the universal in-game **Settings → Mods** page. RebornManager now attempts to install the **latest published stable ModCore DLL automatically whenever it installs BepInEx** for a newly prepared game instance. This applies to preparing an existing selected game, creating an instance with **Prepare for mods**, and importing a shared `.orbuspack` with its required loader setup.
 
-Once RebornMenu has a tested compiled release, RM will install it as an **optional, repairable core companion** when preparing BepInEx in an instance. **This auto-install feature has not shipped yet** — both RM and all other mods must continue working without it.
+- The existing registry ID `orbusrebornmenu`, published asset `OrbusRebornMenu.dll`, plugin GUID and user configuration path are retained for compatibility with existing mods and installations. The display name is **ModCore**.
+- ModCore is installed through RM's trusted GitHub release loader, including the usual asset checks; no script injection or alternate download mechanism.
+- A failed or unavailable companion download **does not undo BepInEx**. RM reports that ModCore needs manual retry from **Client Mods → ModCore → Install**.
+- Existing installations are not silently changed or force-upgraded; users can update/repair from Client Mods. A deliberately disabled ModCore and manually placed legacy DLL are respected.
+- Other BepInEx plugins still work without ModCore, although they will not have its shared Mods configuration page.
+- The future **server-side ModCore** is separate JavaScript server tooling; it is not part of this BepInEx client DLL.
 
-See [RebornMenu architecture and design](docs/REBORNMENU_SPEC.md) and [its developer contract](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md).
-
-## Planned RebornMenu core companion
-
-[OrbusRebornMenu](https://github.com/Hor1zonVR/OrbusRebornMenu) will provide a **universal VR mod settings menu**. Normal BepInEx config entries appear automatically; compatible mods can optionally provide custom pages, live previews and safe in-VR placement controls.
-
-Once the runtime is tested and released, RM will install RebornMenu automatically alongside BepInEx and offer a per-instance **repair/disable** option. **This automatic companion installation is planned and not available in current RM builds.** Neither RM nor ordinary mods will require RebornMenu to work.
-
-See [the architecture](docs/REBORNMENU_SPEC.md) and [developer contract](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md).
+See [ModCore developer contract](https://github.com/Hor1zonVR/OrbusRebornMenu/blob/main/docs/DEVELOPER_API.md) for optional custom pages and the existing fallback support for normal `Config.Bind(...)` settings.
 
 ## Install, uninstall, and update
 
