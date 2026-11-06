@@ -673,7 +673,7 @@
                                                         <TextBlock Text="{Binding Name}" FontSize="16"
                                                                    FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                                                         <TextBlock Text="{Binding Status}" Margin="0,6,0,0"
-                                                                   FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                                                   FontSize="12" Foreground="{Binding StatusColor}"
                                                                    TextTrimming="CharacterEllipsis"/>
                                                     </StackPanel>
                                                 </Grid>

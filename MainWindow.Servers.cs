@@ -25,8 +25,13 @@ public sealed class ServerCardRow : INotifyPropertyChanged
     public string Status
     {
         get => _status;
-        set { if (_status != value) { _status = value; Changed(); } }
+        set { if (_status != value) { _status = value; Changed(); Changed(nameof(StatusColor)); } }
     }
+    public Brush StatusColor => _status.StartsWith("● Running", StringComparison.Ordinal)
+        ? new SolidColorBrush(Color.FromRgb(100, 215, 169))
+        : _status.StartsWith("○ Stopped", StringComparison.Ordinal)
+            ? new SolidColorBrush(Color.FromRgb(220, 155, 151))
+            : new SolidColorBrush(Color.FromRgb(151, 165, 180));
     public event PropertyChangedEventHandler? PropertyChanged;
     private void Changed([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -57,6 +62,7 @@ public partial class MainWindow
     private bool _serverStatusKnown;
     private bool _serverRunning;
     private bool _consoleLoading;
+    private bool _serverCardRefreshBusy;
     private int _statusRequestNumber;
     private string? _selectedServerPath;
     private string _serverTab = "overview";
@@ -82,6 +88,8 @@ public partial class MainWindow
         {
             if (ServerControlPanel.Visibility == Visibility.Visible && !_serverBusy)
                 await RefreshServerStatusAsync();
+            else if (ServerLibraryPanel.Visibility == Visibility.Visible)
+                await RefreshServerCardsStatusAsync();
         };
         _statusRefreshTimer.Start();
         _consoleRefreshTimer.Tick += async (_, _) =>
@@ -165,16 +173,27 @@ public partial class MainWindow
 
     private async Task RefreshServerCardsStatusAsync()
     {
-        foreach (var card in ServerCards.ToArray())
+        if (_serverCardRefreshBusy) return;
+        _serverCardRefreshBusy = true;
+        try
         {
-            if (ServerLibraryPanel.Visibility != Visibility.Visible) return;
-            try
+            foreach (var card in ServerCards.ToArray())
             {
-                var status = await _serverHost.GetStatusAsync(card.Path);
-                card.Status = status.Running ? "● Running" : "○ Stopped";
+                if (ServerLibraryPanel.Visibility != Visibility.Visible) break;
+                try
+                {
+                    var status = await _serverHost.GetStatusAsync(card.Path);
+                    if (ServerCards.Contains(card))
+                        card.Status = status.Running ? "● Running" : "○ Stopped";
+                }
+                catch (Exception ex)
+                {
+                    if (ServerCards.Contains(card))
+                        card.Status = "Unavailable · " + ex.Message.Split('\n')[0];
+                }
             }
-            catch (Exception ex) { card.Status = "Unavailable · " + ex.Message.Split('\n')[0]; }
         }
+        finally { _serverCardRefreshBusy = false; }
     }
 
     private async void DetectServer_Click(object sender, RoutedEventArgs e)
