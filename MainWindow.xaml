@@ -37,7 +37,7 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="13,0,0,0">
                     <ContentControl ContentTemplate="{StaticResource OrbusMark}"
                                     Width="27" Height="27"/>
-                    <TextBlock Text="Orbus Reborn" FontFamily="{StaticResource HeadingFont}"
+                    <TextBlock Text="Orbus" FontFamily="{StaticResource HeadingFont}"
                                FontSize="14" FontWeight="SemiBold"
                                VerticalAlignment="Center" Margin="10,0,0,0"/>
                     <TextBlock Text="Manager" FontSize="13" VerticalAlignment="Center"

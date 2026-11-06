@@ -230,3 +230,16 @@ Server-side JavaScript executes with the server's privileges. Do not install unk
 ### Release migration
 
 The first server-management build should be tested through the repository's Windows CI before releasing a new installer or enabling auto-updates. Existing Velopack package identities must not be renamed without a dedicated migration.
+
+
+### Try the Server Manager preview without changing your installed app
+
+Open [Pull Request #10](https://github.com/Hor1zonVR/OrbusRebornManager/pull/10), open its successful **Build and release RebornManager** check, and download the **OrbusManager-Preview-win-x64** Actions artifact. Extract the ZIP and launch OrbusRebornManager.exe from the extracted folder. The executable name is deliberately retained for compatibility while the application UI is branded OrbusManager.
+
+If SmartScreen shows a publisher warning for this developer build, verify that you downloaded it from this repository's GitHub Actions workflow. The preview is not an automatically delivered update. Leave your existing installed app intact.
+
+For developers: source checkout build:
+
+    dotnet publish OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
+
+Run publish/win-x64/OrbusRebornManager.exe to preview.

@@ -76,6 +76,15 @@ jobs:
           New-Item -ItemType Directory -Force -Path distribution | Out-Null
           Copy-Item -LiteralPath $setup[0].FullName -Destination distribution/RebornManager-Setup.exe
 
+      # Test the unified UI without replacing the user's existing Velopack installation.
+      - name: Upload portable OrbusManager preview (pull requests)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OrbusManager-Preview-win-x64
+          path: publish/win-x64/
+          if-no-files-found: error
+
       - name: Upload installer test artifact
         uses: actions/upload-artifact@v4
         with:
