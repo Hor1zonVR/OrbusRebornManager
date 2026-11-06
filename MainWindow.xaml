@@ -614,124 +614,262 @@
             </ScrollViewer>
 
 
-            <!-- LOCAL SERVER CONTROL -->
-            <ScrollViewer Grid.Row="1" x:Name="ServerControlPanel"
-                          Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,3,0">
-                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
-                        <StackPanel>
-                            <TextBlock Text="LOCAL SERVER" Style="{StaticResource Eyebrow}"/>
-                            <TextBlock Text="Manage your Orbus Reborn server" FontSize="19"
-                                       FontWeight="SemiBold" Margin="0,9,0,7"/>
-                            <TextBlock Text="Connected through Docker Desktop. No browser, tokens or extra server plugins."
-                                       FontSize="13" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"
-                                       Margin="0,0,0,12"/>
-                            <TextBox x:Name="ServerPathText" ToolTip="Folder containing docker-compose.yml"/>
-                            <WrapPanel Margin="0,11,0,0">
-                                <Button Content="Detect running server" Click="DetectServer_Click"
-                                        Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
-                                <Button Content="Browse" Click="BrowseServerFolder_Click"
-                                        Style="{StaticResource PillButton}" Margin="0,0,8,8"/>
-                                <Button Content="Save path" Click="SaveServerPath_Click"
-                                        Style="{StaticResource PillButton}" Margin="0,0,8,8"/>
-                                <Button Content="Open folder" Click="OpenServerFolder_Click"
-                                        Style="{StaticResource PillButton}" Margin="0,0,8,8"/>
-                            </WrapPanel>
-                            <TextBlock x:Name="ServerPathHint"
-                                       Text="Detect your running server or choose the OrbusRebornServer folder."
-                                       Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
-                        <StackPanel>
-                            <TextBlock Text="SERVER STATUS" Style="{StaticResource Eyebrow}"/>
-                            <TextBlock x:Name="ServerStateText" Text="Not connected" FontSize="23"
-                                       FontWeight="SemiBold" Margin="0,10,0,6"/>
-                            <TextBlock x:Name="ServerSummaryText" Text="Connect to see Docker services."
-                                       Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="13"/>
-                            <WrapPanel Margin="0,18,0,0">
-                                <Button x:Name="StartServerButton" Content="Start server"
-                                        Click="StartServer_Click" Style="{StaticResource PrimaryButton}"
-                                        Margin="0,0,8,8"/>
-                                <Button x:Name="StopServerButton" Content="Stop server"
-                                        Click="StopServer_Click" Style="{StaticResource PillButton}"
-                                        Margin="0,0,8,8"/>
-                                <Button x:Name="RestartServerButton" Content="Restart game + API"
-                                        Click="RestartServer_Click" Style="{StaticResource PillButton}"
-                                        Margin="0,0,8,8"/>
-                                <Button x:Name="ReloadServerModsButton" Content="Reload server mods"
-                                        Click="ReloadServerMods_Click" Style="{StaticResource PillButton}"
-                                        Margin="0,0,8,8"/>
-                                <Button Content="Refresh status" Click="RefreshServer_Click"
-                                        Style="{StaticResource PillButton}" Margin="0,0,8,8"/>
-                            </WrapPanel>
-                            <TextBlock Text="Stop preserves characters and database volumes. Restarts disconnect players."
-                                       Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"
-                                       FontSize="12" Margin="0,5,0,0"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource PanelCard}">
-                        <StackPanel>
-                            <TextBlock Text="GAME + API LOGS" Style="{StaticResource Eyebrow}"/>
-                            <Button Content="Load latest logs" Click="ViewServerLogs_Click"
-                                    Style="{StaticResource PillButton}" HorizontalAlignment="Left"
-                                    Margin="0,11,0,9"/>
-                            <TextBox x:Name="ServerLogsText" FontFamily="Consolas" FontSize="11"
-                                     MinHeight="220" MaxHeight="330" AcceptsReturn="True"
-                                     TextWrapping="Wrap" IsReadOnly="True"
-                                     VerticalScrollBarVisibility="Auto"
-                                     Text="Click Load latest logs to view recent server output."/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </ScrollViewer>
-
-            <!-- SERVER CATALOGUE -->
-            <Grid Grid.Row="1" x:Name="ServerPanel" Visibility="Collapsed">
+            <!-- SERVER LIBRARY: instance-style server cards, not a configuration form -->
+            <Grid Grid.Row="1" x:Name="ServerLibraryPanel" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Margin="0,0,0,14">
+                <Grid Margin="0,0,0,18">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="ServerSearchText" VerticalContentAlignment="Center"
-                             ToolTip="Search server mods"
-                             TextChanged="ServerSearchText_Changed"/>
-                    <Button Grid.Column="1" Content="Refresh" Click="RefreshCatalog_Click"
-                            Style="{StaticResource PillButton}" Margin="10,0,0,0"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="YOUR SERVERS" Style="{StaticResource Eyebrow}"/>
+                        <TextBlock x:Name="ServerLibraryCount" Text="0 saved servers"
+                                   Margin="0,9,0,0" FontSize="13"
+                                   Foreground="{StaticResource MutedBrush}"/>
+                    </StackPanel>
+                    <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                        <Button Content="Detect server" Click="DetectServer_Click"
+                                Style="{StaticResource PillButton}" Margin="0,0,9,0"/>
+                        <Button Content="+  Add existing server"
+                                Click="BrowseServerFolder_Click"
+                                Style="{StaticResource PrimaryButton}"/>
+                    </WrapPanel>
                 </Grid>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,0,3,0">
-                        <Border Style="{StaticResource PanelCard}" Padding="15" Margin="0,0,0,13">
-                            <StackPanel>
-                                <TextBlock Text="For server operators" FontSize="15" FontWeight="SemiBold"/>
-                                <TextBlock Text="Server mods belong on a game server, not inside your local OrbusVR instance."
-                                           Foreground="{StaticResource MutedBrush}" FontSize="13"
-                                           TextWrapping="Wrap" Margin="0,7,0,0"/>
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding ServerCards}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource PanelCard}" Width="342" MinHeight="190"
+                                            Margin="0,0,15,15" Padding="18">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="44" Height="44"
+                                                            Background="#263B3C" CornerRadius="12">
+                                                        <TextBlock Text="&#xE753;" FontFamily="Segoe MDL2 Assets"
+                                                                   Foreground="{StaticResource AccentBrush}"
+                                                                   FontSize="23" VerticalAlignment="Center"
+                                                                   HorizontalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" Margin="12,2,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="16"
+                                                                   FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Status}" Margin="0,6,0,0"
+                                                                   FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                                <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis"
+                                                           FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                           Margin="0,17,0,0"/>
+                                            </StackPanel>
+                                            <DockPanel Grid.Row="1" Margin="0,15,0,0" LastChildFill="False">
+                                                <Button Content="Remove" DockPanel.Dock="Right"
+                                                        Tag="{Binding}" Click="RemoveServer_Click"
+                                                        Style="{StaticResource PillButton}"/>
+                                                <Button Content="Open server  →" DockPanel.Dock="Right"
+                                                        Tag="{Binding}" Click="ServerCard_Click"
+                                                        Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                                            </DockPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border x:Name="EmptyServerLibrary" Style="{StaticResource PanelCard}"
+                                Padding="32" Margin="0,4,0,0" Visibility="Collapsed">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="No servers added yet" FontSize="18"
+                                           FontWeight="SemiBold" TextAlignment="Center"/>
+                                <TextBlock Text="Import your running Community Server once. It will stay in your server library."
+                                           MaxWidth="420" TextWrapping="Wrap" FontSize="13"
+                                           TextAlignment="Center" Margin="0,10,0,18"
+                                           Foreground="{StaticResource MutedBrush}"/>
+                                <Button Content="+  Add existing server" Click="BrowseServerFolder_Click"
+                                        Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
-                        <Border Style="{StaticResource PanelCard}" Margin="0,0,0,13">
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- SELECTED SERVER: persistent header and Modrinth-style tabs -->
+            <Grid Grid.Row="1" x:Name="ServerControlPanel" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Style="{StaticResource PanelCard}" Margin="0,0,0,14" Padding="19">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <Button Content="←  All servers" Click="BackToServers_Click"
+                                    Style="{StaticResource PillButton}"
+                                    HorizontalAlignment="Left" Padding="11,6" Margin="0,0,0,13"/>
+                            <TextBlock x:Name="SelectedServerName" Text="Selected server"
+                                       FontSize="23" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="SelectedServerPathText" TextTrimming="CharacterEllipsis"
+                                       Margin="0,7,15,0" FontSize="11"
+                                       Foreground="{StaticResource MutedBrush}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                    Margin="16,0,0,0">
+                            <TextBlock x:Name="ServerStateText" Text="Checking status"
+                                       Foreground="{StaticResource AccentBrush}" FontSize="14"
+                                       FontWeight="SemiBold" HorizontalAlignment="Right"
+                                       Margin="0,0,0,12"/>
+                            <Button x:Name="StartStopServerButton" Content="▶  Start server"
+                                    Click="StartStopServer_Click" Style="{StaticResource PrimaryButton}"
+                                    Padding="20,12" IsEnabled="False" MinWidth="142"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border Grid.Row="1" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1"
+                        Margin="0,0,0,13">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="OverviewTabButton" Content="Overview" Click="ServerOverviewTab_Click"
+                                Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
+                        <Button x:Name="ServerModsTabButton" Content="Mods" Click="ServerModsTab_Click"
+                                Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
+                        <Button x:Name="ConsoleTabButton" Content="Console" Click="ServerConsoleTab_Click"
+                                Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- OVERVIEW: just the things needed while the server is running -->
+                <ScrollViewer Grid.Row="2" x:Name="ServerOverviewTab" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,4,0">
+                        <Border Style="{StaticResource PanelCard}" Margin="0,0,0,13" Padding="22">
                             <StackPanel>
-                                <TextBlock Text="INSTALLED SERVER COMPONENTS" Style="{StaticResource Eyebrow}"/>
-                                <TextBlock x:Name="ServerComponentPathText"
-                                           Text="Choose a server under My Servers."
-                                           Foreground="{StaticResource MutedBrush}"
-                                           TextWrapping="Wrap" FontSize="12" Margin="0,8,0,10"/>
-                                <WrapPanel Margin="0,0,0,10">
-                                    <Button Content="Import local .js" Click="ImportServerComponent_Click"
-                                            Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
-                                    <Button Content="Refresh" Click="RefreshServerComponents_Click"
-                                            Style="{StaticResource PillButton}" Margin="0,0,8,8"/>
-                                    <Button Content="Restart game to apply" Click="ReloadServerMods_Click"
-                                            Style="{StaticResource PillButton}" Margin="0,0,8,8"/>
+                                <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                                    <StackPanel DockPanel.Dock="Left">
+                                        <TextBlock Text="SERVER HEALTH" Style="{StaticResource Eyebrow}"/>
+                                        <TextBlock Text="Services" FontSize="17" FontWeight="SemiBold"
+                                                   Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                    <Button Content="Refresh" Click="RefreshServer_Click"
+                                            DockPanel.Dock="Right" VerticalAlignment="Center"
+                                            Style="{StaticResource PillButton}"/>
+                                </DockPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="{StaticResource CardAltBrush}" CornerRadius="10" Padding="16">
+                                        <StackPanel>
+                                            <TextBlock Text="GAME" Style="{StaticResource Eyebrow}"/>
+                                            <TextBlock x:Name="GameServiceText" Text="—" Margin="0,10,0,0"
+                                                       FontSize="21" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="2" Background="{StaticResource CardAltBrush}" CornerRadius="10" Padding="16">
+                                        <StackPanel>
+                                            <TextBlock Text="API" Style="{StaticResource Eyebrow}"/>
+                                            <TextBlock x:Name="ApiServiceText" Text="—" Margin="0,10,0,0"
+                                                       FontSize="21" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="4" Background="{StaticResource CardAltBrush}" CornerRadius="10" Padding="16">
+                                        <StackPanel>
+                                            <TextBlock Text="OTHER SERVICES" Style="{StaticResource Eyebrow}"/>
+                                            <TextBlock x:Name="OtherServicesText" Text="—" Margin="0,10,0,0"
+                                                       FontSize="21" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                                <TextBlock x:Name="ServerSummaryText" Margin="0,17,0,0"
+                                           FontSize="12" TextWrapping="Wrap"
+                                           Foreground="{StaticResource MutedBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource PanelCard}" Padding="22" Margin="0,0,0,13">
+                            <StackPanel>
+                                <TextBlock Text="QUICK ACTIONS" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock Text="Manage your world" FontSize="17" FontWeight="SemiBold"
+                                           Margin="0,8,0,15"/>
+                                <WrapPanel>
+                                    <Button x:Name="RestartServerButton" Content="↻  Restart game + API"
+                                            Click="RestartServer_Click" IsEnabled="False"
+                                            Style="{StaticResource PillButton}" Margin="0,0,10,10"/>
+                                    <Button x:Name="ReloadServerModsButton" Content="Reload mods"
+                                            Click="ReloadServerMods_Click" IsEnabled="False"
+                                            Style="{StaticResource PillButton}" Margin="0,0,10,10"/>
+                                    <Button Content="Open server folder" Click="OpenServerFolder_Click"
+                                            Style="{StaticResource PillButton}" Margin="0,0,10,10"/>
                                 </WrapPanel>
+                                <TextBlock Text="Restarting disconnects online players. Stop preserves your server database."
+                                           Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"
+                                           FontSize="12" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelCard}" Padding="18">
+                            <StackPanel>
+                                <TextBlock Text="RECENT ACTIVITY" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock x:Name="ServerActivityText" Text="No actions this session."
+                                           Foreground="{StaticResource MutedBrush}"
+                                           Margin="0,11,0,0" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- MODS: installed components and a compact curated catalogue -->
+                <ScrollViewer Grid.Row="2" x:Name="ServerPanel" Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,4,0">
+                        <Border Style="{StaticResource PanelCard}" Padding="20" Margin="0,0,0,13">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="INSTALLED COMPONENTS" Style="{StaticResource Eyebrow}"/>
+                                        <TextBlock Text="Server mods" FontSize="18" FontWeight="SemiBold"
+                                                   Margin="0,7,0,0"/>
+                                    </StackPanel>
+                                    <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <Button Content="+  Import .js" Click="ImportServerComponent_Click"
+                                                Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                                        <Button Content="Refresh" Click="RefreshServerComponents_Click"
+                                                Style="{StaticResource PillButton}"/>
+                                    </WrapPanel>
+                                </Grid>
+                                <TextBlock x:Name="ServerComponentPathText" TextTrimming="CharacterEllipsis"
+                                           Margin="0,12,0,15" FontSize="11"
+                                           Foreground="{StaticResource MutedBrush}"/>
                                 <ItemsControl ItemsSource="{Binding InstalledServerComponents}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{StaticResource CardAltBrush}" Padding="12"
+                                            <Border Background="{StaticResource CardAltBrush}" Padding="13"
                                                     CornerRadius="8" Margin="0,0,0,7">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
@@ -739,9 +877,9 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" FontSize="13"/>
                                                         <TextBlock Text="{Binding Status}" FontSize="11"
-                                                                   Foreground="{StaticResource MutedBrush}" Margin="0,4,0,0"/>
+                                                                   Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
                                                     </StackPanel>
                                                     <Button Grid.Column="1" Content="{Binding ActionLabel}"
                                                             Tag="{Binding}" Click="ToggleServerComponent_Click"
@@ -752,60 +890,130 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                                 <TextBlock x:Name="EmptyInstalledServerComponents"
-                                           Text="No local .js server components installed."
-                                           Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                <TextBlock Text="Only install trusted code. An enabled .js component runs on the server after restarting game."
-                                           TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}"
-                                           Margin="0,12,0,0" FontSize="12"/>
+                                           Text="No components installed yet. Import a trusted .js file to start."
+                                           Foreground="{StaticResource MutedBrush}" FontSize="12"
+                                           Margin="0,8,0,0"/>
+                                <DockPanel Margin="0,15,0,0">
+                                    <TextBlock Text="Mod changes apply after a server restart."
+                                               Foreground="{StaticResource MutedBrush}" FontSize="12"
+                                               VerticalAlignment="Center"/>
+                                    <Button Content="Restart game to apply" Click="ReloadServerMods_Click"
+                                            Style="{StaticResource PillButton}" DockPanel.Dock="Right"/>
+                                </DockPanel>
                             </StackPanel>
                         </Border>
-                        <TextBlock Text="CURATED SERVER MODS" Style="{StaticResource Eyebrow}"
-                                   Margin="0,4,0,10"/>
-                        <ItemsControl ItemsSource="{Binding ServerMods}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource PanelCard}" Margin="0,0,0,11">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
-                                                <TextBlock Text="{Binding Author}" FontSize="12"
-                                                           Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
-                                                <TextBlock Text="{Binding Description}" FontSize="13"
-                                                           Foreground="{StaticResource MutedBrush}"
-                                                           TextWrapping="Wrap" Margin="0,9,0,0"/>
-                                                <TextBlock Text="{Binding Version}" FontSize="12"
-                                                           Foreground="{StaticResource MutedBrush}" Margin="0,8,0,0"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                                                <Button Content="Install / Update" Tag="{Binding}"
-                                                        Click="InstallServerCatalogMod_Click"
-                                                        IsEnabled="{Binding CanClick}"
-                                                        Style="{StaticResource PrimaryButton}" Margin="0,0,0,7"/>
-                                                <Button Content="View source" Tag="{Binding}"
-                                                        Style="{StaticResource PillButton}"
-                                                        Click="OpenGithub_Click"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <Border x:Name="EmptyServerPanel" Style="{StaticResource PanelCard}"
-                                Padding="36" Visibility="Collapsed">
+                        <Border Style="{StaticResource PanelCard}" Padding="20">
                             <StackPanel>
-                                <TextBlock Text="No server mods found" FontSize="16"
-                                           FontWeight="SemiBold" TextAlignment="Center"/>
-                                <TextBlock Text="No reviewed server components published yet. You can import local scripts above."
-                                           FontSize="13" Foreground="{StaticResource MutedBrush}"
-                                           Margin="0,10,0,0" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="DISCOVER" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock Text="Server mod catalogue" FontSize="18" FontWeight="SemiBold"
+                                           Margin="0,8,0,13"/>
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="ServerSearchText" VerticalContentAlignment="Center"
+                                             ToolTip="Search approved server mods"
+                                             TextChanged="ServerSearchText_Changed"/>
+                                    <Button Grid.Column="1" Content="Refresh catalogue"
+                                            Click="RefreshCatalog_Click"
+                                            Style="{StaticResource PillButton}" Margin="10,0,0,0"/>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding ServerMods}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{StaticResource CardAltBrush}" CornerRadius="9"
+                                                    Padding="15" Margin="0,0,0,9">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding Author}" FontSize="11" Margin="0,4,0,0"
+                                                                   Foreground="{StaticResource MutedBrush}"/>
+                                                        <TextBlock Text="{Binding Description}" FontSize="12"
+                                                                   TextWrapping="Wrap" Margin="0,7,0,0"
+                                                                   Foreground="{StaticResource MutedBrush}"/>
+                                                        <TextBlock Text="{Binding Status}" FontSize="11"
+                                                                   TextWrapping="Wrap" Margin="0,8,0,0"
+                                                                   Foreground="{StaticResource MutedBrush}"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Margin="16,0,0,0"
+                                                                VerticalAlignment="Center">
+                                                        <Button Content="Install / Update" Tag="{Binding}"
+                                                                Click="InstallServerCatalogMod_Click"
+                                                                IsEnabled="{Binding CanClick}"
+                                                                Style="{StaticResource PrimaryButton}" Margin="0,0,0,7"/>
+                                                        <Button Content="View source" Tag="{Binding}"
+                                                                Style="{StaticResource PillButton}"
+                                                                Click="OpenGithub_Click"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Border x:Name="EmptyServerPanel" Background="{StaticResource CardAltBrush}"
+                                        CornerRadius="9" Padding="22" Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock Text="No approved server mods yet"
+                                                   FontSize="15" FontWeight="SemiBold"
+                                                   TextAlignment="Center"/>
+                                        <TextBlock Text="The curated catalogue will appear here when server components are published. You can still import your own scripts above."
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Margin="0,8,0,0" TextAlignment="Center"
+                                                   Foreground="{StaticResource MutedBrush}"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
+
+                <!-- CONSOLE: log tab, automatically refreshed only while open -->
+                <Grid Grid.Row="2" x:Name="ServerConsoleTab" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="SERVER CONSOLE" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="Game + API output" FontSize="17"
+                                       FontWeight="SemiBold" Margin="0,7,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <CheckBox x:Name="ConsoleAutoRefreshCheck" Content="Auto-refresh"
+                                      IsChecked="True" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                            <Button Content="Refresh" Click="ViewServerLogs_Click"
+                                    Style="{StaticResource PillButton}" Margin="0,0,8,0"/>
+                            <Button Content="Copy logs" Click="CopyServerLogs_Click"
+                                    Style="{StaticResource PillButton}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Border Grid.Row="1" Background="#111319" CornerRadius="10"
+                            BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                            Padding="12">
+                        <TextBox x:Name="ServerLogsText" FontFamily="Consolas" FontSize="12"
+                                 Background="#111319" BorderThickness="0" Padding="5"
+                                 Foreground="#C0D9D0" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="NoWrap"
+                                 HorizontalScrollBarVisibility="Auto"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Text="Console output appears here when you open this tab."/>
+                    </Border>
+                    <TextBlock Grid.Row="2" x:Name="ConsoleStatusText"
+                               Text="Showing recent game and API output."
+                               FontSize="11" Foreground="{StaticResource MutedBrush}"
+                               Margin="3,10,0,2"/>
+                </Grid>
             </Grid>
 
             <!-- BROWSE MODS -->
