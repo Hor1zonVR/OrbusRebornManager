@@ -43,7 +43,7 @@
       "id": "orbusweaponadjustments",
       "name": "OrbusWeaponAdjustments",
       "author": "Hor1zonVR",
-      "description": "In-game weapon grip adjustments and class-specific named presets with Share/Import codes, protected originals, backups, Trash and Undo. Custom settings page via RebornMenu.",
+      "description": "Class-specific weapon-grip presets with Save/Load/Rename, native adjustment, protected originals, backups and recovery Trash. Offline sharing is available in v0.3.0+; custom page in RebornMenu.",
       "repository": "https://github.com/Hor1zonVR/OrbusWeaponAdjustments",
       "assetPattern": "OrbusWeaponAdjustments.dll",
       "target": "client",
