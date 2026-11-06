@@ -243,3 +243,16 @@ For developers: source checkout build:
     dotnet publish OrbusRebornManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
 
 Run publish/win-x64/OrbusRebornManager.exe to preview.
+
+
+## My Servers and the Console tab
+
+Open **My Servers**, detect or add a local Orbus Community server, and open its card. The server detail has **Overview**, **Mods** and **Console** tabs.
+
+- Overview: one state-aware Start/Stop button, Docker service health, restart/reload actions and session activity. Destructive stop actions require confirmation; the database volume is never deleted.
+- Mods: installed .js components and approved catalogue entries live within the selected server; restart the game service to apply changes.
+- Console: last 180 timestamped lines from game/API, automatically refreshed every 3 seconds while the tab is visible. Turn off Auto-refresh to pause, or refresh/copy manually. It is a log viewer, not a shell.
+
+Previously saved ServerPath is migrated to the persistent server library automatically. Removing a server card forgets its path **without** deleting files or Docker data. Card statuses refresh while the library is visible.
+
+Test on your own Docker server, ideally without players connected before trying Stop. Build CI does not run a live Orbus server.

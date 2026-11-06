@@ -98,7 +98,10 @@ public sealed class ServerHostService
     public Task<string> StopAsync(string serverPath) => ComposeAsync(serverPath, 60000, "stop");
     public Task<string> RestartAsync(string serverPath) => ComposeAsync(serverPath, 90000, "restart", "game", "api");
     public Task<string> ReloadComponentsAsync(string serverPath) => ComposeAsync(serverPath, 60000, "restart", "game");
-    public Task<string> LogsAsync(string serverPath) => ComposeAsync(serverPath, 30000, "logs", "--no-color", "--tail", "90", "game", "api");
+    // Poll the latest lines rather than opening a long-running Docker stream. A console tab
+    // refreshes this on a short timer while it is visible; it never accumulates processes.
+    public Task<string> LogsAsync(string serverPath) => ComposeAsync(serverPath, 30000,
+        "logs", "--no-color", "--timestamps", "--tail", "180", "game", "api");
 
     private static ServerServiceStatus ParseStatus(JsonElement obj)
     {
