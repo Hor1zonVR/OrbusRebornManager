@@ -14,7 +14,7 @@ $version = [string]$project.Project.PropertyGroup.Version
 if ([string]::IsNullOrWhiteSpace($version)) { throw 'Project version is missing.' }
 
 $destination = Join-Path $PSScriptRoot 'publish\win-x64'
-Write-Host "Publishing RebornManager v$version..." -ForegroundColor Cyan
+Write-Host "Publishing OrbusManager v$version..." -ForegroundColor Cyan
 dotnet publish '.\OrbusRebornManager.csproj' -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o $destination
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed.' }
 
@@ -31,7 +31,7 @@ if (-not (Test-Path $vpk)) {
     if ($LASTEXITCODE -ne 0) { throw 'Could not install the Velopack packaging tool.' }
 }
 
-& $vpk pack --packId 'Hor1zonVR.OrbusRebornManager' --packVersion $version --packDir $destination --mainExe 'OrbusRebornManager.exe' --packTitle 'Orbus Reborn Manager' --icon 'Assets/OrbusRebornManager.ico' --channel win --runtime win-x64
+& $vpk pack --packId 'Hor1zonVR.OrbusRebornManager' --packVersion $version --packDir $destination --mainExe 'OrbusRebornManager.exe' --packTitle 'OrbusManager' --icon 'Assets/OrbusRebornManager.ico' --channel win --runtime win-x64
 if ($LASTEXITCODE -ne 0) { throw 'Velopack packaging failed.' }
 Write-Host 'Installer and update packages are in the Releases directory.' -ForegroundColor Green
 Write-Host 'Only properly tagged GitHub Releases are offered through the in-app updater.'

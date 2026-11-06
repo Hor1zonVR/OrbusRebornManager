@@ -190,3 +190,43 @@ Important security note: BepInEx plugins execute native or managed code with the
 - **OrbusRebornAutoMount** — automatically summon equipped mount after combat ends; to be developed separately.
 
 Releasing the camera and AutoMount requires **published compiled DLL assets**, not just source files, for the manager to offer one-click installs and updates.
+
+
+## OrbusManager: Servers and Server Mods (development branch)
+
+OrbusManager is the new product name for RebornManager. To protect existing installs, the executable assembly name, .NET namespace, LocalAppData settings directory, GitHub repository, Velopack package ID and updater URL are **unchanged** for now. Your client instances and installed mods remain in place.
+
+### Connect your existing server
+
+Open **My Servers** in the app. Click **Detect running server** to query Docker Compose for the running reborn-server project. If needed, click **Browse** and choose the folder containing the Orbus server's docker-compose.yml, content and mods directories. The app saves the server path.
+
+On Windows, for a typical installation this may be:
+
+    C:\Users\<windows-user>\OneDrive\Documents\OrbusRebornServer
+
+The page supports **Start server**, **Stop server**, **Restart game + API**, **Reload server mods**, service status, and recent game/API logs. All commands execute through Docker Compose locally. There is no browser dashboard or access token. Your database volume is not deleted by Stop.
+
+### Server mods
+
+**Server Mods** is separate from the existing **Client Mods** catalogue. You can import one trusted JavaScript .js component into the server's mods/components folder, enable/disable it, and restart the game process to apply changes. Disabled files are moved to .orbusmanager/disabled-components outside the loader's folder. Existing unmanaged .js files are displayed and are never overwritten by imports.
+
+The reviewed GitHub catalogue supports a **server** target with a **single .js** release asset. A curator can add server-only entries to catalog/mods.json using:
+
+    {
+      "id": "sample-server-component",
+      "name": "Sample Server Component",
+      "author": "Maintainer",
+      "description": "Short, reviewed description.",
+      "repository": "https://github.com/owner/repo",
+      "assetPattern": "SampleComponent.js",
+      "target": "server",
+      "category": "Server"
+    }
+
+This is a schema example, **not a published or available mod**. Only real, reviewed repositories should be added to the catalogue. The manager checks stable GitHub releases, verifies SHA-256 when provided by GitHub, backs up updates and rejects file collisions with manually installed components. Multi-file packages and ZIP-based server mods are deliberately unsupported pending a reviewed installation manifest.
+
+Server-side JavaScript executes with the server's privileges. Do not install unknown scripts. The manager cannot prove a community script is safe.
+
+### Release migration
+
+The first server-management build should be tested through the repository's Windows CI before releasing a new installer or enabling auto-updates. Existing Velopack package identities must not be renamed without a dedicated migration.
