@@ -16,6 +16,8 @@ public sealed class ManagerSettings
     public bool AutoUpdate { get; set; } = true;
     // Keep existing settings and update installation ID across rebrand.
     public string ServerPath { get; set; } = "";
+    // Saved server library. ServerPath remains the last selected entry for older installations.
+    public List<string> ManagedServerPaths { get; set; } = new();
     public bool CheckManagerUpdates { get; set; } = true;
     public string DefaultInstanceDirectory { get; set; } =
         System.IO.Path.Combine(
