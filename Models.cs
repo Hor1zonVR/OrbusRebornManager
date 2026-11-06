@@ -14,6 +14,8 @@ public sealed class ManagerSettings
         "https://raw.githubusercontent.com/Hor1zonVR/OrbusRebornManager/main/catalog/mods.json";
 
     public bool AutoUpdate { get; set; } = true;
+    // Keep existing settings and update installation ID across rebrand.
+    public string ServerPath { get; set; } = "";
     public bool CheckManagerUpdates { get; set; } = true;
     public string DefaultInstanceDirectory { get; set; } =
         System.IO.Path.Combine(

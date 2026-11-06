@@ -37,7 +37,7 @@ public partial class MainWindow
             }
             else
             {
-                ManagerUpdateStatusText.Text = "Updates are provided through the official RebornManager update feed.";
+                ManagerUpdateStatusText.Text = "Updates are provided through the official OrbusManager update feed.";
             }
         }
         catch (Exception ex)
@@ -55,7 +55,7 @@ public partial class MainWindow
 
         _managerUpdateBusy = true;
         CheckManagerUpdatesButton.IsEnabled = false;
-        ManagerUpdateStatusText.Text = "Checking for RebornManager updates...";
+        ManagerUpdateStatusText.Text = "Checking for OrbusManager updates...";
 
         try
         {
@@ -66,7 +66,7 @@ public partial class MainWindow
             {
                 UpdateActionButton.Visibility = Visibility.Collapsed;
                 ManagerUpdateStatusText.Text = "You're up to date.";
-                if (manual) Log("RebornManager is up to date.");
+                if (manual) Log("OrbusManager is up to date.");
             }
             else
             {
@@ -74,13 +74,13 @@ public partial class MainWindow
                 UpdateActionButton.Content = "Update & restart";
                 UpdateActionButton.Visibility = Visibility.Visible;
                 ManagerUpdateStatusText.Text = "Version " + version + " is available.";
-                Log("RebornManager v" + version + " is available.");
+                Log("OrbusManager v" + version + " is available.");
             }
         }
         catch (Exception ex)
         {
             ManagerUpdateStatusText.Text = "Could not check for updates: " + ex.Message;
-            if (manual) Log("RebornManager update check failed.");
+            if (manual) Log("OrbusManager update check failed.");
         }
         finally
         {
@@ -129,7 +129,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             ManagerUpdateStatusText.Text = "Update failed: " + ex.Message;
-            Log("RebornManager update failed.");
+            Log("OrbusManager update failed.");
         }
         finally
         {

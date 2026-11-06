@@ -36,6 +36,7 @@ public partial class MainWindow : Window
         DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
         CatalogUrlText.Text = _settings.CatalogUrl;
         AutoUpdatesCheck.IsChecked = _settings.AutoUpdate;
+        ServerPathText.Text = _settings.ServerPath;
         SidebarVersionText.Text = "v" + (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "unknown");
         InitializeManagerUpdates();
         ShowPanel("instances");
@@ -134,6 +135,7 @@ public partial class MainWindow : Window
         DashboardPanel.Visibility = page == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         DiscoverPanel.Visibility = page == "discover" ? Visibility.Visible : Visibility.Collapsed;
         ServerPanel.Visibility = page == "server" ? Visibility.Visible : Visibility.Collapsed;
+        ServerControlPanel.Visibility = page == "servers" ? Visibility.Visible : Visibility.Collapsed;
         InstalledPanel.Visibility = page == "installed" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = page == "settings" ? Visibility.Visible : Visibility.Collapsed;
         CommunityPanel.Visibility = page == "community" ? Visibility.Visible : Visibility.Collapsed;
@@ -145,7 +147,8 @@ public partial class MainWindow : Window
             "discover" => ("Client Mods", _modBrowseInstancePath == null
                 ? "Browse all mods. You choose an instance when you install."
                 : "Browsing mods for your selected instance."),
-            "server" => ("Server Mods", "Find projects for community server operators."),
+            "server" => ("Server Mods", "Install and manage server-side components."),
+            "servers" => ("Servers", "Start, stop and configure your own Orbus server."),
             "installed" => ("Installed Mods", "Manage mods for your selected instance."),
             "settings" => ("Settings", "Manage your preferences."),
             "community" => ("Community & Support", "Guides, reporting bugs and contributing mods."),
@@ -162,6 +165,8 @@ public partial class MainWindow : Window
         NavHome.Background = page == "instances" || page == "dashboard" || page == "installed" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavBrowse.Background = page == "discover" ?
+            new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
+        NavServers.Background = page == "servers" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         NavServer.Background = page == "server" ?
             new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
@@ -228,7 +233,11 @@ public partial class MainWindow : Window
         }
         catch { return null; }
     }
-    private void ServerMods_Click(object sender, RoutedEventArgs e) => ShowPanel("server");
+    private void ServerMods_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPanel("server");
+        RefreshServerComponentRows();
+    }
     private void Installed_Click(object sender, RoutedEventArgs e) => ShowPanel("installed");
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowPanel("settings");
 
