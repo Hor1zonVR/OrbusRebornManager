@@ -177,7 +177,7 @@ public partial class MainWindow
         }
     }
 
-    private void DetectServer_Click(object sender, RoutedEventArgs e)
+    private async void DetectServer_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -227,7 +227,11 @@ public partial class MainWindow
         RefreshServerCards();
     }
 
-    private void BackToServers_Click(object sender, RoutedEventArgs e) => ShowPanel("servers");
+    private async void BackToServers_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPanel("servers");
+        await RefreshServerCardsStatusAsync();
+    }
 
     private void OpenServerDetail(string path, string tab)
     {
@@ -358,6 +362,8 @@ public partial class MainWindow
             "Confirm server action", MessageBoxButton.YesNo,
             MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         SetServerBusy(true);
+        _serverStatusKnown = false;
+        UpdateServerActions();
         ServerStateText.Text = label + "...";
         ServerActivityText.Text = label + " in progress…";
         try
@@ -375,6 +381,7 @@ public partial class MainWindow
         }
         finally
         {
+            _serverStatusKnown = false;
             SetServerBusy(false);
             await RefreshServerStatusAsync();
         }

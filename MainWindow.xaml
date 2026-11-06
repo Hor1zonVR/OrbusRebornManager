@@ -893,7 +893,7 @@
                                            Text="No components installed yet. Import a trusted .js file to start."
                                            Foreground="{StaticResource MutedBrush}" FontSize="12"
                                            Margin="0,8,0,0"/>
-                                <DockPanel Margin="0,15,0,0">
+                                <DockPanel Margin="0,15,0,0" LastChildFill="False">
                                     <TextBlock Text="Mod changes apply after a server restart."
                                                Foreground="{StaticResource MutedBrush}" FontSize="12"
                                                VerticalAlignment="Center"/>
