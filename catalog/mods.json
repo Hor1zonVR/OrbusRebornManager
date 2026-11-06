@@ -38,6 +38,26 @@
       "assetPattern": "OrbusAbilityLabels.dll",
       "target": "client",
       "category": "Quality of Life"
+    },
+    {
+      "id": "orbusweaponadjustments",
+      "name": "OrbusWeaponAdjustments",
+      "author": "Hor1zonVR",
+      "description": "In-game weapon grip adjustments and class-specific named presets with Share/Import codes, protected originals, backups, Trash and Undo. Custom settings page via RebornMenu.",
+      "repository": "https://github.com/Hor1zonVR/OrbusWeaponAdjustments",
+      "assetPattern": "OrbusWeaponAdjustments.dll",
+      "target": "client",
+      "category": "Quality of Life"
+    },
+    {
+      "id": "orbusautomount",
+      "name": "OrbusAutoMount",
+      "author": "Hor1zonVR",
+      "description": "Automatically summons your currently equipped mount after leaving combat where mounting is allowed.",
+      "repository": "https://github.com/Hor1zonVR/OrbusAutoMount",
+      "assetPattern": "OrbusAutoMount.dll",
+      "target": "client",
+      "category": "Quality of Life"
     }
   ]
 }
