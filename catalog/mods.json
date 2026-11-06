@@ -53,7 +53,7 @@
       "id": "orbusautomount",
       "name": "OrbusAutoMount",
       "author": "Hor1zonVR",
-      "description": "Automatically summons your currently equipped mount after leaving combat where mounting is allowed.",
+      "description": "Experimental auto-mount using Orbus's normal equipped-mount summon after combat ends. Starts disabled by default, with enable and summon-delay settings available through RebornMenu.",
       "repository": "https://github.com/Hor1zonVR/OrbusAutoMount",
       "assetPattern": "OrbusAutoMount.dll",
       "target": "client",
