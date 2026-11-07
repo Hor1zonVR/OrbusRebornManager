@@ -27,20 +27,56 @@ public partial class MainWindow
     private const int ItemPageSize = 36;
     private const int InventoryPageSize = 40;
 
-    private void ChooseItemIcons_Click(object sender, RoutedEventArgs e)
+    private async void ChooseItemIcons_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = "Choose a folder with item PNG icons (names must match the Orbus item catalogue)"
+            Title = "Choose your local exported Orbus item icons (subfolders supported)"
         };
         if (dialog.ShowDialog(this) != true) return;
         _settings.ItemIconDirectory = dialog.FolderName;
         LocalItemArtwork.DirectoryPath = dialog.FolderName;
         _service.SaveSettings(_settings);
-        ItemIconFolderText.Text = "Using local PNGs from " + dialog.FolderName;
-        // WPF recomputes IconPath when rebinding these collections.
-        RefreshItemGrid();
-        RefreshInventoryPage();
+        await RefreshLocalIconIndexAsync();
+    }
+
+    private async Task RefreshLocalIconIndexAsync()
+    {
+        if (ItemIconFolderText == null) return;
+        string folder = LocalItemArtwork.DirectoryPath;
+        ItemIconFolderText.Text = "Searching exported icon PNGs, including subfolders…";
+        try
+        {
+            await Task.Run(LocalItemArtwork.RefreshIndex);
+            if (!folder.Equals(LocalItemArtwork.DirectoryPath, StringComparison.OrdinalIgnoreCase))
+                return;
+            UpdateLocalIconStatus();
+            // Rebind the displayed cards after indexing (they are immutable records).
+            RefreshItemGrid();
+            RefreshInventoryPage();
+        }
+        catch (Exception ex)
+        {
+            ItemIconFolderText.Text = "Icon search failed: " + ex.Message;
+        }
+    }
+
+    private void UpdateLocalIconStatus()
+    {
+        if (ItemIconFolderText == null) return;
+        int iconNames = _allPlayerItems.Select(i => i.IconName)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        int matched = _allPlayerItems
+            .Where(i => !string.IsNullOrWhiteSpace(i.IconName))
+            .Select(i => i.IconName).Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count(n => LocalItemArtwork.FindIcon(n) != null);
+        string folder = LocalItemArtwork.DirectoryPath;
+        ItemIconFolderText.Text = LocalItemArtwork.IndexedFileCount == 0
+            ? "No exported PNGs found. Export item Sprites/Texture2D from your own game " +
+              "using AssetStudio, then select the export folder here (nested folders work)."
+            : $"Matched {matched:N0}/{iconNames:N0} catalogue icons " +
+              $"({LocalItemArtwork.IndexedFileCount:N0} PNGs found). Source: {folder}";
     }
 
     private void ResetInventoryViewer()
