@@ -183,6 +183,67 @@ public sealed class ServerHostService
     public Task<string> LogsAsync(string serverPath) => ComposeAsync(serverPath, 30000,
         "logs", "--no-color", "--timestamps", "--tail", "180", "game", "api");
 
+    // Export ALL logs retained by Docker's current game/api containers, streaming
+    // directly to a file. Do not buffer gigabytes of output in WPF memory.
+    // Docker log rotation / removed containers can limit available history.
+    public async Task<long> ExportRetainedLogsAsync(
+        string serverPath, string destinationPath, CancellationToken cancellationToken = default)
+    {
+        string folder = ValidateServerPath(serverPath);
+        string fullDestination = Path.GetFullPath(destinationPath);
+        string directory = Path.GetDirectoryName(fullDestination)
+            ?? throw new InvalidOperationException("Choose an output folder for the log.");
+        string staging = Path.Combine(directory, ".orbusmanager-log-" + Guid.NewGuid().ToString("N") + ".tmp");
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo
+        {
+            FileName = "docker",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = folder
+        };
+        foreach (string arg in new[] {
+            "compose", "-f", Path.Combine(folder, "docker-compose.yml"),
+            "logs", "--no-color", "--timestamps", "game", "api"
+        }) process.StartInfo.ArgumentList.Add(arg);
+
+        try
+        {
+            if (!process.Start())
+                throw new InvalidOperationException("Docker could not start the log export.");
+            Task<string> errorTask = process.StandardError.ReadToEndAsync();
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TimeSpan.FromMinutes(10));
+            await using (var output = new FileStream(staging, FileMode.CreateNew,
+                FileAccess.Write, FileShare.None, 131072, useAsync: true))
+            {
+                await process.StandardOutput.BaseStream.CopyToAsync(output, timeout.Token);
+                await process.WaitForExitAsync(timeout.Token);
+                await output.FlushAsync(timeout.Token);
+            }
+            string stderr = await errorTask;
+            if (process.ExitCode != 0)
+                throw new InvalidOperationException("Docker log export failed: " +
+                    stderr[..Math.Min(stderr.Length, 1000)]);
+            long bytes = new FileInfo(staging).Length;
+            File.Move(staging, fullDestination, overwrite: true);
+            return bytes;
+        }
+        catch
+        {
+            if (!process.HasExited)
+                try { process.Kill(entireProcessTree: true); } catch { }
+            throw;
+        }
+        finally
+        {
+            if (File.Exists(staging))
+                try { File.Delete(staging); } catch { }
+        }
+    }
+
     private static ServerServiceStatus ParseStatus(JsonElement obj)
     {
         static string Value(JsonElement o, string property) =>

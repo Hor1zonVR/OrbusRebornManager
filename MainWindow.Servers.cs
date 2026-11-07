@@ -62,6 +62,7 @@ public partial class MainWindow
     private bool _serverStatusKnown;
     private bool _serverRunning;
     private bool _consoleLoading;
+    private bool _fullLogExporting;
     private bool _serverCardRefreshBusy;
     private bool _serverStatusLoading;
     private int _statusRequestNumber;
@@ -488,6 +489,49 @@ public partial class MainWindow
     {
         if (!string.IsNullOrWhiteSpace(ServerLogsText.Text))
             Clipboard.SetText(ServerLogsText.Text);
+    }
+
+    private async void ExportFullServerLogs_Click(object sender, RoutedEventArgs e)
+    {
+        if (_fullLogExporting) return;
+        string? server = ServerFolder();
+        if (server == null) return;
+        var dialog = new SaveFileDialog
+        {
+            Title = "Export all retained game + API logs",
+            Filter = "Log files (*.log)|*.log|Text files (*.txt)|*.txt",
+            FileName = "OrbusServer-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".log",
+            OverwritePrompt = true,
+            AddExtension = true
+        };
+        if (dialog.ShowDialog(this) != true) return;
+
+        _fullLogExporting = true;
+        ExportFullServerLogsButton.IsEnabled = false;
+        ConsoleStatusText.Text = "Exporting all retained Docker logs directly to disk...";
+        try
+        {
+            long bytes = await _serverHost.ExportRetainedLogsAsync(server, dialog.FileName);
+            ConsoleStatusText.Text = "Exported " + bytes.ToString("N0") +
+                " bytes of retained game + API logs.";
+            Log("Exported retained server logs to " + dialog.FileName);
+            MessageBox.Show(this,
+                "Full retained logs saved to:\n\n" + dialog.FileName +
+                "\n\nDocker may have rotated older logs. The export may include account identifiers, " +
+                "character data, and other private information; review before sharing.",
+                "Log export complete", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            ConsoleStatusText.Text = "Log export failed: " + ex.Message;
+            MessageBox.Show(this, ex.Message, "Could not export logs",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        finally
+        {
+            _fullLogExporting = false;
+            ExportFullServerLogsButton.IsEnabled = true;
+        }
     }
 
     private void RefreshServerComponentRows()
