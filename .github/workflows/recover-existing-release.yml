@@ -1,0 +1,110 @@
+name: Recover already-built OrbusManager release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to recover"
+        required: true
+        default: "v0.7.10"
+        type: string
+      run_id:
+        description: "Successful Windows build run ID (failed Pages deploy)"
+        required: true
+        default: "42381497775"
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  recover:
+    name: Publish existing installer and update assets to GitHub Releases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact tag and build run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          RUN_ID: ${{ inputs.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ${{ ! "$RUN_ID" =~ ^[0-9]+$ || ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ }}; then
+            echo "::error::Invalid tag or run id."
+            exit 1
+          fi
+          tag_sha="$(git rev-parse "refs/tags/$TAG^{commit}")"
+          run_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")"
+          run_sha="$(jq -r '.head_sha' <<< "$run_json")"
+          run_ref="$(jq -r '.head_branch' <<< "$run_json")"
+          if ${{ "$tag_sha" != "$run_sha" || "$run_ref" != "$TAG" }}; then
+            echo "::error::Selected run does not match the exact tag commit."
+            exit 1
+          fi
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release already exists. No overwrites."
+            exit 1
+          fi
+
+      - name: Download previously built installer
+        uses: actions/download-artifact@v4
+        with:
+          name: RebornManager-Setup-win-x64
+          path: installer
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Download previously staged updater feed
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: pages
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Extract and validate release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s installer/RebornManager-Setup.exe
+          mapfile -t archives < <(find pages -type f -name '*.tar')
+          if [ "${#archives[@]}" -ne 1 ]; then
+            echo "::error::Expected one Pages tar archive."
+            exit 1
+          fi
+          mkdir -p extracted distribution
+          tar -xf "${archives[0]}" -C extracted
+          mapfile -t manifests < <(find extracted -type f -name releases.win.json)
+          mapfile -t packages < <(find extracted -type f -name '*-full.nupkg')
+          if [ "${#manifests[@]}" -ne 1 ] || [ "${#packages[@]}" -ne 1 ]; then
+            echo "::error::Expected one Velopack manifest and one full package."
+            exit 1
+          fi
+          test -s "${manifests[0]}"
+          test -s "${packages[0]}"
+          cp "${manifests[0]}" distribution/
+          cp "${packages[0]}" distribution/
+          cp installer/RebornManager-Setup.exe distribution/
+          jq -e '.Assets | length > 0' distribution/releases.win.json > /dev/null
+
+      - name: Publish existing tag without Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          packages=(distribution/*-full.nupkg)
+          if [ "${#packages[@]}" -ne 1 ]; then exit 1; fi
+          gh release create "$TAG" \
+            distribution/RebornManager-Setup.exe \
+            distribution/releases.win.json "${packages[@]}" \
+            --title "OrbusManager $TAG" --generate-notes --verify-tag
