@@ -751,6 +751,8 @@
                     <StackPanel Orientation="Horizontal">
                         <Button x:Name="OverviewTabButton" Content="Overview" Click="ServerOverviewTab_Click"
                                 Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
+                        <Button x:Name="ServerPlayersTabButton" Content="Players" Click="ServerPlayersTab_Click"
+                                Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
                         <Button x:Name="ServerModsTabButton" Content="Mods" Click="ServerModsTab_Click"
                                 Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
                         <Button x:Name="ConsoleTabButton" Content="Console" Click="ServerConsoleTab_Click"
@@ -839,6 +841,174 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
+
+                <!-- PLAYERS: persistent server character history with verified presence only -->
+                <Grid Grid.Row="2" x:Name="ServerPlayersTab" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="PLAYER DIRECTORY" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="Characters &amp; Items" FontSize="19" FontWeight="SemiBold"
+                                       Margin="0,7,0,0"/>
+                        </StackPanel>
+                        <Button x:Name="PlayerRefreshButton" Grid.Column="1"
+                                Content="↻  Refresh players" Click="PlayerRefresh_Click"
+                                Style="{StaticResource PillButton}" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="14"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource PanelCard}" Padding="16">
+                            <DockPanel LastChildFill="True">
+                                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Background="{StaticResource CardAltBrush}" CornerRadius="9" Padding="14">
+                                            <StackPanel>
+                                                <TextBlock Text="SAVED CHARACTERS" Style="{StaticResource Eyebrow}"/>
+                                                <TextBlock x:Name="PlayerHistoryCountText" Text="—"
+                                                           FontSize="24" Margin="0,9,0,0" FontWeight="SemiBold"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Grid.Column="2" Background="{StaticResource CardAltBrush}"
+                                                CornerRadius="9" Padding="14">
+                                            <StackPanel>
+                                                <TextBlock Text="ONLINE NOW" Style="{StaticResource Eyebrow}"/>
+                                                <TextBlock x:Name="PlayerOnlineCountText" Text="—"
+                                                           FontSize="24" Margin="0,9,0,0" FontWeight="SemiBold"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="SEARCH CHARACTERS" Style="{StaticResource Eyebrow}"
+                                               Margin="0,0,0,8"/>
+                                    <TextBox x:Name="PlayerSearchText" ToolTip="Search saved characters"
+                                             TextChanged="PlayerSearch_Changed"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,10">
+                                        <Button x:Name="PlayerAllButton" Content="All characters"
+                                                Click="PlayerAll_Click" Style="{StaticResource PillButton}"
+                                                Padding="11,6" Margin="0,0,8,0"/>
+                                        <Button x:Name="PlayerOnlineButton" Content="Online"
+                                                Click="PlayerOnline_Click" Style="{StaticResource PillButton}"
+                                                Padding="11,6"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel>
+                                        <ItemsControl ItemsSource="{Binding VisibleServerPlayers}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Tag="{Binding}" Click="SelectServerPlayer_Click"
+                                                            Style="{StaticResource PillButton}"
+                                                            HorizontalContentAlignment="Stretch"
+                                                            Margin="0,0,0,7" Padding="12">
+                                                        <DockPanel>
+                                                            <TextBlock Text="{Binding PresenceText}" DockPanel.Dock="Right"
+                                                                       FontSize="10" Margin="8,0,0,0"
+                                                                       Foreground="{StaticResource MutedBrush}"/>
+                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                                       FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                                        </DockPanel>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock x:Name="EmptyServerPlayersText"
+                                                   Text="Open the directory to load characters."
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Margin="3,9,3,9"/>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </Border>
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Border Style="{StaticResource PanelCard}" Padding="17" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="SOURCE" Style="{StaticResource Eyebrow}"/>
+                                        <TextBlock x:Name="PlayerDirectoryInfoText"
+                                                   Text="Character history loads when you open this tab."
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Margin="0,10,0,0" Foreground="{StaticResource MutedBrush}"/>
+                                        <TextBlock x:Name="PlayerDiagnosticText"
+                                                   TextWrapping="Wrap" FontSize="11"
+                                                   Foreground="#E8BA93" Margin="0,10,0,0"
+                                                   Visibility="Collapsed"/>
+                                        <Button Content="Copy diagnostic details"
+                                                Click="CopyPlayerDiagnostics_Click"
+                                                Style="{StaticResource PillButton}"
+                                                HorizontalAlignment="Left" Padding="9,5"
+                                                Margin="0,11,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border x:Name="PlayerSelectionEmpty" Style="{StaticResource PanelCard}" Padding="25">
+                                    <StackPanel>
+                                        <TextBlock Text="Select a character" FontWeight="SemiBold" FontSize="18"/>
+                                        <TextBlock Text="Choose someone from the directory to prepare an item grant."
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Margin="0,11,0,0" Foreground="{StaticResource MutedBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border x:Name="PlayerProfilePanel" Style="{StaticResource PanelCard}"
+                                        Visibility="Collapsed" Padding="19">
+                                    <StackPanel>
+                                        <TextBlock Text="CHARACTER PROFILE" Style="{StaticResource Eyebrow}"/>
+                                        <TextBlock x:Name="PlayerProfileNameText" Text="—" FontSize="22"
+                                                   Margin="0,10,0,5" FontWeight="SemiBold"
+                                                   TextWrapping="Wrap"/>
+                                        <TextBlock x:Name="PlayerProfilePresenceText" Text="—"
+                                                   FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                                        <Border Height="1" Background="{StaticResource StrokeBrush}"
+                                                Margin="0,20,0,18"/>
+                                        <TextBlock Text="GIVE ITEM" Style="{StaticResource Eyebrow}"/>
+                                        <TextBlock Text="The recipient can be offline. Grants use the Community Server's admin command."
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource MutedBrush}" Margin="0,10,0,12"/>
+                                        <TextBlock Text="SEARCH ITEMS BY NAME OR ID" Style="{StaticResource Eyebrow}"
+                                                   Margin="0,4,0,8"/>
+                                        <TextBox x:Name="PlayerItemSearchText"
+                                                 ToolTip="Search by item name or numeric ID"
+                                                 TextChanged="PlayerItemSearch_Changed"/>
+                                        <ComboBox x:Name="PlayerItemSelect" Margin="0,10,0,0"
+                                                  MinHeight="38" FontSize="12"
+                                                  Background="{StaticResource CardAltBrush}"
+                                                  Foreground="{StaticResource TextBrush}"
+                                                  BorderBrush="{StaticResource StrokeBrush}"
+                                                  MaxDropDownHeight="250"
+                                                  ItemsSource="{Binding VisiblePlayerItems}"
+                                                  DisplayMemberPath="Label"
+                                                  SelectionChanged="PlayerItemSelect_Changed"/>
+                                        <TextBlock x:Name="PlayerItemCountText" Text=""
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Margin="0,7,0,0" FontSize="11"/>
+                                        <Button x:Name="PlayerGiftButton" Content="Give selected item"
+                                                Style="{StaticResource PrimaryButton}" Margin="0,18,0,0"
+                                                IsEnabled="False" Click="GivePlayerItem_Click"/>
+                                        <TextBlock x:Name="PlayerGiftStatusText"
+                                                   Text="Choose an item before sending an admin request."
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="12" Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
 
                 <!-- MODS: installed components and a compact curated catalogue -->
                 <ScrollViewer Grid.Row="2" x:Name="ServerPanel" Visibility="Collapsed"
