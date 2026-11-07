@@ -46,9 +46,24 @@ public sealed class ServerPlayerService
     private const string CharacterQueryJs = """
 (async () => {
  const prefix = "ORBUS_MANAGER_PLAYERS:";
- const emit = obj => console.log(prefix + JSON.stringify(obj));
+ // The old Node 8 container may leave connection-pool handles open forever.
+ // Write a complete result and exit ONLY after stdout has flushed.
+ let completed = false;
+ const collected = new Set();
+ const discoveredSources = [];
+ const emit = obj => {
+   if (completed) return;
+   completed = true;
+   clearTimeout(scanTimeout);
+   process.stdout.write(prefix + JSON.stringify(obj) + "\n", () => process.exit(0));
+ };
+ const scanTimeout = setTimeout(() => {
+   emit({ok:collected.size > 0, names:[...collected].sort().slice(0,8000),
+     source:discoveredSources.join(", "),
+     diagnostic:"Character scan reached its 18-second budget. Saved any names found so far; a later refresh can retry."});
+ }, 18000);
  try {
-   let r, run, close = async () => {};
+   let r, run;
    const host = process.env.ORBUS_DB_HOST || "rethinkdb";
    try {
      const factory = require("rethinkdbdash");
@@ -65,7 +80,7 @@ public sealed class ServerPlayerService
          let value = await q.run(connection);
          return value && typeof value.toArray === "function" ? await value.toArray() : value;
        };
-       close = async () => connection.close();
+       // The process terminates after flushing the small JSON result.
      } catch (inner) {
        emit({ok:false,error:"RethinkDB Node driver unavailable in server container. Read-only player discovery requires a compatible driver."});
        return;
@@ -124,23 +139,29 @@ public sealed class ServerPlayerService
            for (const name of namesFrom(record, table)) names.push(name);
          }
          examined.push(db + "." + table);
-         if (names.length) candidates.push({db,table,score: names.length * 4 + (/char/i.test(table) ? 25 : /player/i.test(table) ? 12 : 0)});
+         if (names.length) {
+           for (const name of names) collected.add(name);
+           candidates.push({db,table,score: names.length * 4 + (/char/i.test(table) ? 25 : /player/i.test(table) ? 12 : 0)});
+         }
        } catch (sampleError) { /* An unrelated table might not be accessible; skip it. */ }
      }
    }
    candidates.sort((a,b) => b.score - a.score);
-   const selected = candidates.slice(0,5);
-   const set = new Set();
+   // Bound the scan so an enormous account table cannot hang the UI. Future
+   // versions can page an identified schema to exhaustively list characters.
+   const selected = candidates.slice(0,3);
    for (const item of selected) {
-     const records = await run(r.db(item.db).table(item.table).limit(12000));
+     discoveredSources.push(item.db + "." + item.table);
+     const records = await run(r.db(item.db).table(item.table).limit(2000));
      for (const row of (Array.isArray(records) ? records : [])) {
-       for (const name of namesFrom(row, item.table)) set.add(name);
+       for (const name of namesFrom(row, item.table)) collected.add(name);
      }
    }
-   await close();
-   emit({ok: selected.length > 0, names:[...set].sort().slice(0,20000),
-     source:selected.map(x => x.db+"."+x.table).join(", "),
-     diagnostic:selected.length ? "" : "Could not identify a character table automatically. Candidate tables examined: " + examined.join(", ")});
+   emit({ok: collected.size > 0, names:[...collected].sort().slice(0,8000),
+     source:discoveredSources.join(", "),
+     diagnostic:!selected.length
+       ? "Could not identify a character table automatically. Candidate tables examined: " + examined.join(", ")
+       : "Read-only scan is capped at the first 2000 rows in each of up to 3 matching tables. Some older characters may not be included yet."});
  } catch (e) {
    emit({ok:false,error:String(e.message || e).slice(0,320)});
  }
@@ -209,7 +230,11 @@ public sealed class ServerPlayerService
                     if (item.ValueKind == JsonValueKind.String && NameAllowed(item.GetString()))
                         history.Add(item.GetString()!);
                 }
-            historySource = root.TryGetProperty("source", out var source) ? "RethinkDB: " + source.GetString() : "RethinkDB";
+            historySource = root.TryGetProperty("source", out var source) && !string.IsNullOrWhiteSpace(source.GetString())
+                ? "RethinkDB: " + source.GetString() : "RethinkDB";
+            if (root.TryGetProperty("diagnostic", out var note) && note.ValueKind == JsonValueKind.String &&
+                !string.IsNullOrWhiteSpace(note.GetString()))
+                diagnostics.Add(note.GetString()!);
             Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
             string temp = cachePath + ".new";
             await File.WriteAllTextAsync(temp, JsonSerializer.Serialize(history.OrderBy(x => x).ToArray()));
