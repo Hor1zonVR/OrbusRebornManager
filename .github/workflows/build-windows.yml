@@ -43,6 +43,12 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
+      - name: Test inventory decoding, item metadata and player bridge syntax
+        shell: pwsh
+        run: |
+          dotnet run --project tests/ItemGridSmoke/ItemGridSmoke.csproj --configuration Release
+          pwsh -NoProfile -File tests/CharacterBridgeCompatibility.ps1
+
       - name: Smoke-test World settings backups and merge preservation
         run: dotnet run --project tests/WorldSettingsSmoke/WorldSettingsSmoke.csproj --configuration Release
 

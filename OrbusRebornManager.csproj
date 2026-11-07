@@ -20,6 +20,7 @@
     <Resource Include="Assets/OrbusRebornManager.ico" />
     <!-- The standalone World settings smoke harness must not compile into the WPF app. -->
     <Compile Remove="tests/WorldSettingsSmoke/**/*.cs" />
+    <Compile Remove="tests/ItemGridSmoke/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="catalog/mods.json"
