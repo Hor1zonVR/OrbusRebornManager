@@ -754,6 +754,8 @@
                                 Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
                         <Button x:Name="ServerPlayersTabButton" Content="Players" Click="ServerPlayersTab_Click"
                                 Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
+                        <Button x:Name="WorldTabButton" Content="World" Click="ServerWorldTab_Click"
+                                Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
                         <Button x:Name="ServerModsTabButton" Content="Mods" Click="ServerModsTab_Click"
                                 Style="{StaticResource PillButton}" Margin="0,0,8,11"/>
                         <Button x:Name="ConsoleTabButton" Content="Console" Click="ServerConsoleTab_Click"
@@ -838,6 +840,94 @@
                                 <TextBlock x:Name="ServerActivityText" Text="No actions this session."
                                            Foreground="{StaticResource MutedBrush}"
                                            Margin="0,11,0,0" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                                <!-- WORLD: documented config settings, with an honest XP Bomb experiment -->
+                <ScrollViewer Grid.Row="2" x:Name="ServerWorldTab" Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,4,0">
+                        <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock Text="WORLD MANAGEMENT" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock Text="World Settings" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            </StackPanel>
+                            <Button Content="Refresh settings" Click="WorldRefresh_Click"
+                                    DockPanel.Dock="Right" Style="{StaticResource PillButton}"
+                                    VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <Border Style="{StaticResource PanelCard}" Padding="22" Margin="0,0,0,13">
+                            <StackPanel>
+                                <TextBlock Text="GENERAL" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock Text="Server identity" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,17"/>
+                                <TextBlock Text="SERVER NAME" Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
+                                <TextBox x:Name="WorldServerNameText" MaxLength="90" MinHeight="41"
+                                         Padding="12,10" Margin="0,0,0,17"/>
+                                <TextBlock Text="WELCOME MESSAGE" Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
+                                <TextBox x:Name="WorldMotdText" MaxLength="400" MinHeight="41"
+                                         Padding="12,10" Margin="0,0,0,17"/>
+                                <CheckBox x:Name="WorldAllowAccountsCheck"
+                                          Content="Allow new players to create accounts"
+                                          IsChecked="True" Margin="0,0,0,3"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelCard}" Padding="22" Margin="0,0,0,13">
+                            <StackPanel>
+                                <TextBlock Text="PROGRESSION &amp; REWARDS" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock Text="Gameplay settings" FontSize="18" FontWeight="SemiBold"
+                                           Margin="0,8,0,17"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="CHARACTERS PER ACCOUNT" Style="{StaticResource Eyebrow}"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBox x:Name="WorldCharacterLimitText" Text="2"
+                                                 MinHeight="41" Padding="12,10" MaxLength="2"/>
+                                        <TextBlock Text="The game may only show two character slots even if the server accepts more."
+                                                   Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"
+                                                   FontSize="11" Margin="0,9,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="VERY RARE COSMETIC CHANCE (%)"
+                                                   Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
+                                        <TextBox x:Name="WorldRareChanceText" Text="10"
+                                                 MinHeight="41" Padding="12,10" MaxLength="6"/>
+                                        <TextBlock Text="The server's rare cosmetic roll, not ordinary loot drops."
+                                                   Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"
+                                                   FontSize="11" Margin="0,9,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock x:Name="WorldInfoText" Text="Open World to load server settings."
+                                           Foreground="{StaticResource MutedBrush}" FontSize="12"
+                                           TextWrapping="Wrap" Margin="0,17,0,13"/>
+                                <WrapPanel>
+                                    <Button x:Name="WorldSaveButton" Content="Save world settings"
+                                            Click="WorldSave_Click" IsEnabled="False"
+                                            Style="{StaticResource PrimaryButton}" Margin="0,0,10,8"/>
+                                    <Button Content="Restart game + API to apply" Click="WorldRestart_Click"
+                                            Style="{StaticResource PillButton}" Margin="0,0,10,8"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelCard}" Padding="22" Margin="0,0,0,13">
+                            <StackPanel>
+                                <TextBlock Text="XP BOOST EXPERIMENT" Style="{StaticResource Eyebrow}"/>
+                                <TextBlock Text="XP Boost Bomb · Item #1351" FontSize="18"
+                                           FontWeight="SemiBold" Margin="0,8,0,12"/>
+                                <TextBlock Text="The original game includes a server-wide XP bomb. Its strength and duration are controlled inside the server implementation, not the public config. Permanent +100% (2×) XP is not yet enabled."
+                                           TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}"
+                                           FontSize="12" Margin="0,0,0,14"/>
+                                <Button Content="Find XP Bomb in the item browser" Click="WorldTryXpBomb_Click"
+                                        Style="{StaticResource PillButton}" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Grant item #1351 to your character, activate it in-game and observe the boost. This does not alter XP rates until we verify the server mechanism."
+                                           FontSize="11" TextWrapping="Wrap"
+                                           Foreground="{StaticResource MutedBrush}" Margin="0,11,0,0"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
