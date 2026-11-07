@@ -49,7 +49,9 @@ public partial class MainWindow
             try
             {
                 _allPlayerItems = _serverPlayerService.ReadItems(folder);
-                FilterPlayerItems();
+                RefreshItemGrid();
+                if (_chosenPlayer != null)
+                    await LoadCharacterSnapshotAsync();
             }
             catch (Exception e)
             {
@@ -85,6 +87,7 @@ public partial class MainWindow
         _allPlayerItems.Clear();
         VisiblePlayerItems.Clear();
         VisibleServerPlayers.Clear();
+        ResetInventoryViewer();
         PlayerHistoryCountText.Text = "—";
         PlayerOnlineCountText.Text = "—";
         PlayerSearchText.Text = "";
@@ -168,7 +171,8 @@ public partial class MainWindow
         PlayerProfilePanel.Visibility = Visibility.Visible;
         PlayerProfileNameText.Text = player.Name;
         PlayerProfilePresenceText.Text = player.PresenceText;
-        PlayerGiftStatusText.Text = "Choose an item below to prepare a grant.";
+        PlayerGiftStatusText.Text = "Choose an item below to prepare a base-item grant.";
+        _ = LoadCharacterSnapshotAsync();
         UpdateGrantEnabled();
     }
 
@@ -177,42 +181,26 @@ public partial class MainWindow
         _chosenPlayer = null;
         PlayerSelectionEmpty.Visibility = Visibility.Visible;
         PlayerProfilePanel.Visibility = Visibility.Collapsed;
+        ++_characterRequest;
         UpdateGrantEnabled();
     }
 
-    private void FilterPlayerItems()
+    private void PlayerItemSearch_Changed(object sender, TextChangedEventArgs e)
     {
-        if (PlayerItemSelect == null || PlayerItemSearchText == null ||
-            PlayerItemCountText == null) return;
-        var previous = PlayerItemSelect.SelectedItem as ServerItemEntry;
-        string query = PlayerItemSearchText.Text.Trim();
-        VisiblePlayerItems.Clear();
-        foreach (var item in _allPlayerItems.Where(x =>
-            query.Length == 0 || x.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-            x.Id.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)).Take(500))
-            VisiblePlayerItems.Add(item);
-        if (previous != null)
-            PlayerItemSelect.SelectedItem = VisiblePlayerItems.FirstOrDefault(x => x.Id == previous.Id);
-        PlayerItemCountText.Text = _allPlayerItems.Count == 0 ? "No items loaded" :
-            $"{_allPlayerItems.Count} server items · showing {VisiblePlayerItems.Count}";
-        UpdateGrantEnabled();
+        _itemPage = 0;
+        RefreshItemGrid();
     }
-
-    private void PlayerItemSearch_Changed(object sender, TextChangedEventArgs e) =>
-        FilterPlayerItems();
-    private void PlayerItemSelect_Changed(object sender, SelectionChangedEventArgs e) =>
-        UpdateGrantEnabled();
 
     private void UpdateGrantEnabled()
     {
         if (PlayerGiftButton == null) return;
-        PlayerGiftButton.IsEnabled = !_playerBusy && _chosenPlayer != null &&
-            PlayerItemSelect.SelectedItem is ServerItemEntry;
+        PlayerGiftButton.IsEnabled = !_playerBusy && !_giftBusy &&
+            _chosenPlayer != null && _selectedCatalogItem != null;
     }
 
     private async void GivePlayerItem_Click(object sender, RoutedEventArgs e)
     {
-        if (_chosenPlayer == null || PlayerItemSelect.SelectedItem is not ServerItemEntry item)
+        if (_giftBusy || _chosenPlayer == null || _selectedCatalogItem is not ServerItemEntry item)
             return;
         string? folder = ServerFolder();
         if (folder == null) return;
@@ -224,8 +212,9 @@ public partial class MainWindow
             "This sends an admin request, not a guaranteed delivery. Confirm it in-game.",
             "Confirm item grant", MessageBoxButton.YesNo,
             MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-        PlayerGiftButton.IsEnabled = false;
-        PlayerGiftStatusText.Text = "Sending admin request…";
+        _giftBusy = true;
+        UpdateGrantEnabled();
+        PlayerGiftStatusText.Text = "Sending admin base-item request…";
         try
         {
             string response = await _serverPlayerService.GiveItemAsync(folder, target, item.Id);
@@ -238,6 +227,6 @@ public partial class MainWindow
             PlayerGiftStatusText.Text = "Gift request failed: " + ex.Message;
             Log("Gift request failed: " + ex.Message);
         }
-        finally { UpdateGrantEnabled(); }
+        finally { _giftBusy = false; UpdateGrantEnabled(); }
     }
 }
