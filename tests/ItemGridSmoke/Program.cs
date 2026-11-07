@@ -42,3 +42,28 @@ if (classes.Count != 5 || classes[0].DisplayName != "Runemage" || classes[0].Lev
     !classes.Any(x => x.DisplayName == "Warrior"))
     throw new Exception("Saved per-class level/XP fields were not decoded.");
 Console.WriteLine("PASS: real per-class progression fields.");
+
+string artRoot = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+    "OrbusItemArtTest-" + Guid.NewGuid().ToString("N"));
+string originalArtRoot = LocalItemArtwork.DirectoryPath;
+try
+{
+    string nested = System.IO.Path.Combine(artRoot, "Assets", "Sprite");
+    System.IO.Directory.CreateDirectory(nested);
+    string localIcon = System.IO.Path.Combine(nested, "BW_T_01.PNG");
+    System.IO.File.WriteAllText(localIcon, "test"); // path-only match, not a real texture
+    LocalItemArtwork.DirectoryPath = artRoot;
+    LocalItemArtwork.RefreshIndex();
+    if (LocalItemArtwork.IndexedFileCount != 1 ||
+        !string.Equals(bow.IconPath, localIcon, StringComparison.OrdinalIgnoreCase) ||
+        LocalItemArtwork.FindIcon("../BW_T_01.PNG") != null)
+        throw new Exception("Recursive, case-insensitive asset icon lookup failed.");
+    Console.WriteLine("PASS: local Sprite/Texture2D export folder indexing.");
+}
+finally
+{
+    LocalItemArtwork.DirectoryPath = originalArtRoot;
+    LocalItemArtwork.RefreshIndex();
+    if (System.IO.Directory.Exists(artRoot))
+        System.IO.Directory.Delete(artRoot, true);
+}

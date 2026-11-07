@@ -1134,7 +1134,15 @@
                                                     <Button Tag="{Binding}" Click="InspectInventorySlot_Click"
                                                             Style="{StaticResource PillButton}"
                                                             Width="66" Height="78" Padding="3" Margin="0,0,5,5"
-                                                            ToolTip="{Binding TooltipText}">
+                                                            ToolTipService.ShowDuration="15000">
+                                                        <Button.ToolTip>
+                                                            <ToolTip>
+                                                                <TextBlock Text="{Binding TooltipText}"
+                                                                           Foreground="{StaticResource TextBrush}"
+                                                                           TextWrapping="Wrap" Width="320"
+                                                                           FontSize="12"/>
+                                                            </ToolTip>
+                                                        </Button.ToolTip>
                                                         <StackPanel HorizontalAlignment="Center">
                                                             <Border BorderBrush="{Binding RarityColor}"
                                                                     BorderThickness="1" CornerRadius="7"
@@ -1231,9 +1239,17 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Button Tag="{Binding}" Click="SelectCatalogItem_Click"
-                                                            ToolTip="{Binding TooltipText}"
+                                                            ToolTipService.ShowDuration="15000"
                                                             Style="{StaticResource PillButton}"
                                                             Width="130" Height="125" Margin="0,0,7,7" Padding="6">
+                                                        <Button.ToolTip>
+                                                            <ToolTip>
+                                                                <TextBlock Text="{Binding TooltipText}"
+                                                                           Foreground="{StaticResource TextBrush}"
+                                                                           TextWrapping="Wrap" Width="320"
+                                                                           FontSize="12"/>
+                                                            </ToolTip>
+                                                        </Button.ToolTip>
                                                         <StackPanel HorizontalAlignment="Center">
                                                             <Border BorderBrush="{Binding RarityColor}"
                                                                     BorderThickness="1" CornerRadius="9"
