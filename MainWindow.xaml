@@ -1256,7 +1256,12 @@
                             <Button Content="Refresh" Click="ViewServerLogs_Click"
                                     Style="{StaticResource PillButton}" Margin="0,0,8,0"/>
                             <Button Content="Copy logs" Click="CopyServerLogs_Click"
-                                    Style="{StaticResource PillButton}"/>
+                                    Style="{StaticResource PillButton}" Margin="0,0,8,0"/>
+                            <Button x:Name="ExportFullServerLogsButton"
+                                    Content="Export full logs"
+                                    ToolTip="Save all currently retained Docker game + API logs to a file without truncating them."
+                                    Click="ExportFullServerLogs_Click"
+                                    Style="{StaticResource PrimaryButton}"/>
                         </StackPanel>
                     </Grid>
                     <Border Grid.Row="1" Background="#111319" CornerRadius="10"

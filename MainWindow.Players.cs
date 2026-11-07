@@ -219,7 +219,9 @@ public partial class MainWindow
         string target = _chosenPlayer.Name;
         if (MessageBox.Show(this,
             $"Send 1 × {item.Name} (#{item.Id}) to {target}?\n\n" +
-            "This sends an admin item-grant request to your server. Confirm delivery in-game.",
+            "IMPORTANT: Your testing showed online grants may be overwritten by the live server's next save.\n" +
+            "Prefer granting while the recipient is fully logged OFF.\n\n" +
+            "This sends an admin request, not a guaranteed delivery. Confirm it in-game.",
             "Confirm item grant", MessageBoxButton.YesNo,
             MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         PlayerGiftButton.IsEnabled = false;
