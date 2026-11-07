@@ -276,3 +276,28 @@ Open **My Servers → selected server → Players**. The left pane lists charact
 Click **Start Server** even when Docker Desktop is not running. OrbusManager first attempts the official `docker desktop start --detach` command, falls back to the installed Docker Desktop executable for older versions, and checks `docker info` until the Linux engine is ready. Docker Desktop remains a prerequisite and may need initial installation, sign-in, or interactive setup. The app does not automatically start your Orbus containers on Windows sign-in; it only starts them when you press Start.
 
 The Players reader uses the server's legacy Node.js interpreter. To prevent hanging after a database result was printed, it now flushes the name-only JSON response and exits the Node process. An 18-second scan budget returns any partial character-name discovery instead of waiting indefinitely. Historical names discovered are saved by server; a diagnostic explains that automated discovery is capped at 2,000 rows per selected table (three tables maximum). A full database-wide historical scan and verified online status remain future work.
+
+
+## GitHub Releases updater migration (post-v0.7.10)
+
+Prior versions use the static GitHub Pages source at
+`https://hor1zonvr.github.io/OrbusRebornManager/updates`. Pages deploys
+were timing out in November 2026 and preventing the GitHub Release from
+being published, despite Windows builds passing.
+
+New builds use Velopack's `GithubSource` pointed at the public
+`Hor1zonVR/OrbusRebornManager` GitHub Releases page. Every tagged build
+publishes the installer, `releases.win.json`, and the complete
+`*-full.nupkg` as release assets. The installer release depends only
+on the successful Windows build and no longer waits for GitHub Pages.
+
+The legacy Pages deployment remains as a best-effort compatibility path
+so previously installed versions can still receive upgrades when Pages is
+working. An already-installed version that ONLY knows the old Pages feed
+cannot learn the new source until it installs a migration update. If
+Pages remains unavailable, affected users may need to install the new
+Setup.exe once. Preserve the existing Velopack package ID and local app
+settings across that transition.
+
+GitHub Releases queries made without an API token are subject to
+GitHub's public unauthenticated API rate limits.

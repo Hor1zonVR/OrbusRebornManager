@@ -24,8 +24,11 @@ public partial class MainWindow
         try
         {
             _managerUpdater = new UpdateManager(
-                new SimpleWebSource(
-                    "https://hor1zonvr.github.io/OrbusRebornManager/updates"));
+                // GitHub Releases now publishes both the installer and Velopack assets.
+                // This avoids blocking updates on GitHub Pages deployment outages.
+                new GithubSource(
+                    "https://github.com/Hor1zonVR/OrbusRebornManager",
+                    accessToken: null, prerelease: false));
 
             UninstallManagerButton.IsEnabled = _managerUpdater.IsInstalled;
             if (!_managerUpdater.IsInstalled)
