@@ -19,6 +19,7 @@ public partial class MainWindow
     private readonly List<OrbusInventorySlot> _inventoryAll = new();
     private ServerItemEntry? _selectedCatalogItem;
     private int _itemPage;
+    private int _filteredItemCount;
     private int _slotPage;
     private string _itemCategory = "All";
     private int _characterRequest;
@@ -132,6 +133,7 @@ public partial class MainWindow
             (string.IsNullOrWhiteSpace(query) || i.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 i.Id.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)));
         var filtered = items.ToList();
+        _filteredItemCount = filtered.Count;
         int pages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)ItemPageSize));
         _itemPage = Math.Clamp(_itemPage, 0, pages - 1);
         VisiblePlayerItems.Clear();
@@ -157,15 +159,7 @@ public partial class MainWindow
 
     private void PlayerItemNext_Click(object sender, RoutedEventArgs e)
     {
-        if ((_itemPage + 1) * ItemPageSize <
-            _allPlayerItems.Count(i => (_itemCategory == "All" ||
-            _itemCategory == "Other" && (i.Category == "Materials & Other" ||
-                i.Category == "Tools" || i.Category == "Pets & Mounts" ||
-                i.Category == "Weapons" || i.Category == "Muskets") ||
-            i.Category == _itemCategory) &&
-            (string.IsNullOrWhiteSpace(PlayerItemSearchText.Text) ||
-             i.Name.Contains(PlayerItemSearchText.Text.Trim(), StringComparison.OrdinalIgnoreCase) ||
-             i.Id.ToString().Contains(PlayerItemSearchText.Text.Trim(), StringComparison.OrdinalIgnoreCase)))))
+        if ((_itemPage + 1) * ItemPageSize < _filteredItemCount)
         {
             _itemPage++;
             RefreshItemGrid();
