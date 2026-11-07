@@ -29,12 +29,13 @@ public sealed record ServerItemEntry(
             string n = Name.ToLowerInvariant(), t = Type.ToLowerInvariant();
             if (n.Contains("dye") || t.Contains("dye")) return "Dyes";
             if (n.Contains("potion") || n.Contains("elixir") || t.Contains("consumable")) return "Potions";
+            // Armour must stay in Armour even if its required class is Bard/Runemage/etc.
+            if (t == "equipment" || t == "equpiment") return "Armour";
             if (n.Contains("mallet") || RequiredClass.Equals("bard", StringComparison.OrdinalIgnoreCase)) return "Mallets";
             if (n.Contains("hammer") || RequiredClass.Equals("paladin", StringComparison.OrdinalIgnoreCase)) return "Hammers";
             if (n.Contains("bow") || RequiredClass.Equals("archer", StringComparison.OrdinalIgnoreCase)) return "Bows";
             if (n.Contains("wand") || RequiredClass.Equals("runemage", StringComparison.OrdinalIgnoreCase)) return "Wands";
             if (n.Contains("musket") || RequiredClass.Equals("orbhealer", StringComparison.OrdinalIgnoreCase)) return "Muskets";
-            if (t == "equipment" || t == "equpiment") return "Armour";
             if (t == "classweapon" || Slot.Equals("weapon", StringComparison.OrdinalIgnoreCase)) return "Weapons";
             if (t == "tool") return "Tools";
             if (n.Contains("mount") || n.Contains("pet")) return "Pets & Mounts";
