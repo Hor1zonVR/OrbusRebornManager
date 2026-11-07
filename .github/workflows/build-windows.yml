@@ -100,6 +100,16 @@ jobs:
           path: distribution/RebornManager-Setup.exe
           if-no-files-found: error
 
+      - name: Upload updater packages for GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: OrbusManager-Updater-win-x64
+          path: |
+            Releases/*-full.nupkg
+            Releases/releases.win.json
+          if-no-files-found: error
+
       - name: Stage update feed (tag releases only)
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
@@ -130,14 +140,18 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Publish the update feed
+      - name: Publish legacy Pages update feed (best effort)
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+        with:
+          timeout: "120000"
 
   release:
     name: Publish Setup.exe only
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [windows, update-feed]
+    # The installer and canonical updater packages must NOT depend on Pages.
+    needs: windows
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -148,13 +162,29 @@ jobs:
           name: RebornManager-Setup-win-x64
           path: distribution
 
-      - name: Publish user-facing release
+      - name: Download updater packages
+        uses: actions/download-artifact@v4
+        with:
+          name: OrbusManager-Updater-win-x64
+          path: update-feed
+
+      - name: Publish user-facing release and updater packages
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         shell: bash
         run: |
+          set -euo pipefail
           test -f distribution/RebornManager-Setup.exe
-          gh release create "$RELEASE_TAG" distribution/RebornManager-Setup.exe \
-            --title "RebornManager $RELEASE_TAG" --generate-notes --verify-tag
+          test -f update-feed/releases.win.json
+          shopt -s nullglob
+          packages=(update-feed/*-full.nupkg)
+          if [ "${#packages[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one full update package"
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" \
+            distribution/RebornManager-Setup.exe \
+            update-feed/releases.win.json "${packages[@]}" \
+            --title "OrbusManager $RELEASE_TAG" --generate-notes --verify-tag
