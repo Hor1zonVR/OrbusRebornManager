@@ -5,12 +5,17 @@ var bow = new ServerItemEntry(619, "Ancient Bow", "bw_t_01.png",
     "Test bow", "rare", "classweapon", "weapon", "archer", 30, "");
 var dye = new ServerItemEntry(1337, "Red Dye", "test.png",
     "Dye description", "common", "item", "none", "", 1, "");
-if (bow.Category != "Bows" || dye.Category != "Dyes")
+var mageArmor = new ServerItemEntry(6, "Mages Shirt", "chest.png", "",
+    "uncommon", "equipment", "chest", "runemage", 10, "");
+if (bow.Category != "Bows" || dye.Category != "Dyes" || mageArmor.Category != "Armour")
     throw new Exception("Catalogue item classification failed.");
 var items = new Dictionary<int,ServerItemEntry> { [619]=bow };
 var slot = OrbusInventorySlot.Parse(199,
     "619%1%{\"itemLevel\":30,\"armor\":40,\"maxDurability\":120,\"durability\":88,\"affixes\":[\"plusdotdmg\"]}",
     items);
+if (!slot.TryGetDurability(out var current, out var maxDurability) ||
+    current != 88 || maxDurability != 120)
+    throw new Exception("Saved durability bar values were not decoded.");
 if (slot.Slot != 199 || slot.ItemId != 619 || slot.Name != "Ancient Bow" ||
     !slot.ItemStats.Contains("itemLevel: 30") ||
     !slot.ItemStats.Contains("maxDurability: 120") ||

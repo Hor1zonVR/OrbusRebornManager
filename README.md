@@ -301,3 +301,17 @@ settings across that transition.
 
 GitHub Releases queries made without an API token are subject to
 GitHub's public unauthenticated API rate limits.
+
+
+## Player Management 2.0 – visual item browser and read-only inventory (preview)
+
+Select **My Servers → a server → Players → a character**. The character panel contains:
+- A read-only inspection of the selected character in the confirmed `orbus.Player` table. The bridge returns a bounded list of saved inventory slots and only fields whose names suggest level/class/XP progression. Class-level fields will need real-world schema verification before editing becomes available.
+- Saved inventory slots, in their original stored order, displayed as a paginated grid. Selecting a slot shows the **actual saved instance metadata**, including item level, armour, rarity, durability, maximum durability, affixes and upgrade values when those keys exist. A durability bar only appears when both current and maximum values are explicitly stored.
+- A new paginated **item-grant grid** that replaces the previous ComboBox dropdown. It is searchable by item ID/name and filterable by category. Each item card uses real catalogue name, description, rarity, slot, required class, minimum level and base properties.
+- The original **base-item gift command** remains available after selecting a catalogue item. The standard `/admin/updateinventory/<character>/<itemId>` route does **not** accept generated equipment stats or +X upgrade levels. Nothing in this UI pretends to create custom rolled equipment. Avoid gifts while the target character is online because its live cached inventory may overwrite the admin modification.
+- An optional **Choose local item icons** button. Select a folder of PNGs with filenames matching the server's `item-serverdata.txt` icon column, e.g. `bw_t_01.png`. Item images are looked up from that folder locally; fallback fantasy glyphs are used when none is available. The manager does not extract, download or redistribute copyrighted Orbus artwork.
+
+This phase is intentionally **read-only** for class levels and existing inventory. Level editing, character resets, exact +X equipment generation and complete offline/online tracking are reserved for later work after the real schema, safe save coordination and backup/restore are verified.
+
+Test on a local server: compare several inventory slots and equipment properties to their in-game tooltips, test search/categories, grant a simple item while logged off, and report any unexpected format through the diagnostic interface.
