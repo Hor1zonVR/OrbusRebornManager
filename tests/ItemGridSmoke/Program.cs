@@ -29,3 +29,16 @@ var plain = OrbusInventorySlot.Parse(1, "619%1", items);
 if (!plain.ItemStats.Contains("No rolled item stats"))
     throw new Exception("Plain grant cannot fabricate equipment modifiers.");
 Console.WriteLine("PASS: category filters and safe inventory instance stats.");
+
+var fields = new Dictionary<string,string>
+{
+    ["skill_level"] = "{\"archer\":2,\"bard\":1,\"runemage\":30,\"orbhealer\":1,\"swordboard\":1}",
+    ["skill_xp"] = "{\"archer\":3037,\"bard\":0,\"runemage\":42300,\"orbhealer\":0,\"swordboard\":0}"
+};
+var classes = ServerClassProgress.Read(fields);
+if (classes.Count != 5 || classes[0].DisplayName != "Runemage" || classes[0].Level != 30 ||
+    !classes.Any(x => x.DisplayName == "Archer" && x.Level == 2 && x.RecordedXp == 3037) ||
+    !classes.Any(x => x.DisplayName == "Musketeer") ||
+    !classes.Any(x => x.DisplayName == "Warrior"))
+    throw new Exception("Saved per-class level/XP fields were not decoded.");
+Console.WriteLine("PASS: real per-class progression fields.");

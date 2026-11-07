@@ -15,6 +15,7 @@ public partial class MainWindow
     private readonly ServerCharacterInspector _characterInspector = new();
     public ObservableCollection<OrbusInventorySlot> VisibleInventorySlots { get; } = new();
     public ObservableCollection<CharacterProgressionRow> CharacterProgression { get; } = new();
+    public ObservableCollection<ServerClassProgress> VisibleClassProgress { get; } = new();
 
     private readonly List<OrbusInventorySlot> _inventoryAll = new();
     private ServerItemEntry? _selectedCatalogItem;
@@ -85,6 +86,7 @@ public partial class MainWindow
         _inventoryAll.Clear();
         VisibleInventorySlots.Clear();
         CharacterProgression.Clear();
+        VisibleClassProgress.Clear();
         _slotPage = 0;
         _itemPage = 0;
         _selectedCatalogItem = null;
@@ -111,6 +113,7 @@ public partial class MainWindow
         CharacterInventoryStatusText.Text = "Reading saved character inventory and progression…";
         VisibleInventorySlots.Clear();
         CharacterProgression.Clear();
+        VisibleClassProgress.Clear();
         try
         {
             var result = await _characterInspector.ReadAsync(folder, name);
@@ -124,11 +127,15 @@ public partial class MainWindow
                 _inventoryAll.Add(OrbusInventorySlot.Parse(i, result.SerializedSlots[i], lookup));
             _slotPage = 0;
             RefreshInventoryPage();
+            foreach (var item in ServerClassProgress.Read(result.Progression))
+                VisibleClassProgress.Add(item);
             foreach (var field in result.Progression.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
-                CharacterProgression.Add(new CharacterProgressionRow(field.Key, field.Value));
+                if (!field.Key.Equals("skill_level", StringComparison.OrdinalIgnoreCase) &&
+                    !field.Key.Equals("skill_xp", StringComparison.OrdinalIgnoreCase))
+                    CharacterProgression.Add(new CharacterProgressionRow(field.Key, field.Value));
             CharacterInventoryStatusText.Text =
-                $"{_inventoryAll.Count} saved slots · {CharacterProgression.Count} progression fields. " +
-                result.Diagnostic;
+                $"{_inventoryAll.Count} saved slots · {VisibleClassProgress.Count} classes · " +
+                $"{CharacterProgression.Count} other progression fields. " + result.Diagnostic;
         }
         catch (Exception e)
         {

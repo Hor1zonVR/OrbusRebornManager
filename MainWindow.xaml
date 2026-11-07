@@ -1076,6 +1076,36 @@
                                                    Text="Select a character to inspect saved inventory."
                                                    Foreground="{StaticResource MutedBrush}"
                                                    TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"/>
+                                        <TextBlock Text="CLASS LEVELS" Style="{StaticResource Eyebrow}"
+                                                   Margin="0,2,0,9"/>
+                                        <ItemsControl ItemsSource="{Binding VisibleClassProgress}" Margin="0,0,0,11">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Width="154" Background="{StaticResource CardAltBrush}"
+                                                            BorderBrush="{StaticResource StrokeBrush}"
+                                                            BorderThickness="1" CornerRadius="9"
+                                                            Padding="10" Margin="0,0,7,7">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding DisplayName}" FontSize="12"
+                                                                       FontWeight="SemiBold"
+                                                                       TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding LevelLabel}" FontSize="17"
+                                                                       FontWeight="Bold" Margin="0,6,0,0"
+                                                                       Foreground="{Binding LevelColor}"/>
+                                                            <TextBlock Text="{Binding XpLabel}" FontSize="11"
+                                                                       Foreground="{StaticResource MutedBrush}"
+                                                                       Margin="0,4,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Text="OTHER PROGRESSION DATA"
+                                                   Style="{StaticResource Eyebrow}"
+                                                   Margin="0,3,0,7"/>
                                         <ItemsControl ItemsSource="{Binding CharacterProgression}" Margin="0,0,0,12">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -1092,7 +1122,7 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <TextBlock Text="Class levels and XP shown above only when stored in recognised player fields. Level editing is locked pending schema verification."
+                                        <TextBlock Text="Class levels and XP are read directly from skill_level and skill_xp. XP is a saved value, not an invented progress-to-next-level percentage. Level editing remains locked."
                                                    FontSize="11" Foreground="{StaticResource MutedBrush}"
                                                    TextWrapping="Wrap" Margin="0,0,0,12"/>
                                         <ItemsControl ItemsSource="{Binding VisibleInventorySlots}">
