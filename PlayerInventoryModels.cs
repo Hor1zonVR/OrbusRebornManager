@@ -50,7 +50,8 @@ public static class LocalItemArtwork
             catch (IOException) { /* Use whichever PNGs were readable. */ }
             catch (UnauthorizedAccessException) { /* Inaccessible folders are skipped. */ }
         }
-        System.Threading.Volatile.Write(ref _indexed, found);
+        if (string.Equals(root, DirectoryPath, StringComparison.OrdinalIgnoreCase))
+            System.Threading.Volatile.Write(ref _indexed, found);
     }
 
     public static string? FindIcon(string? name)
