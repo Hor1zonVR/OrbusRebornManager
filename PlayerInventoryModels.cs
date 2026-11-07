@@ -206,6 +206,58 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
     }
 }
 
+// These values are read from the saved skill_level and skill_xp objects.
+// Do NOT invent XP thresholds or interpret raw XP as "to next level".
+public sealed record ServerClassProgress(string Key, int Level, long RecordedXp)
+{
+    public string DisplayName => Key.ToLowerInvariant() switch
+    {
+        "orbhealer" => "Musketeer",
+        "swordboard" => "Warrior",
+        "fisher" => "Fishing",
+        "gambler" => "Gambling",
+        "runemage" => "Runemage",
+        _ => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(Key.Replace('_', ' '))
+    };
+    public string LevelLabel => $"Level {Level}";
+    public string XpLabel => $"{RecordedXp:N0} XP recorded";
+    public string LevelColor => Level > 1 ? "#86D9BC" : "#D9DEE7";
+
+    public static IReadOnlyList<ServerClassProgress> Read(
+        IReadOnlyDictionary<string, string> fields)
+    {
+        Dictionary<string, long> Extract(string key)
+        {
+            var numbers = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+            if (!fields.TryGetValue(key, out string? json) || string.IsNullOrWhiteSpace(json))
+                return numbers;
+            try
+            {
+                using var parsed = JsonDocument.Parse(json);
+                if (parsed.RootElement.ValueKind != JsonValueKind.Object)
+                    return numbers;
+                foreach (var entry in parsed.RootElement.EnumerateObject())
+                    if (entry.Value.ValueKind == JsonValueKind.Number &&
+                        entry.Value.TryGetInt64(out long n))
+                        numbers[entry.Name] = n;
+            }
+            catch (JsonException) { /* Raw field remains available for diagnostics. */ }
+            return numbers;
+        }
+
+        var levels = Extract("skill_level");
+        var xp = Extract("skill_xp");
+        return levels.Keys.Union(xp.Keys, StringComparer.OrdinalIgnoreCase)
+            .Select(key => new ServerClassProgress(
+                key, levels.TryGetValue(key, out long level) ?
+                    (int)Math.Clamp(level, 0, int.MaxValue) : 0,
+                xp.TryGetValue(key, out long value) ? value : 0))
+            .OrderByDescending(c => c.Level)
+            .ThenBy(c => c.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+}
+
 public sealed record ServerCharacterSnapshot(string CharacterName,
     IReadOnlyList<string> SerializedSlots, IReadOnlyDictionary<string,string> Progression,
     string Diagnostic);
