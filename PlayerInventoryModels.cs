@@ -11,9 +11,61 @@ namespace OrbusRebornManager;
 // on individual inventory slots and MUST NOT be inferred from the catalogue.
 public static class LocalItemArtwork
 {
+    // PNGs stay on the owner's computer. AssetStudio exports commonly have
+    // nested "Sprite"/"Texture2D" directories; index their files by basename.
     public static string DirectoryPath { get; set; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "OrbusRebornManager", "ItemIcons");
+
+    private static IReadOnlyDictionary<string, string> _indexed = new Dictionary<string, string>(
+        StringComparer.OrdinalIgnoreCase);
+
+    public static int IndexedFileCount => System.Threading.Volatile.Read(ref _indexed).Count;
+
+    public static void RefreshIndex()
+    {
+        var found = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        string root = DirectoryPath;
+        if (Directory.Exists(root))
+        {
+            var options = new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                IgnoreInaccessible = true,
+                MaxRecursionDepth = 15
+            };
+            try
+            {
+                foreach (string file in Directory.EnumerateFiles(root, "*", options).Take(100000))
+                {
+                    if (!Path.GetExtension(file).Equals(".png", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    string basename = Path.GetFileName(file);
+                    if (!found.TryGetValue(basename, out string? existing) ||
+                        (file.Contains("Sprite", StringComparison.OrdinalIgnoreCase) &&
+                         !existing.Contains("Sprite", StringComparison.OrdinalIgnoreCase)))
+                        found[basename] = file;
+                }
+            }
+            catch (IOException) { /* Use whichever PNGs were readable. */ }
+            catch (UnauthorizedAccessException) { /* Inaccessible folders are skipped. */ }
+        }
+        if (string.Equals(root, DirectoryPath, StringComparison.OrdinalIgnoreCase))
+            System.Threading.Volatile.Write(ref _indexed, found);
+    }
+
+    public static string? FindIcon(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name) ||
+            !name.Equals(Path.GetFileName(name), StringComparison.Ordinal) ||
+            !Path.GetExtension(name).Equals(".png", StringComparison.OrdinalIgnoreCase))
+            return null;
+        var indexed = System.Threading.Volatile.Read(ref _indexed);
+        if (indexed.TryGetValue(name, out string? result) && File.Exists(result))
+            return result;
+        string directPath = Path.Combine(DirectoryPath, name);
+        return File.Exists(directPath) ? directPath : null;
+    }
 }
 
 public sealed record ServerItemEntry(
@@ -57,18 +109,7 @@ public sealed record ServerItemEntry(
     };
     // Optional local artwork directory: do not package game art into the app.
     // Owners may supply icons they have permission to use, named exactly as the CSV icon field.
-    public string? IconPath
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(IconName) ||
-                !IconName.Equals(Path.GetFileName(IconName), StringComparison.Ordinal))
-                return null;
-            if (!IconName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) return null;
-            string path = Path.Combine(LocalItemArtwork.DirectoryPath, IconName);
-            return File.Exists(path) ? path : null;
-        }
-    }
+    public string? IconPath => LocalItemArtwork.FindIcon(IconName);
     public Visibility IconImageVisibility => IconPath == null ? Visibility.Collapsed : Visibility.Visible;
     public Visibility IconFallbackVisibility => IconPath == null ? Visibility.Visible : Visibility.Collapsed;
     public string TooltipText =>
@@ -162,6 +203,58 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
         items.TryGetValue(id, out var item);
         return new OrbusInventorySlot(index, id, quantity, item,
             parts.Length == 3 ? parts[2] : "", "");
+    }
+}
+
+// These values are read from the saved skill_level and skill_xp objects.
+// Do NOT invent XP thresholds or interpret raw XP as "to next level".
+public sealed record ServerClassProgress(string Key, int Level, long RecordedXp)
+{
+    public string DisplayName => Key.ToLowerInvariant() switch
+    {
+        "orbhealer" => "Musketeer",
+        "swordboard" => "Warrior",
+        "fisher" => "Fishing",
+        "gambler" => "Gambling",
+        "runemage" => "Runemage",
+        _ => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(Key.Replace('_', ' '))
+    };
+    public string LevelLabel => $"Level {Level}";
+    public string XpLabel => $"{RecordedXp:N0} XP recorded";
+    public string LevelColor => Level > 1 ? "#86D9BC" : "#D9DEE7";
+
+    public static IReadOnlyList<ServerClassProgress> Read(
+        IReadOnlyDictionary<string, string> fields)
+    {
+        Dictionary<string, long> Extract(string key)
+        {
+            var numbers = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+            if (!fields.TryGetValue(key, out string? json) || string.IsNullOrWhiteSpace(json))
+                return numbers;
+            try
+            {
+                using var parsed = JsonDocument.Parse(json);
+                if (parsed.RootElement.ValueKind != JsonValueKind.Object)
+                    return numbers;
+                foreach (var entry in parsed.RootElement.EnumerateObject())
+                    if (entry.Value.ValueKind == JsonValueKind.Number &&
+                        entry.Value.TryGetInt64(out long n))
+                        numbers[entry.Name] = n;
+            }
+            catch (JsonException) { /* Raw field remains available for diagnostics. */ }
+            return numbers;
+        }
+
+        var levels = Extract("skill_level");
+        var xp = Extract("skill_xp");
+        return levels.Keys.Union(xp.Keys, StringComparer.OrdinalIgnoreCase)
+            .Select(key => new ServerClassProgress(
+                key, levels.TryGetValue(key, out long level) ?
+                    (int)Math.Clamp(level, 0, int.MaxValue) : 0,
+                xp.TryGetValue(key, out long value) ? value : 0))
+            .OrderByDescending(c => c.Level)
+            .ThenBy(c => c.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 }
 

@@ -50,6 +50,7 @@ public partial class MainWindow
             {
                 _allPlayerItems = _serverPlayerService.ReadItems(folder);
                 RefreshItemGrid();
+                UpdateLocalIconStatus();
                 if (_chosenPlayer != null)
                     await LoadCharacterSnapshotAsync();
             }

@@ -15,6 +15,7 @@ public partial class MainWindow
     private readonly ServerCharacterInspector _characterInspector = new();
     public ObservableCollection<OrbusInventorySlot> VisibleInventorySlots { get; } = new();
     public ObservableCollection<CharacterProgressionRow> CharacterProgression { get; } = new();
+    public ObservableCollection<ServerClassProgress> VisibleClassProgress { get; } = new();
 
     private readonly List<OrbusInventorySlot> _inventoryAll = new();
     private ServerItemEntry? _selectedCatalogItem;
@@ -27,20 +28,56 @@ public partial class MainWindow
     private const int ItemPageSize = 36;
     private const int InventoryPageSize = 40;
 
-    private void ChooseItemIcons_Click(object sender, RoutedEventArgs e)
+    private async void ChooseItemIcons_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = "Choose a folder with item PNG icons (names must match the Orbus item catalogue)"
+            Title = "Choose your local exported Orbus item icons (subfolders supported)"
         };
         if (dialog.ShowDialog(this) != true) return;
         _settings.ItemIconDirectory = dialog.FolderName;
         LocalItemArtwork.DirectoryPath = dialog.FolderName;
         _service.SaveSettings(_settings);
-        ItemIconFolderText.Text = "Using local PNGs from " + dialog.FolderName;
-        // WPF recomputes IconPath when rebinding these collections.
-        RefreshItemGrid();
-        RefreshInventoryPage();
+        await RefreshLocalIconIndexAsync();
+    }
+
+    private async Task RefreshLocalIconIndexAsync()
+    {
+        if (ItemIconFolderText == null) return;
+        string folder = LocalItemArtwork.DirectoryPath;
+        ItemIconFolderText.Text = "Searching exported icon PNGs, including subfolders…";
+        try
+        {
+            await Task.Run(LocalItemArtwork.RefreshIndex);
+            if (!folder.Equals(LocalItemArtwork.DirectoryPath, StringComparison.OrdinalIgnoreCase))
+                return;
+            UpdateLocalIconStatus();
+            // Rebind the displayed cards after indexing (they are immutable records).
+            RefreshItemGrid();
+            RefreshInventoryPage();
+        }
+        catch (Exception ex)
+        {
+            ItemIconFolderText.Text = "Icon search failed: " + ex.Message;
+        }
+    }
+
+    private void UpdateLocalIconStatus()
+    {
+        if (ItemIconFolderText == null) return;
+        int iconNames = _allPlayerItems.Select(i => i.IconName)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        int matched = _allPlayerItems
+            .Where(i => !string.IsNullOrWhiteSpace(i.IconName))
+            .Select(i => i.IconName).Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count(n => LocalItemArtwork.FindIcon(n) != null);
+        string folder = LocalItemArtwork.DirectoryPath;
+        ItemIconFolderText.Text = LocalItemArtwork.IndexedFileCount == 0
+            ? "No exported PNGs found. Export item Sprites/Texture2D from your own game " +
+              "using AssetStudio, then select the export folder here (nested folders work)."
+            : $"Matched {matched:N0}/{iconNames:N0} catalogue icons " +
+              $"({LocalItemArtwork.IndexedFileCount:N0} PNGs found). Source: {folder}";
     }
 
     private void ResetInventoryViewer()
@@ -49,6 +86,7 @@ public partial class MainWindow
         _inventoryAll.Clear();
         VisibleInventorySlots.Clear();
         CharacterProgression.Clear();
+        VisibleClassProgress.Clear();
         _slotPage = 0;
         _itemPage = 0;
         _selectedCatalogItem = null;
@@ -75,6 +113,7 @@ public partial class MainWindow
         CharacterInventoryStatusText.Text = "Reading saved character inventory and progression…";
         VisibleInventorySlots.Clear();
         CharacterProgression.Clear();
+        VisibleClassProgress.Clear();
         try
         {
             var result = await _characterInspector.ReadAsync(folder, name);
@@ -88,11 +127,15 @@ public partial class MainWindow
                 _inventoryAll.Add(OrbusInventorySlot.Parse(i, result.SerializedSlots[i], lookup));
             _slotPage = 0;
             RefreshInventoryPage();
+            foreach (var item in ServerClassProgress.Read(result.Progression))
+                VisibleClassProgress.Add(item);
             foreach (var field in result.Progression.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
-                CharacterProgression.Add(new CharacterProgressionRow(field.Key, field.Value));
+                if (!field.Key.Equals("skill_level", StringComparison.OrdinalIgnoreCase) &&
+                    !field.Key.Equals("skill_xp", StringComparison.OrdinalIgnoreCase))
+                    CharacterProgression.Add(new CharacterProgressionRow(field.Key, field.Value));
             CharacterInventoryStatusText.Text =
-                $"{_inventoryAll.Count} saved slots · {CharacterProgression.Count} progression fields. " +
-                result.Diagnostic;
+                $"{_inventoryAll.Count} saved slots · {VisibleClassProgress.Count} classes · " +
+                $"{CharacterProgression.Count} other progression fields. " + result.Diagnostic;
         }
         catch (Exception e)
         {

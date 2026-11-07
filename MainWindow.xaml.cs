@@ -44,6 +44,8 @@ public partial class MainWindow : Window
         InitializeManagerUpdates();
         ShowPanel("instances");
         UpdateDashboard();
+        // Index locally exported artwork without delaying startup or bundling assets.
+        _ = RefreshLocalIconIndexAsync();
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)

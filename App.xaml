@@ -30,6 +30,34 @@
             <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
         </Style>
 
+        <!-- The OS default tooltip is light. Its inherited white text became white-on-white.
+             Give ALL tooltips an explicit dark template, rather than patching each item. -->
+        <Style TargetType="{x:Type ToolTip}">
+            <Setter Property="Background" Value="#20252D"/>
+            <Setter Property="Foreground" Value="#F4F5F7"/>
+            <Setter Property="BorderBrush" Value="#566168"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MaxWidth" Value="390"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToolTip}">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="10">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="#27282F"/>
             <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
