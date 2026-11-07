@@ -71,13 +71,14 @@ public sealed class ServerPlayerService
        return;
      }
    }
-   const keyNames = ["characterName","charactername","character_name","charName","charname","playerName","playername","player_name","name"];
+   const keyNames = ["characterName","charactername","character_name","charName","charname","playerName","playername","player_name","displayName","name"];
    function pickName(record, table) {
      if (!record || typeof record !== "object") return null;
      const likely = /char|player|avatar/i.test(table);
      for (const key of keyNames) {
        if (key === "name" && !likely) continue;
-       const val = record[key];
+       const matched = Object.keys(record).find(k => k.toLowerCase() === key.toLowerCase());
+       const val = matched === undefined ? undefined : record[matched];
        if (typeof val === "string" && val.trim().length > 0 && val.trim().length <= 80)
          return val.trim();
      }
@@ -224,7 +225,7 @@ public sealed class ServerPlayerService
             var root = doc.RootElement;
             if (root.ValueKind == JsonValueKind.Object)
             {
-                foreach (string key in new[] {"onlinePlayers", "playersOnline", "connectedPlayers", "online_players"})
+                foreach (string key in new[] {"onlinePlayers", "playersOnline", "connectedPlayers", "online_players", "players"})
                 {
                     if (!root.TryGetProperty(key, out var arr) || arr.ValueKind != JsonValueKind.Array) continue;
                     var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -249,6 +250,16 @@ public sealed class ServerPlayerService
             }
         }
         catch (Exception e) { diagnostics.Add("Live presence: " + e.Message); }
+        // Save live-discovered names as well; this local history remains usable
+        // when the server is stopped or an account later deletes a character.
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
+            string temp = cachePath + ".new";
+            await File.WriteAllTextAsync(temp, JsonSerializer.Serialize(history.OrderBy(x => x).ToArray()));
+            File.Move(temp, cachePath, true);
+        }
+        catch (Exception e) { diagnostics.Add("History cache could not be saved: " + e.Message); }
         return new ServerPlayerDirectoryResult
         {
             Players = history.OrderBy(x => x, StringComparer.OrdinalIgnoreCase)

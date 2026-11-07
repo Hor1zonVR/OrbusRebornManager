@@ -147,6 +147,13 @@ public partial class MainWindow
     private async void PlayerRefresh_Click(object sender, RoutedEventArgs e) =>
         await LoadPlayersAsync();
 
+    private void CopyPlayerDiagnostics_Click(object sender, RoutedEventArgs e)
+    {
+        Clipboard.SetText("Source: " + PlayerDirectoryInfoText.Text + "\n" +
+            "Diagnostics: " + PlayerDiagnosticText.Text);
+        Log("Player directory diagnostic details copied.");
+    }
+
     private void SelectServerPlayer_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: ServerPlayerEntry player })
