@@ -43,6 +43,11 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
+      - name: Check player directory bridge for legacy Node compatibility
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File tests/PlayerBridgeCompatibility.ps1
+
       - name: Smoke-test GitHub release caching and throttling
         shell: pwsh
         run: |
