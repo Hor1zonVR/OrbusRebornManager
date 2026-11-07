@@ -45,11 +45,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          # Release-version commits pushed by GITHUB_TOKEN do not start a push workflow.
+          # Accept a successful manual build as well, but ONLY for the exact main SHA.
+          # A PR-branch build never satisfies this check.
           state="$(gh run list --repo "$GITHUB_REPOSITORY" \
-            --workflow build-windows.yml --branch main --limit 50 \
+            --workflow build-windows.yml --branch main --limit 100 \
             --json headSha,conclusion,event \
             | jq -r --arg sha "$GITHUB_SHA" \
-              '[.[] | select(.headSha == $sha and .event == "push")][0].conclusion // "missing"')"
+              '[.[] | select(.headSha == $sha and (.event == "push" or .event == "workflow_dispatch")) | .conclusion] | if index("success") != null then "success" elif length == 0 then "missing" else .[0] end')"
           if [ "$state" != "success" ]; then
             echo "::error::The current main commit must pass its Windows build first (status: $state)."
             echo "Wait for the latest main build to finish and run this workflow again."
