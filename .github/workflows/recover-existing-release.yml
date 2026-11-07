@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if ${{ ! "$RUN_ID" =~ ^[0-9]+$ || ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ }}; then
+          if [[ ! "$RUN_ID" =~ ^[0-9]+$ || ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Invalid tag or run id."
             exit 1
           fi
@@ -44,7 +44,7 @@ jobs:
           run_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")"
           run_sha="$(jq -r '.head_sha' <<< "$run_json")"
           run_ref="$(jq -r '.head_branch' <<< "$run_json")"
-          if ${{ "$tag_sha" != "$run_sha" || "$run_ref" != "$TAG" }}; then
+          if [[ "$tag_sha" != "$run_sha" || "$run_ref" != "$TAG" ]]; then
             echo "::error::Selected run does not match the exact tag commit."
             exit 1
           fi
