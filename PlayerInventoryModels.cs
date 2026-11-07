@@ -11,9 +11,60 @@ namespace OrbusRebornManager;
 // on individual inventory slots and MUST NOT be inferred from the catalogue.
 public static class LocalItemArtwork
 {
+    // PNGs stay on the owner's computer. AssetStudio exports commonly have
+    // nested "Sprite"/"Texture2D" directories; index their files by basename.
     public static string DirectoryPath { get; set; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "OrbusRebornManager", "ItemIcons");
+
+    private static IReadOnlyDictionary<string, string> _indexed = new Dictionary<string, string>(
+        StringComparer.OrdinalIgnoreCase);
+
+    public static int IndexedFileCount => System.Threading.Volatile.Read(ref _indexed).Count;
+
+    public static void RefreshIndex()
+    {
+        var found = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        string root = DirectoryPath;
+        if (Directory.Exists(root))
+        {
+            var options = new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                IgnoreInaccessible = true,
+                MaxRecursionDepth = 15
+            };
+            try
+            {
+                foreach (string file in Directory.EnumerateFiles(root, "*", options).Take(100000))
+                {
+                    if (!Path.GetExtension(file).Equals(".png", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    string basename = Path.GetFileName(file);
+                    if (!found.TryGetValue(basename, out string? existing) ||
+                        (file.Contains("Sprite", StringComparison.OrdinalIgnoreCase) &&
+                         !existing.Contains("Sprite", StringComparison.OrdinalIgnoreCase)))
+                        found[basename] = file;
+                }
+            }
+            catch (IOException) { /* Use whichever PNGs were readable. */ }
+            catch (UnauthorizedAccessException) { /* Inaccessible folders are skipped. */ }
+        }
+        System.Threading.Volatile.Write(ref _indexed, found);
+    }
+
+    public static string? FindIcon(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name) ||
+            !name.Equals(Path.GetFileName(name), StringComparison.Ordinal) ||
+            !Path.GetExtension(name).Equals(".png", StringComparison.OrdinalIgnoreCase))
+            return null;
+        var indexed = System.Threading.Volatile.Read(ref _indexed);
+        if (indexed.TryGetValue(name, out string? result) && File.Exists(result))
+            return result;
+        string directPath = Path.Combine(DirectoryPath, name);
+        return File.Exists(directPath) ? directPath : null;
+    }
 }
 
 public sealed record ServerItemEntry(
@@ -57,18 +108,7 @@ public sealed record ServerItemEntry(
     };
     // Optional local artwork directory: do not package game art into the app.
     // Owners may supply icons they have permission to use, named exactly as the CSV icon field.
-    public string? IconPath
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(IconName) ||
-                !IconName.Equals(Path.GetFileName(IconName), StringComparison.Ordinal))
-                return null;
-            if (!IconName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) return null;
-            string path = Path.Combine(LocalItemArtwork.DirectoryPath, IconName);
-            return File.Exists(path) ? path : null;
-        }
-    }
+    public string? IconPath => LocalItemArtwork.FindIcon(IconName);
     public Visibility IconImageVisibility => IconPath == null ? Visibility.Collapsed : Visibility.Visible;
     public Visibility IconFallbackVisibility => IconPath == null ? Visibility.Visible : Visibility.Collapsed;
     public string TooltipText =>
