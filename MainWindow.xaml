@@ -741,6 +741,7 @@
                                        FontWeight="SemiBold" HorizontalAlignment="Right"
                                        Margin="0,0,0,12"/>
                             <Button x:Name="StartStopServerButton" Content="▶  Start server"
+                                    ToolTip="When Docker Desktop is offline, Start Server launches it and waits for the Docker engine before starting the game."
                                     Click="StartStopServer_Click" Style="{StaticResource PrimaryButton}"
                                     Padding="20,12" IsEnabled="False" MinWidth="142"/>
                         </StackPanel>

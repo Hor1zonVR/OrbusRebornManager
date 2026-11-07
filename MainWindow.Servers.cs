@@ -63,6 +63,7 @@ public partial class MainWindow
     private bool _serverRunning;
     private bool _consoleLoading;
     private bool _serverCardRefreshBusy;
+    private bool _serverStatusLoading;
     private int _statusRequestNumber;
     private string? _selectedServerPath;
     private string _serverTab = "overview";
@@ -177,6 +178,12 @@ public partial class MainWindow
         _serverCardRefreshBusy = true;
         try
         {
+            if (!await _serverHost.DockerReadyAsync())
+            {
+                foreach (var card in ServerCards.ToArray())
+                    if (ServerCards.Contains(card)) card.Status = "Docker Desktop offline";
+                return;
+            }
             foreach (var card in ServerCards.ToArray())
             {
                 if (ServerLibraryPanel.Visibility != Visibility.Visible) break;
@@ -333,7 +340,8 @@ public partial class MainWindow
     private async Task RefreshServerStatusAsync()
     {
         string? folder = ServerFolder(false);
-        if (folder == null || _serverBusy) return;
+        if (folder == null || _serverBusy || _serverStatusLoading) return;
+        _serverStatusLoading = true;
         int request = ++_statusRequestNumber;
         try
         {
@@ -358,12 +366,21 @@ public partial class MainWindow
         {
             if (request != _statusRequestNumber ||
                 !string.Equals(folder, _selectedServerPath, StringComparison.OrdinalIgnoreCase)) return;
-            _serverStatusKnown = false;
-            ServerStateText.Text = "Unavailable";
-            ServerSummaryText.Text = ex.Message;
+            // When the daemon is offline, offer the same Start button to launch it.
+            // Other Compose errors remain unavailable; never guess server status.
+            bool dockerReady = await _serverHost.DockerReadyAsync();
+            _serverStatusKnown = !dockerReady;
+            _serverRunning = false;
+            ServerStateText.Text = dockerReady ? "Unavailable" : "Docker Desktop offline";
+            ServerSummaryText.Text = dockerReady ? ex.Message :
+                "Press Start Server to launch Docker Desktop and then start your Orbus server.";
             ServerStateText.Foreground = new SolidColorBrush(Color.FromRgb(235, 174, 155));
         }
-        finally { if (request == _statusRequestNumber) UpdateServerActions(); }
+        finally
+        {
+            _serverStatusLoading = false;
+            if (request == _statusRequestNumber) UpdateServerActions();
+        }
     }
 
     private async void RefreshServer_Click(object sender, RoutedEventArgs e) =>

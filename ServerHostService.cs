@@ -93,7 +93,87 @@ public sealed class ServerHostService
         return new ServerHostStatus(services);
     }
 
-    public Task<string> StartAsync(string serverPath) => ComposeAsync(serverPath, 180000, "up", "-d");
+    // Docker Desktop's engine is separate from the Orbus containers. On Windows it
+    // may be stopped even though Docker Compose and the docker.exe CLI are installed.
+    public async Task<bool> DockerReadyAsync()
+    {
+        try
+        {
+            await RunDockerAsync(null, 7000, "info", "--format", "{{.ServerVersion}}");
+            return true;
+        }
+        catch { return false; }
+    }
+
+    private static string? FindDockerDesktopExe()
+    {
+        string[] candidates =
+        {
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                "Docker", "Docker", "Docker Desktop.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Programs", "DockerDesktop", "Docker Desktop.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Programs", "Docker", "Docker", "Docker Desktop.exe")
+        };
+        return candidates.FirstOrDefault(File.Exists);
+    }
+
+    private async Task EnsureDockerStartedAsync()
+    {
+        if (await DockerReadyAsync()) return;
+
+        // Supported on recent Docker Desktop versions. Do not start the Orbus
+        // server until the daemon can actually answer "docker info".
+        bool started = false;
+        try
+        {
+            await RunDockerAsync(null, 20000, "desktop", "start", "--detach");
+            started = true;
+        }
+        catch
+        {
+            // Older desktop builds may not have the docker desktop CLI plugin.
+        }
+
+        if (!started && !await DockerReadyAsync())
+        {
+            string? executable = FindDockerDesktopExe();
+            if (executable == null)
+                throw new InvalidOperationException(
+                    "Docker Desktop is not responding and its executable could not be found. Install or open Docker Desktop.");
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = executable,
+                    UseShellExecute = true,
+                    WorkingDirectory = Path.GetDirectoryName(executable)!
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Could not launch Docker Desktop: " + ex.Message, ex);
+            }
+        }
+
+        // Docker Desktop often launches before its Linux engine is ready.
+        // Poll for readiness; do not mistake a launched window for a running daemon.
+        for (int i = 0; i < 45; i++)
+        {
+            if (await DockerReadyAsync()) return;
+            await Task.Delay(2500);
+        }
+        throw new TimeoutException(
+            "Docker Desktop was launched but its engine did not become ready. Open Docker Desktop to check its startup status.");
+    }
+
+    public async Task<string> StartAsync(string serverPath)
+    {
+        string folder = ValidateServerPath(serverPath);
+        await EnsureDockerStartedAsync();
+        return await ComposeAsync(folder, 180000, "up", "-d");
+    }
     // stop, NOT down, to preserve running containers and the database volume
     public Task<string> StopAsync(string serverPath) => ComposeAsync(serverPath, 60000, "stop");
     public Task<string> RestartAsync(string serverPath) => ComposeAsync(serverPath, 90000, "restart", "game", "api");
