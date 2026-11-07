@@ -43,6 +43,9 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false -o publish/win-x64
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
+      - name: Smoke-test World settings backups and merge preservation
+        run: dotnet run --project tests/WorldSettingsSmoke/WorldSettingsSmoke.csproj --configuration Release
+
       - name: Check player directory bridge for legacy Node compatibility
         shell: pwsh
         run: |
