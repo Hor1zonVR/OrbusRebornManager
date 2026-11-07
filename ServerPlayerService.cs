@@ -225,7 +225,7 @@ public sealed class ServerPlayerService
             var root = doc.RootElement;
             if (root.ValueKind == JsonValueKind.Object)
             {
-                foreach (string key in new[] {"onlinePlayers", "playersOnline", "connectedPlayers", "online_players", "players"})
+                foreach (string key in new[] {"onlinePlayers", "playersOnline", "connectedPlayers", "online_players", "activePlayers"})
                 {
                     if (!root.TryGetProperty(key, out var arr) || arr.ValueKind != JsonValueKind.Array) continue;
                     var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

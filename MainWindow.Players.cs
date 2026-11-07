@@ -69,6 +69,7 @@ public partial class MainWindow
             {
                 _playerBusy = false;
                 PlayerRefreshButton.IsEnabled = true;
+                UpdateGrantEnabled();
             }
         }
     }
