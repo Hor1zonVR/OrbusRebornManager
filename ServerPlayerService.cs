@@ -98,8 +98,11 @@ public sealed class ServerPlayerService
      const direct = pickName(row, table);
      if (direct) names.push(direct);
      for (const key of ["characters","chars","avatars"]) {
-       if (Array.isArray(row?.[key])) {
-         for (const item of row[key]) {
+       // The Community Server ships an older Node.js runtime (Node 8).
+       // It cannot parse optional chaining or optional catch bindings.
+       const nested = row && typeof row === "object" ? row[key] : undefined;
+       if (Array.isArray(nested)) {
+         for (const item of nested) {
            const name = pickName(item, "characters");
            if (name) names.push(name);
          }
@@ -116,10 +119,13 @@ public sealed class ServerPlayerService
        try {
          const sample = await run(r.db(db).table(table).limit(3));
          const records = Array.isArray(sample) ? sample : [];
-         const names = records.flatMap(row => namesFrom(row, table));
+         const names = [];
+         for (const record of records) {
+           for (const name of namesFrom(record, table)) names.push(name);
+         }
          examined.push(db + "." + table);
          if (names.length) candidates.push({db,table,score: names.length * 4 + (/char/i.test(table) ? 25 : /player/i.test(table) ? 12 : 0)});
-       } catch { /* An unrelated table might not be accessible; skip it. */ }
+       } catch (sampleError) { /* An unrelated table might not be accessible; skip it. */ }
      }
    }
    candidates.sort((a,b) => b.score - a.score);
