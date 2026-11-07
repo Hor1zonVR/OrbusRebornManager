@@ -893,6 +893,8 @@
                                             </StackPanel>
                                         </Border>
                                     </Grid>
+                                    <TextBlock Text="SEARCH CHARACTERS" Style="{StaticResource Eyebrow}"
+                                               Margin="0,0,0,8"/>
                                     <TextBox x:Name="PlayerSearchText" ToolTip="Search saved characters"
                                              TextChanged="PlayerSearch_Changed"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,10">
@@ -976,11 +978,17 @@
                                         <TextBlock Text="The recipient can be offline. Grants use the Community Server's admin command."
                                                    FontSize="12" TextWrapping="Wrap"
                                                    Foreground="{StaticResource MutedBrush}" Margin="0,10,0,12"/>
+                                        <TextBlock Text="SEARCH ITEMS BY NAME OR ID" Style="{StaticResource Eyebrow}"
+                                                   Margin="0,4,0,8"/>
                                         <TextBox x:Name="PlayerItemSearchText"
                                                  ToolTip="Search by item name or numeric ID"
                                                  TextChanged="PlayerItemSearch_Changed"/>
                                         <ComboBox x:Name="PlayerItemSelect" Margin="0,10,0,0"
                                                   MinHeight="38" FontSize="12"
+                                                  Background="{StaticResource CardAltBrush}"
+                                                  Foreground="{StaticResource TextBrush}"
+                                                  BorderBrush="{StaticResource StrokeBrush}"
+                                                  MaxDropDownHeight="250"
                                                   ItemsSource="{Binding VisiblePlayerItems}"
                                                   DisplayMemberPath="Label"
                                                   SelectionChanged="PlayerItemSelect_Changed"/>

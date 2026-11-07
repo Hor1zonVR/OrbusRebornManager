@@ -256,3 +256,16 @@ Open **My Servers**, detect or add a local Orbus Community server, and open its 
 Previously saved ServerPath is migrated to the persistent server library automatically. Removing a server card forgets its path **without** deleting files or Docker data. Card statuses refresh while the library is visible.
 
 Test on your own Docker server, ideally without players connected before trying Stop. Build CI does not run a live Orbus server.
+
+
+## Player Management (development preview)
+
+Open **My Servers → selected server → Players**. The left pane lists characters discovered from the selected server, with search and All / Online filters. Selecting a character opens the item-grant panel on the right. Item choices come from the local server's content/items/item-serverdata.txt catalogue. Click **Give selected item** and confirm: the app sends the documented Community Server admin command to the api container. A successful request is not proof of delivery; check the recipient inventory in-game.
+
+**Historical characters:** Player names are read using bounded, read-only RethinkDB queries via the server API container's Node dependencies. A small name-only snapshot per server is stored under LocalAppData/OrbusRebornManager/server-player-history. Previously discovered deleted characters remain in local history, but this cannot recover characters deleted before any snapshot was taken. The UI lists characters, not game accounts.
+
+**Online status:** The Orbus Community Server README does not document a named online-player list. If /serverinfo exposes an explicitly named online-player array, the app shows verified Online/Offline status. Otherwise it displays Presence unknown, an unknown online count, and an explanatory message in the Online filter. A future tested server-side presence integration may be needed.
+
+**Diagnostics:** Copy diagnostic details copies only source/table names and error messages, not credentials or inventories. If player discovery fails, use it to investigate.
+
+**Safety:** No database writes, raw inventory edits or mass grants. Item grants use the official admin endpoint one item at a time after confirmation.
