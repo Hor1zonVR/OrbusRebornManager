@@ -1174,7 +1174,7 @@
                                                    Margin="0,0,0,7"/>
                                         <TextBox x:Name="PlayerItemSearchText" TextChanged="PlayerItemSearch_Changed"
                                                  ToolTip="Type a name or item ID" Margin="0,0,0,12"/>
-                                        <WrapPanel Margin="0,0,0,11">
+                                        <WrapPanel x:Name="ItemCategoryBar" Margin="0,0,0,11">
                                             <Button Content="All" Tag="All" Click="PlayerItemCategory_Click"
                                                     Style="{StaticResource PillButton}" Padding="9,6" Margin="0,0,6,6"/>
                                             <Button Content="Bows" Tag="Bows" Click="PlayerItemCategory_Click"
@@ -1224,7 +1224,7 @@
                                                                        FontWeight="SemiBold" MaxWidth="115"
                                                                        TextAlignment="Center" Margin="0,6,0,0"
                                                                        TextTrimming="CharacterEllipsis"/>
-                                                            <TextBlock Text="{Binding Label}" FontSize="10"
+                                                            <TextBlock Text="{Binding ShortId}" FontSize="10"
                                                                        Foreground="{StaticResource MutedBrush}"/>
                                                         </StackPanel>
                                                     </Button>

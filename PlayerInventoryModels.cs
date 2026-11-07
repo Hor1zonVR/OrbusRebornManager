@@ -22,6 +22,7 @@ public sealed record ServerItemEntry(
     string RequiredClass = "", int MinimumLevel = 1, string BaseProperties = "")
 {
     public string Label => $"#{Id} · {Name}";
+    public string ShortId => $"#{Id}";
     public string Category
     {
         get

@@ -177,6 +177,12 @@ public partial class MainWindow
         if (sender is not Button { Tag: string category }) return;
         _itemCategory = category;
         _itemPage = 0;
+        foreach (var categoryButton in ItemCategoryBar.Children.OfType<Button>())
+            categoryButton.Background = string.Equals(categoryButton.Tag?.ToString(), category,
+                StringComparison.OrdinalIgnoreCase)
+                ? new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(47, 72, 69))
+                : System.Windows.Media.Brushes.Transparent;
         RefreshItemGrid();
     }
 
