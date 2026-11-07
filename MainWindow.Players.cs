@@ -99,6 +99,7 @@ public partial class MainWindow
 
     private void RefreshVisiblePlayers()
     {
+        if (PlayerSearchText == null || EmptyServerPlayersText == null) return;
         VisibleServerPlayers.Clear();
         string query = PlayerSearchText.Text.Trim();
         var players = (_playerDirectory?.Players ?? new()).Where(p =>
@@ -173,6 +174,8 @@ public partial class MainWindow
 
     private void FilterPlayerItems()
     {
+        if (PlayerItemSelect == null || PlayerItemSearchText == null ||
+            PlayerItemCountText == null) return;
         var previous = PlayerItemSelect.SelectedItem as ServerItemEntry;
         string query = PlayerItemSearchText.Text.Trim();
         VisiblePlayerItems.Clear();
@@ -220,10 +223,10 @@ public partial class MainWindow
                 (string.IsNullOrWhiteSpace(response) ? "" : "\nResponse: " + response);
             Log($"Admin gift request completed: #{item.Id} to {target}.");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            PlayerGiftStatusText.Text = "Gift request failed: " + e.Message;
-            Log("Gift request failed: " + e.Message);
+            PlayerGiftStatusText.Text = "Gift request failed: " + ex.Message;
+            Log("Gift request failed: " + ex.Message);
         }
         finally { UpdateGrantEnabled(); }
     }
