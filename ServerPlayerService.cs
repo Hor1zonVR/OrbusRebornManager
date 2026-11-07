@@ -20,10 +20,6 @@ public sealed record ServerPlayerEntry(string Name, bool? Online)
     public string StatusHint => Online == null ? "No verified live player-name source" :
         Online == true ? "Connected now" : "Not connected now";
 }
-public sealed record ServerItemEntry(int Id, string Name)
-{
-    public string Label => $"#{Id} · {Name}";
-}
 public sealed class ServerPlayerDirectoryResult
 {
     public List<ServerPlayerEntry> Players { get; init; } = new();
@@ -183,6 +179,13 @@ public sealed class ServerPlayerService
         if (header == null) return result;
         int idIndex = Array.FindIndex(header, s => s.Equals("id", StringComparison.OrdinalIgnoreCase));
         int nameIndex = Array.FindIndex(header, s => s.Equals("name", StringComparison.OrdinalIgnoreCase));
+        int FieldIndex(string key) => Array.FindIndex(header, x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+        string Read(string[] row, string key)
+        {
+            int ix = FieldIndex(key);
+            return ix >= 0 && ix < row.Length ? row[ix] : "";
+        }
+
         if (idIndex < 0 || nameIndex < 0) throw new InvalidOperationException("Unknown item catalogue format.");
         while (!parser.EndOfData && result.Count < 60000)
         {
@@ -190,7 +193,13 @@ public sealed class ServerPlayerService
             if (fields == null || fields.Length <= Math.Max(idIndex, nameIndex)) continue;
             if (int.TryParse(fields[idIndex], out int id) && id > 1 &&
                 !string.IsNullOrWhiteSpace(fields[nameIndex]))
-                result.Add(new ServerItemEntry(id, fields[nameIndex]));
+            {
+                int minLevel = int.TryParse(Read(fields, "minlevel"), out var lvl) ? lvl : 1;
+                result.Add(new ServerItemEntry(
+                    id, fields[nameIndex], Read(fields, "icon"), Read(fields, "description"),
+                    Read(fields, "rarity"), Read(fields, "type"), Read(fields, "slot"),
+                    Read(fields, "reqclass"), minLevel, Read(fields, "baseprops")));
+            }
         }
         return result.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToList();
     }
