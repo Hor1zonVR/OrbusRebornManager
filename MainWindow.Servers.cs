@@ -265,6 +265,7 @@ public partial class MainWindow
         _serverStatusKnown = false;
         _serverRunning = false;
         SetServerStatusUnknown();
+        ResetPlayersForServer();
         ShowPanel("serverdetail");
         ShowServerTab(tab);
         RefreshServerComponentRows();
@@ -275,11 +276,13 @@ public partial class MainWindow
     {
         _serverTab = tab;
         ServerOverviewTab.Visibility = tab == "overview" ? Visibility.Visible : Visibility.Collapsed;
+        ServerPlayersTab.Visibility = tab == "players" ? Visibility.Visible : Visibility.Collapsed;
         ServerPanel.Visibility = tab == "mods" ? Visibility.Visible : Visibility.Collapsed;
         ServerConsoleTab.Visibility = tab == "console" ? Visibility.Visible : Visibility.Collapsed;
         var selected = new SolidColorBrush(Color.FromRgb(50, 66, 70));
         var normal = Brushes.Transparent;
         OverviewTabButton.Background = tab == "overview" ? selected : normal;
+        ServerPlayersTabButton.Background = tab == "players" ? selected : normal;
         ServerModsTabButton.Background = tab == "mods" ? selected : normal;
         ConsoleTabButton.Background = tab == "console" ? selected : normal;
         NavServer.Background = tab == "mods"
@@ -287,6 +290,7 @@ public partial class MainWindow
         NavServers.Background = tab != "mods"
             ? new SolidColorBrush(Color.FromRgb(48, 50, 58)) : Brushes.Transparent;
         if (tab == "mods") RefreshServerComponentRows();
+        if (tab == "players") _ = LoadPlayersAsync();
         if (tab == "console") _ = RefreshConsoleAsync(force: true);
     }
 
@@ -300,6 +304,7 @@ public partial class MainWindow
     }
 
     private void ServerOverviewTab_Click(object sender, RoutedEventArgs e) => ShowServerTab("overview");
+    private void ServerPlayersTab_Click(object sender, RoutedEventArgs e) => ShowServerTab("players");
     private void ServerModsTab_Click(object sender, RoutedEventArgs e) => ShowServerTab("mods");
     private void ServerConsoleTab_Click(object sender, RoutedEventArgs e) => ShowServerTab("console");
 
