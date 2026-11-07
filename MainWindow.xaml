@@ -1149,6 +1149,13 @@
                                                            FontSize="11" TextWrapping="Wrap"
                                                            Foreground="{StaticResource MutedBrush}"
                                                            Margin="0,7,0,0"/>
+                                                <TextBlock x:Name="SelectedInventoryDurabilityText"
+                                                           Text="Durability: —" FontSize="11"
+                                                           Visibility="Collapsed" Margin="0,9,0,4"/>
+                                                <ProgressBar x:Name="SelectedInventoryDurabilityBar"
+                                                             Maximum="100" Minimum="0" Value="0"
+                                                             Height="7" Foreground="{StaticResource AccentBrush}"
+                                                             Visibility="Collapsed"/>
                                             </StackPanel>
                                         </Border>
                                         <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="0,4,0,17"/>

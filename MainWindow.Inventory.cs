@@ -57,6 +57,8 @@ public partial class MainWindow
         CharacterInventoryStatusText.Text = "Select a character to inspect their saved inventory.";
         SelectedInventoryNameText.Text = "Select a saved item slot";
         SelectedInventoryStatText.Text = "Actual saved stats and durability appear here.";
+        SelectedInventoryDurabilityBar.Visibility = Visibility.Collapsed;
+        SelectedInventoryDurabilityText.Visibility = Visibility.Collapsed;
         InventoryPageText.Text = "No inventory loaded";
         SelectedCatalogNameText.Text = "Select an item above";
         SelectedCatalogDetailsText.Text = "Rarity, class requirements and base properties appear here.";
@@ -135,6 +137,16 @@ public partial class MainWindow
         SelectedInventoryStatText.Text = slot.ItemStats +
             "\n\nThese are the exact recognised values stored on the item instance. " +
             "Missing stats are not invented.";
+        bool hasDurability = slot.TryGetDurability(out double current, out double max);
+        SelectedInventoryDurabilityBar.Visibility =
+            hasDurability ? Visibility.Visible : Visibility.Collapsed;
+        SelectedInventoryDurabilityText.Visibility =
+            hasDurability ? Visibility.Visible : Visibility.Collapsed;
+        if (hasDurability)
+        {
+            SelectedInventoryDurabilityBar.Value = current / max * 100;
+            SelectedInventoryDurabilityText.Text = $"Durability: {current:0}/{max:0}";
+        }
     }
 
     private void RefreshItemGrid()

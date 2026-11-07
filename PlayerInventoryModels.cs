@@ -88,6 +88,27 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
     public string RarityColor => Item?.RarityColor ?? "#707783";
     public string ShortLabel => ItemId == 0 ? "—" : (Quantity > 1 ? $"×{Quantity}" : "");
     public string TooltipText => $"Slot {Slot + 1}: {Name}\n" + ItemStats;
+    public bool TryGetDurability(out double current, out double maximum)
+    {
+        current = 0;
+        maximum = 0;
+        if (string.IsNullOrWhiteSpace(Metadata)) return false;
+        try
+        {
+            using var doc = JsonDocument.Parse(Metadata);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object ||
+                !doc.RootElement.TryGetProperty("maxDurability", out var max) ||
+                max.ValueKind != JsonValueKind.Number || !max.TryGetDouble(out maximum) ||
+                maximum <= 0) return false;
+            if ((!doc.RootElement.TryGetProperty("durability", out var val) &&
+                !doc.RootElement.TryGetProperty("currentDurability", out val)) ||
+                val.ValueKind != JsonValueKind.Number || !val.TryGetDouble(out current))
+                return false;
+            current = Math.Clamp(current, 0, maximum);
+            return true;
+        }
+        catch (JsonException) { return false; }
+    }
     public string ItemStats
     {
         get
