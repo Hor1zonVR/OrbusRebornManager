@@ -27,6 +27,22 @@ public partial class MainWindow
     private const int ItemPageSize = 36;
     private const int InventoryPageSize = 40;
 
+    private void ChooseItemIcons_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Choose a folder with item PNG icons (names must match the Orbus item catalogue)"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        _settings.ItemIconDirectory = dialog.FolderName;
+        LocalItemArtwork.DirectoryPath = dialog.FolderName;
+        _service.SaveSettings(_settings);
+        ItemIconFolderText.Text = "Using local PNGs from " + dialog.FolderName;
+        // WPF recomputes IconPath when rebinding these collections.
+        RefreshItemGrid();
+        RefreshInventoryPage();
+    }
+
     private void ResetInventoryViewer()
     {
         ++_characterRequest;

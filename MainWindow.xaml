@@ -1156,6 +1156,13 @@
                                         <TextBlock Text="Search and preview items before gifting. The standard admin command cannot generate custom +X upgrades or rolled stats."
                                                    FontSize="12" TextWrapping="Wrap"
                                                    Foreground="{StaticResource MutedBrush}" Margin="0,9,0,13"/>
+                                        <Button Content="Choose local item icons…" Click="ChooseItemIcons_Click"
+                                                Style="{StaticResource PillButton}" HorizontalAlignment="Left"
+                                                Margin="0,0,0,7"/>
+                                        <TextBlock x:Name="ItemIconFolderText"
+                                                   Text="Optional: choose an icon PNG export folder. Default is the OrbusManager ItemIcons folder."
+                                                   TextWrapping="Wrap" FontSize="11"
+                                                   Foreground="{StaticResource MutedBrush}" Margin="0,0,0,13"/>
                                         <TextBlock Text="SEARCH BY NAME OR ID" Style="{StaticResource Eyebrow}"
                                                    Margin="0,0,0,7"/>
                                         <TextBox x:Name="PlayerItemSearchText" TextChanged="PlayerItemSearch_Changed"

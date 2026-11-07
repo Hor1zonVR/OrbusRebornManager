@@ -9,6 +9,13 @@ namespace OrbusRebornManager;
 
 // Catalogue properties describe base items. Rolled equipment properties live
 // on individual inventory slots and MUST NOT be inferred from the catalogue.
+public static class LocalItemArtwork
+{
+    public static string DirectoryPath { get; set; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "OrbusRebornManager", "ItemIcons");
+}
+
 public sealed record ServerItemEntry(
     int Id, string Name, string IconName = "", string Description = "",
     string Rarity = "", string Type = "", string Slot = "",
@@ -55,9 +62,8 @@ public sealed record ServerItemEntry(
             if (string.IsNullOrWhiteSpace(IconName) ||
                 !IconName.Equals(Path.GetFileName(IconName), StringComparison.Ordinal))
                 return null;
-            string path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "OrbusRebornManager", "ItemIcons", IconName);
+            if (!IconName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) return null;
+            string path = Path.Combine(LocalItemArtwork.DirectoryPath, IconName);
             return File.Exists(path) ? path : null;
         }
     }

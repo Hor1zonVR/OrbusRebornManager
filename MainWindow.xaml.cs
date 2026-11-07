@@ -32,6 +32,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
         _settings = _service.LoadSettings();
+        if (!string.IsNullOrWhiteSpace(_settings.ItemIconDirectory) &&
+            System.IO.Directory.Exists(_settings.ItemIconDirectory))
+            LocalItemArtwork.DirectoryPath = _settings.ItemIconDirectory;
         GamePathText.Text = _settings.GamePath;
         DefaultInstanceFolderText.Text = _settings.DefaultInstanceDirectory;
         CatalogUrlText.Text = _settings.CatalogUrl;

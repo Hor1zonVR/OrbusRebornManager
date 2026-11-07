@@ -19,6 +19,8 @@ public sealed class ManagerSettings
     // Saved server library. ServerPath remains the last selected entry for older installations.
     public List<string> ManagedServerPaths { get; set; } = new();
     public bool CheckManagerUpdates { get; set; } = true;
+    // Optional local exports; artwork is never bundled with the manager.
+    public string ItemIconDirectory { get; set; } = "";
     public string DefaultInstanceDirectory { get; set; } =
         System.IO.Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
