@@ -233,7 +233,12 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
     {
         if (string.IsNullOrWhiteSpace(raw) || raw == "0")
             return new OrbusInventorySlot(index, 0, 0, null, "", "");
-        string[] parts = raw.Split('%', 3);
+        // The Player.inventory outer format is itemId@quantity@metadata, not %.
+        // Some nested metadata (such as containedItems) legitimately contains %,
+        // so only inspect the outer delimiter.
+        bool legacyMalformed = raw.Contains('%') && !raw.Contains('@');
+        string[] parts = raw.Contains('@') ? raw.Split('@', 3) :
+            legacyMalformed ? raw.Split('%', 3) : new[] { raw };
         if (!int.TryParse(parts[0], out int id) || id < 0)
             return new OrbusInventorySlot(index, 0, 0, null, "", "Unknown inventory slot encoding");
         int quantity = 1;
@@ -241,7 +246,8 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
             quantity = 1;
         items.TryGetValue(id, out var item);
         return new OrbusInventorySlot(index, id, quantity, item,
-            parts.Length == 3 ? parts[2] : "", "");
+            parts.Length == 3 ? parts[2] : "",
+            legacyMalformed ? "WARNING: malformed '%' inventory delimiter; do not log in until repaired" : "");
     }
 }
 
