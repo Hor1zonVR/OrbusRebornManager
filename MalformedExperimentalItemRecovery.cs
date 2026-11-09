@@ -129,6 +129,8 @@ public partial class MainWindow
     private readonly MalformedExperimentalItemRecovery _malformedRecovery=new();
     private bool _malformedRecoveryBusy;
 
+    // Only matching pre-grant records authorise cleanup. Do not blanket-replace
+    // percent signs: nested containedItems may legitimately use them.
     private static bool MatchesExactExperimentalMetadata(string raw, int itemId, JsonElement requested)
     {
         int first=raw.IndexOf('%');
