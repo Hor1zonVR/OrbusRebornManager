@@ -1287,7 +1287,7 @@
                                                    Foreground="{StaticResource MutedBrush}"
                                                    FontSize="12" Margin="0,12,0,0"/>
                                         <Button x:Name="PlayerPrepareGearButton"
-                                                Content="Experiment: generated equipment…" IsEnabled="False"
+                                                Content="Experimental equipment grants paused — recovery required" IsEnabled="False"
                                                 Style="{StaticResource PillButton}" Margin="0,12,0,0"
                                                 Click="ToggleGearEditor_Click"/>
                                         <Border x:Name="GearEditorPanel" Visibility="Collapsed"
