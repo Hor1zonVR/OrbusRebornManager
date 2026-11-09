@@ -1337,11 +1337,11 @@
                                                         <TextBox x:Name="GearArmorText" ToolTip="Confirmed on armour drops, not on bows"/>
                                                     </StackPanel>
                                                     <StackPanel Width="111" Margin="0,0,10,9">
-                                                        <TextBlock Text="Damage" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
-                                                        <TextBox x:Name="GearDamageText" ToolTip="Unverified for class weapons; experimental only"/>
+                                                        <TextBlock Text="Attack" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="GearAttackText" ToolTip="Client InventoryItemMeta.attack field; stat scaling is experimental"/>
                                                     </StackPanel>
                                                 </WrapPanel>
-                                                <TextBlock Text="itemLevel and affixes are confirmed in real drops. itemPlusLevel is visible in the IL2CPP client research; weapon damage and + scaling still need in-game verification."
+                                                <TextBlock Text="The client metadata explicitly includes attack and itemPlusLevel. How the server applies attack, item level and + scaling still needs an in-game test."
                                                            FontSize="11" Foreground="{StaticResource MutedBrush}"
                                                            TextWrapping="Wrap" Margin="0,0,0,11"/>
                                                 <Button x:Name="GiveExperimentalGearButton"
