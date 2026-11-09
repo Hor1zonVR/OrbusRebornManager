@@ -187,13 +187,9 @@ public partial class MainWindow
                 throw new InvalidOperationException("The admin command did not create exactly one identifiable new equipment slot. " +
                     "No metadata was applied; inspect the saved inventory before retrying.");
 
-            GearGiftStatusText.Text = "Attaching level/rarity/affix metadata to the newly granted saved slot…";
-            int verifiedSlot = await _equipmentWriter.PatchGrantedSlotAsync(
-                folder, name, item.Id, changedSlot, after.SerializedSlots[changedSlot],
-                metadata, after.SerializedSlots);
-
-            // Create a separate precise UNDO journal after read-back validation.
-            // If the journal cannot be written, treat it as a failed experiment and warn.
+            // Write the exact undo journal BEFORE metadata mutation. A disk
+            // failure must never leave a generated item without an undo record.
+            // The journal is harmless if the later CAS fails; Undo checks exact bytes.
             string testDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "OrbusRebornManager", "equipment-tests");
@@ -211,6 +207,11 @@ public partial class MainWindow
                 originalEmptySlot = before.SerializedSlots[changedSlot],
                 expectedGeneratedItem = finalRaw, preGrantBackupFile = backupPath
             }, new JsonSerializerOptions { WriteIndented = true }));
+
+            GearGiftStatusText.Text = "Applying a single saved-item metadata change…";
+            int verifiedSlot = await _equipmentWriter.PatchGrantedSlotAsync(
+                folder, name, item.Id, changedSlot, after.SerializedSlots[changedSlot],
+                metadata, after.SerializedSlots);
 
             GearGiftStatusText.Text = $"Saved equipment metadata verified at slot {verifiedSlot}. " +
                 $"Rollback journal: {journalFile}\nCheck the game, LOG OUT, then test Undo if needed.";
