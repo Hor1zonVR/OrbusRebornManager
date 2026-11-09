@@ -1082,6 +1082,11 @@
                                             <StackPanel>
                                                 <TextBlock Text="Inventory blank in-game? Experimental equipment grants are paused while we investigate." TextWrapping="Wrap"
                                                            Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,0,0,8"/>
+                                                <Button Content="Repair broken experimental item entries from backup…"
+                                                        Style="{StaticResource PillButton}" Padding="12,8"
+                                                        HorizontalAlignment="Left" Click="RepairMalformedInventory_Click"/>
+                                                <TextBlock Text="Select the earliest pre-grant backup; only entries with the bad '%' separator and an exact matching grant record will be removed. Unrelated slot changes are preserved."
+                                                           TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,8,0,8"/>
                                                 <Button Content="Recover one experimental gift from backup…"
                                                         Style="{StaticResource PillButton}" Padding="12,8"
                                                         HorizontalAlignment="Left" Click="RecoverExperimentalInventory_Click"/>

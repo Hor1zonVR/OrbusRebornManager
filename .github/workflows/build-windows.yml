@@ -49,6 +49,10 @@ jobs:
           dotnet run --project tests/ItemGridSmoke/ItemGridSmoke.csproj --configuration Release
           pwsh -NoProfile -File tests/CharacterBridgeCompatibility.ps1
 
+      - name: Smoke-test malformed experimental inventory recovery
+        shell: pwsh
+        run: pwsh -NoProfile -File tests/MalformedExperimentalRecoveryCompatibility.ps1
+
       - name: Smoke-test experimental gift recovery bridge
         shell: pwsh
         run: pwsh -NoProfile -File tests/ExperimentalGiftRollbackCompatibility.ps1

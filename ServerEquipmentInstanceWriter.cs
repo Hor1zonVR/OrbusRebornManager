@@ -84,7 +84,9 @@ public sealed class ServerEquipmentInstanceWriter
    if (actualHash !== expectedHash) {
      output({ok:false,error:"Inventory changed after the grant. No equipment metadata was written."}); return;
    }
-   const nextRaw = itemId + "%1%" + JSON.stringify(info);
+   // Player.inventory top-level delimiter is @; nested containedItems may use %.
+   // Writer remains QUARANTINED in RM until game-client round-trip validation.
+   const nextRaw = itemId + "@1@" + JSON.stringify(info);
    const write = await run(table.get(player.id).update(function (row) {
      return r.branch(
        row("name").eq(name).and(row("inventory").eq(inv)),
