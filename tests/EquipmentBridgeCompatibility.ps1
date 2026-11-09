@@ -16,6 +16,9 @@ try {
     node --check $path
     if ($LASTEXITCODE -ne 0) { throw 'Equipment bridge does not parse' }
     foreach ($expected in @('changeAt(slot,nextRaw)', 'row("inventory").eq(inv)',
+        'const nextRaw = itemId + "@1@" + JSON.stringify(info)',
+        'oldRaw !== base + "@1"',
+        'Existing malformed inventory entry detected',
         '"itemLevel"', '"itemPlusLevel"', 'createHash("sha256")',
         'verify.inventory[slot] !== nextRaw')) {
         if (!$js.Contains($expected)) {
