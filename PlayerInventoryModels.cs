@@ -207,7 +207,7 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
                     if (doc.RootElement.ValueKind == JsonValueKind.Object)
                     {
                         foreach (string key in new[] {
-                            "itemLevel", "level", "rarity", "armor", "damage",
+                            "itemLevel", "level", "rarity", "armor", "attack", "damage", "crit", "rollLevel", "perfect",
                             "durability", "currentDurability", "maxDurability",
                             "upgrade", "upgradeLevel", "enhancementLevel", "itemPlusLevel", "affixes",
                             "strength", "intellect", "vitality", "defense", "criticalChance"
