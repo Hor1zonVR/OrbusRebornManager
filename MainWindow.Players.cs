@@ -168,6 +168,7 @@ public partial class MainWindow
     private void UpdatePlayerSelection(ServerPlayerEntry player)
     {
         CloseClassLevelEditor();
+        if (GearSafetyOptInCheck != null) GearSafetyOptInCheck.IsChecked = false;
         _chosenPlayer = player;
         PlayerSelectionEmpty.Visibility = Visibility.Collapsed;
         PlayerProfilePanel.Visibility = Visibility.Visible;
@@ -181,6 +182,7 @@ public partial class MainWindow
     private void ClearPlayerSelection()
     {
         CloseClassLevelEditor();
+        if (GearSafetyOptInCheck != null) GearSafetyOptInCheck.IsChecked = false;
         _chosenPlayer = null;
         PlayerSelectionEmpty.Visibility = Visibility.Visible;
         PlayerProfilePanel.Visibility = Visibility.Collapsed;
