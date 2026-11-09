@@ -1303,7 +1303,7 @@
                                                    Foreground="{StaticResource MutedBrush}"
                                                    FontSize="12" Margin="0,12,0,0"/>
                                         <Button x:Name="PlayerPrepareGearButton"
-                                                Content="Experimental equipment grants paused — recovery required" IsEnabled="False"
+                                                Content="Equipment Lab · guarded single-item test…" IsEnabled="False"
                                                 Style="{StaticResource PillButton}" Margin="0,12,0,0"
                                                 Click="ToggleGearEditor_Click"/>
                                         <Border x:Name="GearEditorPanel" Visibility="Collapsed"
@@ -1313,7 +1313,7 @@
                                             <StackPanel>
                                                 <TextBlock Text="EXPERIMENTAL EQUIPMENT GENERATOR"
                                                            Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
-                                                <TextBlock Text="For class weapons and armour only. The official admin endpoint places the item, then RM attaches instance metadata. The game may ignore unsupported weapon stats. Character MUST be logged out; an inventory backup is written first."
+                                                <TextBlock Text="ONE TEST ITEM AT A TIME. Character must be logged out. Preview first; RM backs up the entire inventory, writes only a newly granted empty slot, and saves a one-item rollback journal. This is unverified experimental equipment, not a normal item generator."
                                                            FontSize="11" Foreground="{StaticResource MutedBrush}"
                                                            TextWrapping="Wrap" Margin="0,0,0,11"/>
                                                 <WrapPanel>
@@ -1360,8 +1360,20 @@
                                                 <TextBlock Text="The client metadata explicitly includes attack and itemPlusLevel. How the server applies attack, item level and + scaling still needs an in-game test."
                                                            FontSize="11" Foreground="{StaticResource MutedBrush}"
                                                            TextWrapping="Wrap" Margin="0,0,0,11"/>
+                                                <Button x:Name="GearPreviewButton" Content="Preview saved @-format item (no changes)"
+                                                        Click="PreviewGear_Click" Style="{StaticResource PillButton}"
+                                                        Margin="0,0,0,8"/>
+                                                <TextBlock x:Name="GearPreviewText" FontSize="11" TextWrapping="Wrap"
+                                                           Foreground="{StaticResource MutedBrush}" Margin="0,0,0,10"
+                                                           Text="Preview the exact item string before the first test."/>
+                                                <CheckBox x:Name="GearSafetyOptInCheck"
+                                                          Checked="GearOptIn_Changed" Unchecked="GearOptIn_Changed"
+                                                          Margin="0,0,0,12">
+                                                    <TextBlock Text="I have logged out and want to test ONE experimental item. I understand it may still fail in-game."
+                                                               TextWrapping="Wrap" FontSize="12"/>
+                                                </CheckBox>
                                                 <Button x:Name="GiveExperimentalGearButton"
-                                                        Content="Grant &amp; attach equipment metadata"
+                                                        Content="Run one backed-up experimental grant" IsEnabled="False"
                                                         Style="{StaticResource PrimaryButton}"
                                                         Click="GiveExperimentalGear_Click"/>
                                                 <TextBlock x:Name="GearGiftStatusText" Text="The full saved inventory is backed up before the admin grant."
@@ -1369,6 +1381,9 @@
                                                            TextWrapping="Wrap" Margin="0,10,0,0"/>
                                             </StackPanel>
                                         </Border>
+                                        <Button x:Name="UndoEquipmentTestButton" Content="Undo a previous equipment-lab test from journal…"
+                                                Style="{StaticResource PillButton}" Margin="0,6,0,12"
+                                                Click="UndoEquipmentTest_Click" IsEnabled="False"/>
                                         <ScrollViewer MaxHeight="310" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <ItemsControl ItemsSource="{Binding VisiblePlayerItems}">
                                             <ItemsControl.ItemsPanel>

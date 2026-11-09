@@ -37,7 +37,8 @@ public sealed class ExperimentalGiftRollback
        !Number.isInteger(grantedItem) || grantedItem < 1 ||
        !/^[0-9a-f]{64}$/.test(hash) || !expected || expected.length > 4096 ||
        !["","0"].includes(original) ||
-       Number(expected.split("%",1)[0]) !== grantedItem) {
+       !(expected.startsWith(String(grantedItem) + "%1%") ||
+         expected.startsWith(String(grantedItem) + "@1@"))) {
      finish({ok:false,error:"Invalid or unsafe rollback request."}); return;
    }
    let r, run;
@@ -91,8 +92,10 @@ public sealed class ExperimentalGiftRollback
             slot < 0 || slot >= currentInventory.Count ||
             (beforeRaw != "" && beforeRaw != "0") ||
             currentRaw != currentInventory[slot] ||
-            !currentRaw.StartsWith(itemId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%",
-                StringComparison.Ordinal))
+            !(currentRaw.StartsWith(itemId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%1%",
+                 StringComparison.Ordinal) ||
+              currentRaw.StartsWith(itemId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "@1@",
+                 StringComparison.Ordinal)))
             throw new InvalidOperationException("This recovery only removes a freshly granted item from its previously empty slot.");
         string output=await _host.ComposeAsync(folder,30000,"exec","-T","api","node","-e",
             RollbackJs,name,slot.ToString(System.Globalization.CultureInfo.InvariantCulture),

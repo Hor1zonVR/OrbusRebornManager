@@ -168,6 +168,7 @@ public partial class MainWindow
     private void UpdatePlayerSelection(ServerPlayerEntry player)
     {
         CloseClassLevelEditor();
+        if (GearSafetyOptInCheck != null) GearSafetyOptInCheck.IsChecked = false;
         _chosenPlayer = player;
         PlayerSelectionEmpty.Visibility = Visibility.Collapsed;
         PlayerProfilePanel.Visibility = Visibility.Visible;
@@ -181,6 +182,7 @@ public partial class MainWindow
     private void ClearPlayerSelection()
     {
         CloseClassLevelEditor();
+        if (GearSafetyOptInCheck != null) GearSafetyOptInCheck.IsChecked = false;
         _chosenPlayer = null;
         PlayerSelectionEmpty.Visibility = Visibility.Visible;
         PlayerProfilePanel.Visibility = Visibility.Collapsed;
@@ -197,14 +199,14 @@ public partial class MainWindow
     private void UpdateGrantEnabled()
     {
         if (PlayerGiftButton == null) return;
-        PlayerGiftButton.IsEnabled = !_playerBusy && !_giftBusy &&
+        PlayerGiftButton.IsEnabled = !_playerBusy && !_giftBusy && !_equipmentGrantBusy &&
             _chosenPlayer != null && _selectedCatalogItem != null;
         RefreshEquipmentControls();
     }
 
     private async void GivePlayerItem_Click(object sender, RoutedEventArgs e)
     {
-        if (_giftBusy || _chosenPlayer == null || _selectedCatalogItem is not ServerItemEntry item)
+        if (_giftBusy || _equipmentGrantBusy || _chosenPlayer == null || _selectedCatalogItem is not ServerItemEntry item)
             return;
         string? folder = ServerFolder();
         if (folder == null) return;
