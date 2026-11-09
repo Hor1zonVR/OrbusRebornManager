@@ -13,8 +13,12 @@ public partial class MainWindow
     private readonly ServerEquipmentInstanceWriter _equipmentWriter = new();
     private bool _equipmentGrantBusy;
 
+    // Quarantined after reported blank in-game inventory; retain existing read-only inspection.
+    // Re-enable only after the client inventory serialization has been verified.
+    private const bool ExperimentalEquipmentGrantsEnabled = false;
+
     private static bool CanGenerateEquipment(ServerItemEntry? item) =>
-        item != null && (item.Type.Equals("classweapon", StringComparison.OrdinalIgnoreCase) ||
+        ExperimentalEquipmentGrantsEnabled && item != null && (item.Type.Equals("classweapon", StringComparison.OrdinalIgnoreCase) ||
                          item.Type.Equals("equipment", StringComparison.OrdinalIgnoreCase) ||
                          item.Type.Equals("equpiment", StringComparison.OrdinalIgnoreCase));
 
