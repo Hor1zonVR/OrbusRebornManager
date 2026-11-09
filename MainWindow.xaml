@@ -1109,6 +1109,29 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
+                                        <Border x:Name="LevelEditPanel" Visibility="Collapsed"
+                                                Background="{StaticResource CardAltBrush}"
+                                                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                                                CornerRadius="9" Padding="13" Margin="0,0,0,12">
+                                            <StackPanel>
+                                                <TextBlock x:Name="LevelEditHeadingText" Text="Edit class level"
+                                                           FontWeight="SemiBold" FontSize="14" Margin="0,0,0,7"/>
+                                                <TextBlock Text="Change the saved class level only (1–100). Log out of the game first."
+                                                           TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                           Margin="0,0,0,10"/>
+                                                <WrapPanel>
+                                                    <TextBox x:Name="LevelEditValueText" Width="86"
+                                                             VerticalAlignment="Center" Margin="0,0,9,6"
+                                                             ToolTip="New class level, 1–100"/>
+                                                    <Button x:Name="LevelEditSaveButton" Content="Save level"
+                                                            Click="SaveClassLevel_Click" Style="{StaticResource PrimaryButton}"
+                                                            Padding="12,7" Margin="0,0,9,6"/>
+                                                    <Button Content="Cancel" Click="CancelClassLevel_Click"
+                                                            Style="{StaticResource PillButton}" Padding="12,7"
+                                                            Margin="0,0,0,6"/>
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
                                         <Expander Header="Saved inventory &amp; advanced progression" IsExpanded="False" Margin="0,4,0,14">
                                             <StackPanel>
                                         <TextBlock Text="OTHER PROGRESSION DATA"

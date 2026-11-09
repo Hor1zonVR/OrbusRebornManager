@@ -167,6 +167,7 @@ public partial class MainWindow
 
     private void UpdatePlayerSelection(ServerPlayerEntry player)
     {
+        CloseClassLevelEditor();
         _chosenPlayer = player;
         PlayerSelectionEmpty.Visibility = Visibility.Collapsed;
         PlayerProfilePanel.Visibility = Visibility.Visible;
@@ -179,6 +180,7 @@ public partial class MainWindow
 
     private void ClearPlayerSelection()
     {
+        CloseClassLevelEditor();
         _chosenPlayer = null;
         PlayerSelectionEmpty.Visibility = Visibility.Visible;
         PlayerProfilePanel.Visibility = Visibility.Collapsed;

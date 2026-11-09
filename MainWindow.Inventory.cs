@@ -33,86 +33,106 @@ public partial class MainWindow
     private const int InventoryPageSize = 40;
 
 
-    private async void EditClassLevel_Click(object sender, RoutedEventArgs e)
+    private ServerClassProgress? _editingClassLevel;
+    private string? _editingClassCharacter;
+    private string? _editingClassServer;
+
+    // Avoid creating a second WPF Window from a DataTemplate click. The previous
+    // implementation could throw before its try/catch and terminate the app.
+    private void EditClassLevel_Click(object sender, RoutedEventArgs e)
     {
-        if (_levelEditBusy || _chosenPlayer == null ||
-            sender is not Button { Tag: ServerClassProgress selected })
-            return;
-        string? folder = ServerFolder();
-        if (folder == null) return;
-        string name = _chosenPlayer.Name;
-        var dialog = new Window
-        {
-            Title = "Edit " + selected.DisplayName + " level",
-            Owner = this,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            SizeToContent = SizeToContent.WidthAndHeight,
-            ResizeMode = ResizeMode.NoResize,
-            Width = 380,
-            Background = System.Windows.Media.Brushes.Black,
-            Foreground = System.Windows.Media.Brushes.White
-        };
-        var stack = new StackPanel { Margin = new Thickness(22) };
-        stack.Children.Add(new TextBlock
-        {
-            Text = name + " · " + selected.DisplayName,
-            FontSize = 17, FontWeight = FontWeights.SemiBold
-        });
-        stack.Children.Add(new TextBlock
-        {
-            Text = "Saved level: " + selected.Level +
-                   "\nEnter a new level (1–100). Only this class will change.",
-            Margin = new Thickness(0, 12, 0, 12),
-            TextWrapping = TextWrapping.Wrap
-        });
-        var field = new TextBox { Text = selected.Level.ToString(), FontSize = 17, Padding = new Thickness(9) };
-        field.SelectAll();
-        stack.Children.Add(field);
-        var actionRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 18, 0, 0) };
-        var cancel = new Button { Content = "Cancel", Padding = new Thickness(15, 8, 15, 8), Margin = new Thickness(0, 0, 8, 0), IsCancel = true };
-        cancel.Click += (_, _) => dialog.DialogResult = false;
-        var save = new Button { Content = "Review change", Padding = new Thickness(15, 8, 15, 8), IsDefault = true };
-        save.Click += (_, _) =>
-        {
-            if (!int.TryParse(field.Text.Trim(), out int value) || value < 1 || value > 100)
-            {
-                MessageBox.Show(dialog, "Enter a whole number from 1 to 100.", "Invalid level", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-            dialog.Tag = value;
-            dialog.DialogResult = true;
-        };
-        actionRow.Children.Add(cancel);
-        actionRow.Children.Add(save);
-        stack.Children.Add(actionRow);
-        dialog.Content = stack;
-        if (dialog.ShowDialog() != true || dialog.Tag is not int next || next == selected.Level) return;
-        if (MessageBox.Show(this,
-                "Change " + name + "'s " + selected.DisplayName + " level from " +
-                selected.Level + " to " + next + "?\n\n" +
-                "The character MUST be logged out. RM cannot verify presence on this server version. " +
-                "A local backup of the saved progression values will be written before editing. " +
-                "XP and other classes will not be changed.\n\nContinue?",
-                "Confirm class level edit", MessageBoxButton.YesNo,
-                MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-        _levelEditBusy = true;
         try
         {
-            // A fresh read prevents backing up stale progression. The server-side update
-            // separately checks the expected level atomically.
+            if (_levelEditBusy || _chosenPlayer == null ||
+                sender is not Button { Tag: ServerClassProgress selected })
+                return;
+
+            string? folder = ServerFolder();
+            if (folder == null) return;
+
+            _editingClassLevel = selected;
+            _editingClassCharacter = _chosenPlayer.Name;
+            _editingClassServer = folder;
+            LevelEditHeadingText.Text = $"Edit {selected.DisplayName} · {_chosenPlayer.Name}";
+            LevelEditValueText.Text = selected.Level.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            LevelEditPanel.Visibility = Visibility.Visible;
+            LevelEditValueText.Focus();
+            LevelEditValueText.SelectAll();
+        }
+        catch (Exception ex)
+        {
+            CloseClassLevelEditor();
+            ShowClassLevelEditorError("Could not open the level editor.", ex);
+        }
+    }
+
+    private void CloseClassLevelEditor()
+    {
+        _editingClassLevel = null;
+        _editingClassCharacter = null;
+        _editingClassServer = null;
+        if (LevelEditPanel != null)
+            LevelEditPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void CancelClassLevel_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_levelEditBusy) CloseClassLevelEditor();
+    }
+
+    private async void SaveClassLevel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_levelEditBusy || _editingClassLevel is not { } selected ||
+            _editingClassCharacter is not { } name || _editingClassServer is not { } folder)
+            return;
+
+        try
+        {
+            if (_chosenPlayer == null ||
+                !string.Equals(_chosenPlayer.Name, name, StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(_selectedServerPath, folder, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("The selected character or server has changed. Select the class again.");
+
+            if (!int.TryParse(LevelEditValueText.Text.Trim(), out int next) || next is < 1 or > 100)
+            {
+                MessageBox.Show(this, "Enter a whole number from 1 to 100.",
+                    "Invalid level", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            if (next == selected.Level)
+            {
+                CloseClassLevelEditor();
+                return;
+            }
+            if (MessageBox.Show(this,
+                    $"Change {name}'s {selected.DisplayName} level from {selected.Level} to {next}?\n\n" +
+                    "The character MUST be logged out. This server does not provide verified online presence. " +
+                    "A local backup of saved progression will be written before editing. " +
+                    "XP and other class levels will not be changed.\n\nContinue?",
+                    "Confirm class level edit", MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                return;
+
+            _levelEditBusy = true;
+            LevelEditSaveButton.IsEnabled = false;
+
             var snapshot = await _characterInspector.ReadAsync(folder, name);
             if (!string.Equals(folder, _selectedServerPath, StringComparison.OrdinalIgnoreCase) ||
                 !string.Equals(name, _chosenPlayer?.Name, StringComparison.OrdinalIgnoreCase))
-                return;
+                throw new InvalidOperationException("The selected character changed while reading its saved data.");
+
             if (!snapshot.Progression.TryGetValue("skill_level", out string? raw) ||
                 string.IsNullOrWhiteSpace(raw))
                 throw new InvalidOperationException("Saved class levels could not be read for backup.");
+
             using (var levels = JsonDocument.Parse(raw))
             {
-                if (!levels.RootElement.TryGetProperty(selected.Key, out var oldLevel) ||
+                if (levels.RootElement.ValueKind != JsonValueKind.Object ||
+                    !levels.RootElement.TryGetProperty(selected.Key, out var oldLevel) ||
                     !oldLevel.TryGetInt32(out int current) || current != selected.Level)
-                    throw new InvalidOperationException("Saved level has changed. Refresh the profile first.");
+                    throw new InvalidOperationException("Saved class level has changed. Refresh the profile first.");
             }
+
             string backupFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "OrbusRebornManager", "progression-backups");
@@ -134,8 +154,10 @@ public partial class MainWindow
             };
             await File.WriteAllTextAsync(backupFile, JsonSerializer.Serialize(backup,
                 new JsonSerializerOptions { WriteIndented = true }));
+
             await _classLevelEditor.EditAsync(folder, name, selected.Key, selected.Level, next);
-            Log("Verified saved level edit: " + name + " · " + selected.DisplayName + " → " + next);
+            Log($"Verified saved level edit: {name} · {selected.DisplayName} → {next}");
+            CloseClassLevelEditor();
             await LoadCharacterSnapshotAsync();
             MessageBox.Show(this,
                 "Saved level updated and verified.\n\nBackup: " + backupFile +
@@ -144,11 +166,33 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "No successful level edit was confirmed.\n\n" + ex.Message +
-                "\n\nRefresh the character before attempting another edit.",
-                "Class level edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ShowClassLevelEditorError("The class level was not confirmed as updated.", ex);
         }
-        finally { _levelEditBusy = false; }
+        finally
+        {
+            _levelEditBusy = false;
+            if (LevelEditSaveButton != null) LevelEditSaveButton.IsEnabled = true;
+        }
+    }
+
+    private void ShowClassLevelEditorError(string summary, Exception ex)
+    {
+        string? logPath = null;
+        try
+        {
+            string folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "OrbusRebornManager", "logs");
+            Directory.CreateDirectory(folder);
+            logPath = Path.Combine(folder, "class-level-editor.log");
+            File.AppendAllText(logPath, $"[{DateTimeOffset.UtcNow:O}] {summary}\n{ex}\n\n");
+        }
+        catch (Exception) { /* Logging must never take down the manager. */ }
+
+        Log("Class level editor error: " + ex.Message);
+        MessageBox.Show(this, summary + "\n\n" + ex.Message +
+            (logPath == null ? "" : "\n\nDiagnostic log: " + logPath),
+            "Class level editor", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private async void ChooseItemIcons_Click(object sender, RoutedEventArgs e)
@@ -214,6 +258,7 @@ public partial class MainWindow
         _itemPage = 0;
         _selectedCatalogItem = null;
         _itemCategory = "All";
+        CloseClassLevelEditor();
         if (CharacterInventoryStatusText == null) return;
         CharacterInventoryStatusText.Text = "Select a character to inspect their saved inventory.";
         SelectedInventoryNameText.Text = "Select a saved item slot";
