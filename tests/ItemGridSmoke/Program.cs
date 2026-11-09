@@ -31,11 +31,11 @@ if (!plain.ItemStats.Contains("No rolled item stats"))
 // Real Player.inventory uses @ at the top level. Nested contained-items can
 // legitimately embed percent-delimited strings and must not be split apart.
 var nestedSlot = OrbusInventorySlot.Parse(45,
-    "1564@1@{\\"containedItems\\":[\\"1508%1%{}\\"]}", items);
+    """1564@1@{"containedItems":["1508%1%{}"]}""", items);
 if (nestedSlot.ItemId != 1564 || !nestedSlot.Metadata.Contains("1508%1%{}"))
     throw new Exception("Nested inventory percent encoding was incorrectly split.");
 var malformed = OrbusInventorySlot.Parse(225,
-    "768%1%{\\"itemLevel\\":30,\\"itemPlusLevel\\":0,\\"rarity\\":\\"uncommon\\",\\"affixes\\":[]}", items);
+    """768%1%{"itemLevel":30,"itemPlusLevel":0,"rarity":"uncommon","affixes":[]}""", items);
 if (!malformed.ParseWarning.Contains("malformed"))
     throw new Exception("Malformed experimental top-level percent encoding was not flagged.");
 Console.WriteLine("PASS: category filters and safe inventory instance stats.");
