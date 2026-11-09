@@ -11,7 +11,7 @@ if (bow.Category != "Bows" || dye.Category != "Dyes" || mageArmor.Category != "A
     throw new Exception("Catalogue item classification failed.");
 var items = new Dictionary<int,ServerItemEntry> { [619]=bow };
 var slot = OrbusInventorySlot.Parse(199,
-    "619%1%{\"itemLevel\":30,\"armor\":40,\"maxDurability\":120,\"durability\":88,\"affixes\":[\"plusdotdmg\"]}",
+    "619@1@{\"itemLevel\":30,\"armor\":40,\"maxDurability\":120,\"durability\":88,\"affixes\":[\"plusdotdmg\"]}",
     items);
 if (!slot.TryGetDurability(out var current, out var maxDurability) ||
     current != 88 || maxDurability != 120)
@@ -25,9 +25,19 @@ if (slot.Slot != 199 || slot.ItemId != 619 || slot.Name != "Ancient Bow" ||
 var empty = OrbusInventorySlot.Parse(0, "0", items);
 if (empty.ItemId != 0 || empty.ItemStats != "Empty")
     throw new Exception("Empty slot decoder failed.");
-var plain = OrbusInventorySlot.Parse(1, "619%1", items);
+var plain = OrbusInventorySlot.Parse(1, "619@1", items);
 if (!plain.ItemStats.Contains("No rolled item stats"))
     throw new Exception("Plain grant cannot fabricate equipment modifiers.");
+// Real Player.inventory uses @ at the top level. Nested contained-items can
+// legitimately embed percent-delimited strings and must not be split apart.
+var nestedSlot = OrbusInventorySlot.Parse(45,
+    "1564@1@{\\"containedItems\\":[\\"1508%1%{}\\"]}", items);
+if (nestedSlot.ItemId != 1564 || !nestedSlot.Metadata.Contains("1508%1%{}"))
+    throw new Exception("Nested inventory percent encoding was incorrectly split.");
+var malformed = OrbusInventorySlot.Parse(225,
+    "768%1%{\\"itemLevel\\":30,\\"itemPlusLevel\\":0,\\"rarity\\":\\"uncommon\\",\\"affixes\\":[]}", items);
+if (!malformed.ParseWarning.Contains("malformed"))
+    throw new Exception("Malformed experimental top-level percent encoding was not flagged.");
 Console.WriteLine("PASS: category filters and safe inventory instance stats.");
 
 var fields = new Dictionary<string,string>
