@@ -1078,6 +1078,8 @@
                                                    Text="Select a character to inspect saved inventory."
                                                    Foreground="{StaticResource MutedBrush}"
                                                    TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"/>
+                                        <Expander Header="Class levels &amp; saved inventory" IsExpanded="False" Margin="0,7,0,13">
+                                          <StackPanel>
                                         <TextBlock Text="CLASS LEVELS" Style="{StaticResource Eyebrow}"
                                                    Margin="0,2,0,9"/>
                                         <ItemsControl ItemsSource="{Binding VisibleClassProgress}" Margin="0,0,0,11">
@@ -1128,9 +1130,7 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <TextBlock Text="Select a class to edit its saved level. Changes require the player to be logged out and are backed up before writing."
-                                                   FontSize="11" Foreground="{StaticResource MutedBrush}"
-                                                   TextWrapping="Wrap" Margin="0,0,0,12"/>
+
                                         <ItemsControl ItemsSource="{Binding VisibleInventorySlots}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -1204,7 +1204,10 @@
                                         </Border>
                                             </StackPanel>
                                         </Expander>
+                                          </StackPanel>
+                                        </Expander>
                                         <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="0,4,0,17"/>
+                                        <TextBlock Text="Character progression can be edited under Class levels above; use a logged-out character." FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,0,0,9"/>
                                         <TextBlock Text="ITEM BROWSER · BASE ITEM GRANT" Style="{StaticResource Eyebrow}"/>
                                         <TextBlock Text="Search and preview items before gifting. Custom upgrades and affixes need a verified item-instance writer; only base item grants are currently enabled."
                                                    FontSize="12" TextWrapping="Wrap"
