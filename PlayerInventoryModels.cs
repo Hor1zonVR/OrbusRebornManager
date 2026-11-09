@@ -170,7 +170,7 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
                         foreach (string key in new[] {
                             "itemLevel", "level", "rarity", "armor", "damage",
                             "durability", "currentDurability", "maxDurability",
-                            "upgrade", "upgradeLevel", "enhancementLevel", "affixes",
+                            "upgrade", "upgradeLevel", "enhancementLevel", "itemPlusLevel", "affixes",
                             "strength", "intellect", "vitality", "defense", "criticalChance"
                         })
                         {
