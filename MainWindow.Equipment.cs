@@ -71,7 +71,7 @@ public partial class MainWindow
             string metadata = ServerEquipmentInstanceWriter.MakeMetadata(itemLevel, plus, rarity, affixes,
                 OptionalExperimentalStat(GearDurabilityText.Text, "Maximum durability"),
                 OptionalExperimentalStat(GearArmorText.Text, "Armour"),
-                OptionalExperimentalStat(GearDamageText.Text, "Damage"));
+                OptionalExperimentalStat(GearAttackText.Text, "Attack"));
 
             if (MessageBox.Show(this,
                     $"Experimental grant to {name}: {item.Name} (#{item.Id})\n\n" +
@@ -155,7 +155,7 @@ public partial class MainWindow
                 metadata, after.SerializedSlots);
 
             GearGiftStatusText.Text = $"Server verified new equipment metadata in inventory slot {verifiedSlot}. " +
-                "Log in and inspect the item; weapon damage scaling is still experimental.";
+                "Log in and inspect the item; weapon attack scaling is still experimental.";
             Log($"Experimental equipment metadata attached: {item.Name} lvl {itemLevel} +{plus}, slot {verifiedSlot}.");
             await LoadCharacterSnapshotAsync();
         }
