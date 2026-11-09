@@ -38,9 +38,10 @@ public sealed class ServerEquipmentInstanceWriter
        !/^[a-f0-9]{64}$/.test(expectedHash)) {
      output({ok:false,error:"Invalid equipment patch request."}); return;
    }
-   const originalId = Number(oldRaw.split("%",1)[0]);
-   if (originalId !== itemId) {
-     output({ok:false,error:"The newly granted slot no longer matches the selected item."}); return;
+   const base = String(itemId);
+   // Only patch the unique newly inserted BASE item, never an existing rolled item.
+   if (oldRaw !== base && oldRaw !== base + "@1" && oldRaw !== base + "@1@{}") {
+     output({ok:false,error:"The admin grant did not produce a plain, unmodified equipment item."}); return;
    }
    const info = JSON.parse(metadata);
    if (!info || typeof info !== "object" || Array.isArray(info) ||
@@ -75,6 +76,10 @@ public sealed class ServerEquipmentInstanceWriter
      output({ok:false,error:"Expected exactly one saved character record."}); return;
    }
    const player = matches[0], inv = player.inventory;
+   // Refuse any existing malformed top-level experimental entry; recover first.
+   if (Array.isArray(inv) && inv.some(x => typeof x === "string" && /^[0-9]+%[0-9]+%/.test(x))) {
+     output({ok:false,error:"Existing malformed inventory entry detected. Recover it before new tests."}); return;
+   }
    if (!Array.isArray(inv) || inv.length > 250 || slot >= inv.length ||
        inv.some(x => typeof x !== "string") || inv[slot] !== oldRaw) {
      output({ok:false,error:"Inventory slot changed or unsupported saved slot layout. Refresh before retrying."}); return;
@@ -149,13 +154,24 @@ public sealed class ServerEquipmentInstanceWriter
         return json;
     }
 
+    public static bool IsPlainBaseGrant(int itemId, string raw)
+    {
+        if (itemId <= 0) return false;
+        string id = itemId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return raw == id || raw == id + "@1" || raw == id + "@1@{}";
+    }
+
+    public static bool IsMalformedOuterEntry(string raw) =>
+        System.Text.RegularExpressions.Regex.IsMatch(raw ?? "", @"^[0-9]+%[0-9]+%");
+
     public async Task<int> PatchGrantedSlotAsync(string serverPath, string name, int itemId,
         int slot, string beforeRaw, string metadata, IReadOnlyList<string> expectedInventory)
     {
         if (string.IsNullOrWhiteSpace(name) || name.Length > 80 || name.Any(char.IsControl))
             throw new InvalidOperationException("Select a valid character.");
         if (itemId <= 0 || slot < 0 || slot >= expectedInventory.Count ||
-            beforeRaw != expectedInventory[slot])
+            beforeRaw != expectedInventory[slot] ||
+            !IsPlainBaseGrant(itemId, beforeRaw))
             throw new InvalidOperationException("Invalid newly granted slot.");
         using (var parsed = JsonDocument.Parse(metadata))
             if (parsed.RootElement.ValueKind != JsonValueKind.Object)
