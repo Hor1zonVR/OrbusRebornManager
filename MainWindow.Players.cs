@@ -197,14 +197,14 @@ public partial class MainWindow
     private void UpdateGrantEnabled()
     {
         if (PlayerGiftButton == null) return;
-        PlayerGiftButton.IsEnabled = !_playerBusy && !_giftBusy &&
+        PlayerGiftButton.IsEnabled = !_playerBusy && !_giftBusy && !_equipmentGrantBusy &&
             _chosenPlayer != null && _selectedCatalogItem != null;
         RefreshEquipmentControls();
     }
 
     private async void GivePlayerItem_Click(object sender, RoutedEventArgs e)
     {
-        if (_giftBusy || _chosenPlayer == null || _selectedCatalogItem is not ServerItemEntry item)
+        if (_giftBusy || _equipmentGrantBusy || _chosenPlayer == null || _selectedCatalogItem is not ServerItemEntry item)
             return;
         string? folder = ServerFolder();
         if (folder == null) return;
