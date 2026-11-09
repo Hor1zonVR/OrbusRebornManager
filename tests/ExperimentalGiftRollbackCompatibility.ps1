@@ -13,7 +13,7 @@ foreach ($bad in @('\?\.', '\?\?', '\.flatMap\s*\(', '\bcatch\s*\{')) {
 foreach ($guard in @(
   'changeAt(slot,original)', 'row("inventory").eq(inv)',
   'inv[slot]!==expected', 'digest!==hash',
-  'Number(expected.split("%",1)[0]) !== grantedItem',
+  'expected.startsWith(String(grantedItem) + "@1@")',
   'verified.inventory[slot]!==original'
 )) {
   if (!$js.Contains($guard)) { throw "Missing rollback guard: $guard" }
