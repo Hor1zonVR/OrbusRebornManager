@@ -1286,6 +1286,73 @@
                                                    TextWrapping="Wrap"
                                                    Foreground="{StaticResource MutedBrush}"
                                                    FontSize="12" Margin="0,12,0,0"/>
+                                        <Button x:Name="PlayerPrepareGearButton"
+                                                Content="Experiment: generated equipment…" IsEnabled="False"
+                                                Style="{StaticResource PillButton}" Margin="0,12,0,0"
+                                                Click="ToggleGearEditor_Click"/>
+                                        <Border x:Name="GearEditorPanel" Visibility="Collapsed"
+                                                Background="{StaticResource CardAltBrush}" CornerRadius="9"
+                                                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                                                Padding="13" Margin="0,9,0,12">
+                                            <StackPanel>
+                                                <TextBlock Text="EXPERIMENTAL EQUIPMENT GENERATOR"
+                                                           Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
+                                                <TextBlock Text="For class weapons and armour only. The official admin endpoint places the item, then RM attaches instance metadata. The game may ignore unsupported weapon stats. Character MUST be logged out; an inventory backup is written first."
+                                                           FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                           TextWrapping="Wrap" Margin="0,0,0,11"/>
+                                                <WrapPanel>
+                                                    <StackPanel Width="93" Margin="0,0,10,9">
+                                                        <TextBlock Text="ITEM LEVEL" Style="{StaticResource Eyebrow}" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="GearItemLevelText" Text="30" ToolTip="Experimental 1–100, including level 50"/>
+                                                    </StackPanel>
+                                                    <StackPanel Width="93" Margin="0,0,10,9">
+                                                        <TextBlock Text="PLUS RANK" Style="{StaticResource Eyebrow}" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="GearPlusLevelText" Text="0" ToolTip="Experimental +0–+100; actual game scaling is not confirmed"/>
+                                                    </StackPanel>
+                                                    <StackPanel Width="138" Margin="0,0,10,9">
+                                                        <TextBlock Text="RARITY" Style="{StaticResource Eyebrow}" Margin="0,0,0,4"/>
+                                                        <ComboBox x:Name="GearRarityCombo" SelectedIndex="1" MinHeight="37">
+                                                            <ComboBoxItem Content="common"/>
+                                                            <ComboBoxItem Content="uncommon"/>
+                                                            <ComboBoxItem Content="rare"/>
+                                                            <ComboBoxItem Content="epic"/>
+                                                            <ComboBoxItem Content="legendary"/>
+                                                        </ComboBox>
+                                                    </StackPanel>
+                                                </WrapPanel>
+                                                <TextBlock Text="AFFIX IDS (comma-separated; must be real Orbus server IDs)"
+                                                           Style="{StaticResource Eyebrow}" Margin="0,0,0,4"/>
+                                                <TextBox x:Name="GearAffixesText" Margin="0,0,0,10"
+                                                         ToolTip="Known examples: pluscritdmg, plusdotdmg"
+                                                         Text=""/>
+                                                <TextBlock Text="OPTIONAL NUMERIC METADATA · Leave blank to omit"
+                                                           Style="{StaticResource Eyebrow}" Margin="0,0,0,5"/>
+                                                <WrapPanel>
+                                                    <StackPanel Width="111" Margin="0,0,10,9">
+                                                        <TextBlock Text="Max durability" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="GearDurabilityText" Text="100"/>
+                                                    </StackPanel>
+                                                    <StackPanel Width="111" Margin="0,0,10,9">
+                                                        <TextBlock Text="Armour" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="GearArmorText" ToolTip="Confirmed on armour drops, not on bows"/>
+                                                    </StackPanel>
+                                                    <StackPanel Width="111" Margin="0,0,10,9">
+                                                        <TextBlock Text="Attack" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="GearAttackText" ToolTip="Client InventoryItemMeta.attack field; stat scaling is experimental"/>
+                                                    </StackPanel>
+                                                </WrapPanel>
+                                                <TextBlock Text="The client metadata explicitly includes attack and itemPlusLevel. How the server applies attack, item level and + scaling still needs an in-game test."
+                                                           FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                           TextWrapping="Wrap" Margin="0,0,0,11"/>
+                                                <Button x:Name="GiveExperimentalGearButton"
+                                                        Content="Grant &amp; attach equipment metadata"
+                                                        Style="{StaticResource PrimaryButton}"
+                                                        Click="GiveExperimentalGear_Click"/>
+                                                <TextBlock x:Name="GearGiftStatusText" Text="The full saved inventory is backed up before the admin grant."
+                                                           FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                           TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                            </StackPanel>
+                                        </Border>
                                         <ScrollViewer MaxHeight="310" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <ItemsControl ItemsSource="{Binding VisiblePlayerItems}">
                                             <ItemsControl.ItemsPanel>

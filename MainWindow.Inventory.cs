@@ -423,6 +423,12 @@ public partial class MainWindow
             (string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description + "\n") +
             (string.IsNullOrWhiteSpace(item.BaseProperties) ? "" : $"Catalogue base properties: {item.BaseProperties}\n") +
             "A base-item grant does not guarantee generated level, durability, affixes or upgrade rank.";
+        if (GearRarityCombo != null)
+        {
+            string[] validRarities = { "common", "uncommon", "rare", "epic", "legendary" };
+            int rarityIndex = Array.FindIndex(validRarities, r => r.Equals(item.Rarity, StringComparison.OrdinalIgnoreCase));
+            GearRarityCombo.SelectedIndex = rarityIndex < 0 ? 1 : rarityIndex;
+        }
         UpdateGrantEnabled();
     }
 }

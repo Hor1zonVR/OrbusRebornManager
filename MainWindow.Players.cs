@@ -199,6 +199,7 @@ public partial class MainWindow
         if (PlayerGiftButton == null) return;
         PlayerGiftButton.IsEnabled = !_playerBusy && !_giftBusy &&
             _chosenPlayer != null && _selectedCatalogItem != null;
+        RefreshEquipmentControls();
     }
 
     private async void GivePlayerItem_Click(object sender, RoutedEventArgs e)

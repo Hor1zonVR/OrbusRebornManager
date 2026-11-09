@@ -128,8 +128,47 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
     public string? IconPath => Item?.IconPath;
     public Visibility IconImageVisibility => Item?.IconImageVisibility ?? Visibility.Collapsed;
     public Visibility IconFallbackVisibility => Item?.IconFallbackVisibility ?? Visibility.Visible;
-    public string RarityColor => Item?.RarityColor ?? "#707783";
-    public string ShortLabel => ItemId == 0 ? "—" : (Quantity > 1 ? $"×{Quantity}" : "");
+    private JsonElement? ReadMetaField(string key)
+    {
+        if (string.IsNullOrWhiteSpace(Metadata)) return null;
+        try
+        {
+            using var doc = JsonDocument.Parse(Metadata);
+            if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                doc.RootElement.TryGetProperty(key, out var v))
+                return v.Clone();
+        }
+        catch (JsonException) { }
+        return null;
+    }
+
+    public string RarityColor
+    {
+        get
+        {
+            string rarity = ReadMetaField("rarity") is { ValueKind: JsonValueKind.String } r
+                ? r.GetString() ?? "" : Item?.Rarity ?? "";
+            return rarity.ToLowerInvariant() switch
+            {
+                "uncommon" => "#70B97C", "rare" => "#629CE6",
+                "epic" => "#B78BE8", "legendary" => "#E5B65A",
+                _ => Item?.RarityColor ?? "#707783"
+            };
+        }
+    }
+
+    public string ShortLabel
+    {
+        get
+        {
+            if (ItemId == 0) return "—";
+            if (Quantity > 1) return $"×{Quantity}";
+            if (ReadMetaField("itemPlusLevel") is { ValueKind: JsonValueKind.Number } plus &&
+                plus.TryGetInt32(out int rank) && rank > 0)
+                return $"+{rank}";
+            return "";
+        }
+    }
     public string TooltipText => $"Slot {Slot + 1}: {Name}\n" + ItemStats;
     public bool TryGetDurability(out double current, out double maximum)
     {
@@ -168,9 +207,9 @@ public sealed record OrbusInventorySlot(int Slot, int ItemId, int Quantity, Serv
                     if (doc.RootElement.ValueKind == JsonValueKind.Object)
                     {
                         foreach (string key in new[] {
-                            "itemLevel", "level", "rarity", "armor", "damage",
+                            "itemLevel", "level", "rarity", "armor", "attack", "damage", "crit", "rollLevel", "perfect",
                             "durability", "currentDurability", "maxDurability",
-                            "upgrade", "upgradeLevel", "enhancementLevel", "affixes",
+                            "upgrade", "upgradeLevel", "enhancementLevel", "itemPlusLevel", "affixes",
                             "strength", "intellect", "vitality", "defense", "criticalChance"
                         })
                         {
