@@ -50,10 +50,10 @@ public sealed class ServerEquipmentInstanceWriter
        info.affixes.some(x => typeof x !== "string" || !/^[a-zA-Z0-9_-]{1,48}$/.test(x)) ||
        !["common","uncommon","rare","epic","legendary"].includes(info.rarity) ||
        Object.keys(info).some(k => !["itemLevel","itemPlusLevel","rarity","affixes",
-          "maxDurability","armor","damage"].includes(k))) {
+          "maxDurability","armor","attack"].includes(k))) {
      output({ok:false,error:"Experimental metadata did not pass validation."}); return;
    }
-   for (const key of ["maxDurability","armor","damage"]) {
+   for (const key of ["maxDurability","armor","attack"]) {
      if (Object.prototype.hasOwnProperty.call(info,key) &&
          (!Number.isInteger(info[key]) || info[key] < 0 || info[key] > 1000000)) {
        output({ok:false,error:"Invalid numeric equipment stat: " + key}); return;
@@ -114,7 +114,7 @@ public sealed class ServerEquipmentInstanceWriter
     }
 
     public static string MakeMetadata(int itemLevel, int plus, string rarity,
-        IReadOnlyList<string> affixes, int? maxDurability, int? armor, int? damage)
+        IReadOnlyList<string> affixes, int? maxDurability, int? armor, int? attack)
     {
         if (itemLevel is < 1 or > 100 || plus is < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(itemLevel), "Experimental level and plus rank must be between 1–100 and 0–100.");
@@ -140,7 +140,7 @@ public sealed class ServerEquipmentInstanceWriter
         }
         AddStat("maxDurability", maxDurability);
         AddStat("armor", armor);
-        AddStat("damage", damage);
+        AddStat("attack", attack);
         string json = JsonSerializer.Serialize(data);
         if (json.Length > 2048)
             throw new InvalidOperationException("Metadata is too long.");
