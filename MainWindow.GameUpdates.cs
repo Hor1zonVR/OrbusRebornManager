@@ -54,6 +54,9 @@ public partial class MainWindow
             ? Visibility.Visible : Visibility.Collapsed;
         GameRollbackButton.Visibility = backup && !_gameUpdateBusy
             ? Visibility.Visible : Visibility.Collapsed;
+        GameRestoreModsButton.Visibility = backup && !_gameUpdateBusy &&
+            !_service.IsBepInExInstalled(instance.Path)
+            ? Visibility.Visible : Visibility.Collapsed;
         GameUpdateCheckButton.IsEnabled = !_gameUpdateBusy && !_checkingGameUpdates;
         GameUpdateCancelButton.Visibility = _gameUpdateBusy ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -173,6 +176,57 @@ public partial class MainWindow
         GameUpdateStatusText.Text = "Cancelling before installation...";
         _gameUpdateCancellation?.Cancel();
         GameUpdateCancelButton.IsEnabled = false;
+    }
+
+    private async void RestoreModSetup_Click(object sender, RoutedEventArgs e)
+    {
+        if (_gameUpdateBusy || _jobs > 0) return;
+        var instance = CurrentGameInstance();
+        if (instance == null || string.IsNullOrWhiteSpace(instance.BackupPath) ||
+            !Directory.Exists(instance.BackupPath)) return;
+        if (MessageBox.Show(this,
+            "Recover missing BepInEx, plugins, configs and .NET loader files " +
+            "from RM's previous game backup?\n\n" +
+            "Only MISSING files will be restored; existing files are never " +
+            "replaced. This does not downgrade the game or change its " +
+            "GameAssembly.dll.\n\n" +
+            "Some mods may need updating for the new Spades client. " +
+            "Close OrbusVR and the Spades updater first.",
+            "Restore missing mod setup", MessageBoxButton.YesNo,
+            MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+        _gameUpdateBusy = true;
+        _jobs++;
+        GameUpdateStatusText.Text = "Recovering missing mod-loader files...";
+        RefreshGameUpdateControls();
+        try
+        {
+            int restored = await GameUpdateService.RestoreMissingModSetupAsync(instance);
+            Log("Recovered " + restored + " missing mod setup files from RM backup.");
+            UpdateDashboard();
+            UpdateInstalledRows();
+            UpdateReleaseStatuses();
+            RefreshInstanceCards();
+            MessageBox.Show(this,
+                "Restored " + restored + " missing files. Existing files were left unchanged." +
+                "\n\nLaunch the game once to regenerate interop. " +
+                "Mods that depend on obfuscated game methods may require an update.",
+                "Mod setup restored", MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message,
+                "Mod setup recovery stopped safely", MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+        finally
+        {
+            _gameUpdateBusy = false;
+            _jobs--;
+            RefreshInstanceCards();
+            RefreshGameUpdateControls();
+        }
     }
 
     private async void RollbackGame_Click(object sender, RoutedEventArgs e)
