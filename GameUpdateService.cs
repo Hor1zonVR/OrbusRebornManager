@@ -182,6 +182,134 @@ public static class GameUpdateService
         });
     }
 
+    /// <summary>
+    /// Restore missing loader/mod files from RM's preserved *previous game*
+    /// without downgrading or modifying the current game's executables.
+    /// Existing files are never overwritten. A failed restore removes only
+    /// newly created files and empty directories.
+    /// </summary>
+    public static async Task<int> RestoreMissingModSetupAsync(GameInstance selected,
+        CancellationToken cancellationToken = default)
+    {
+        ValidateManagedInstance(selected);
+        if (GameClientLayout.IsClientRunning())
+            throw new InvalidOperationException("Close all OrbusVR clients and the Spades updater first.");
+        string game = Path.GetFullPath(selected.Path);
+        string parent = Path.GetDirectoryName(game)!;
+        if (string.IsNullOrWhiteSpace(selected.BackupPath))
+            throw new InvalidOperationException(
+                "RM has no rollback backup for this game. It cannot recover files erased by another updater.");
+        string backup = Path.GetFullPath(selected.BackupPath);
+        if (!string.Equals(parent, Path.GetDirectoryName(backup),
+                StringComparison.OrdinalIgnoreCase) ||
+            !Path.GetFileName(backup).StartsWith(".orbus-rollback-",
+                StringComparison.OrdinalIgnoreCase) ||
+            !Directory.Exists(backup) ||
+            (File.GetAttributes(backup) & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidOperationException("The previous RM game backup is missing or unsafe.");
+        if (GameClientLayout.IsRenewed(backup) !=
+            (selected.Edition == GameReleaseDownloadService.Renewed))
+            throw new InvalidOperationException("The backup belongs to a different game edition.");
+        string[] essential =
+        {
+            "winhttp.dll", "doorstop_config.ini",
+            Path.Combine("BepInEx", "core", "BepInEx.Unity.IL2CPP.dll"),
+            Path.Combine("dotnet", "coreclr.dll")
+        };
+        if (essential.Any(name => !File.Exists(Path.Combine(backup, name))))
+            throw new InvalidOperationException(
+                "The RM rollback backup has no complete BepInEx loader; nothing was restored.");
+
+        cancellationToken.ThrowIfCancellationRequested();
+        string working = Path.Combine(parent, ".orbus-mod-recover-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(working);
+        try
+        {
+            await Task.Run(() =>
+            {
+                foreach (string folder in PreservedDirectories)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string source = Path.Combine(backup, folder);
+                    if (Directory.Exists(source))
+                        CopyTree(source, Path.Combine(working, folder),
+                            folder == "BepInEx", cancellationToken);
+                }
+                foreach (string name in PreservedFiles)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string source = Path.Combine(backup, name);
+                    if (File.Exists(source))
+                        File.Copy(source, Path.Combine(working, name));
+                }
+                VerifyPreservedUserFiles(backup, working, cancellationToken);
+            }, cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            if (GameClientLayout.IsClientRunning())
+                throw new InvalidOperationException("OrbusVR started during recovery. Close it and retry.");
+
+            var createdFiles = new List<string>();
+            var createdDirectories = new List<string>();
+            try
+            {
+                // Move only missing files into place. Any existing mod, config
+                // or loader binary (including a user's manual changes) stays.
+                foreach (string stagedFile in Directory.EnumerateFiles(working,
+                             "*", SearchOption.AllDirectories))
+                {
+                    string relative = Path.GetRelativePath(working, stagedFile);
+                    string target = Path.Combine(game, relative);
+                    if (File.Exists(target)) continue;
+                    if (Directory.Exists(target))
+                        throw new IOException("A directory conflicts with restored file " + relative);
+                    string dir = Path.GetDirectoryName(target)!;
+                    var missing = new Stack<string>();
+                    string candidate = dir;
+                    while (!Directory.Exists(candidate))
+                    {
+                        missing.Push(candidate);
+                        candidate = Path.GetDirectoryName(candidate)!;
+                    }
+                    if ((File.GetAttributes(candidate) & FileAttributes.ReparsePoint) != 0)
+                        throw new InvalidOperationException("Cannot restore through a linked directory.");
+                    while (missing.Count > 0)
+                    {
+                        string newDir = missing.Pop();
+                        Directory.CreateDirectory(newDir);
+                        createdDirectories.Add(newDir);
+                    }
+                    File.Move(stagedFile, target);
+                    createdFiles.Add(target);
+                }
+                if (essential.Any(name => !File.Exists(Path.Combine(game, name)) ||
+                    new FileInfo(Path.Combine(game, name)).Length == 0))
+                    throw new IOException("Restored loader remains incomplete; newly added files were removed.");
+                return createdFiles.Count;
+            }
+            catch
+            {
+                // The game binaries and all pre-existing files remain untouched.
+                foreach (string file in createdFiles.AsEnumerable().Reverse())
+                {
+                    try { File.Delete(file); } catch { }
+                }
+                foreach (string directory in createdDirectories.AsEnumerable().Reverse())
+                {
+                    try { if (!Directory.EnumerateFileSystemEntries(directory).Any())
+                            Directory.Delete(directory); }
+                    catch { }
+                }
+                throw;
+            }
+        }
+        finally
+        {
+            try { if (Directory.Exists(working)) Directory.Delete(working, true); }
+            catch { /* Keep staging for recovery if an external process locked it. */ }
+        }
+    }
+
     private static void ValidateManagedInstance(GameInstance instance)
     {
         if (!instance.CreatedByManager ||
