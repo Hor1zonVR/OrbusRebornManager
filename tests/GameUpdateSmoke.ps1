@@ -22,17 +22,10 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using Microsoft.Win32.SafeHandles;
 using OrbusRebornManager;
 
 static class Smoke
 {
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    static extern SafeFileHandle CreateFile(string path, uint access,
-        FileShare share, IntPtr security, FileMode disposition,
-        uint flags, IntPtr template);
-
     static void Assert(bool condition, string message)
     {
         if (!condition) throw new Exception("Smoke test failed: " + message);
@@ -136,25 +129,28 @@ static class Smoke
                 File.Move(savedRuntime, coreclr);
             }
 
-            // A Windows directory handle without FileShare.Delete simulates
-            // the access-denied error seen when Spades or a tool still holds
-            // the instance folder. RM must not remove or replace the game.
-            using (SafeFileHandle lockedDirectory = CreateFile(game, 0x80u,
-                       FileShare.Read | FileShare.Write, IntPtr.Zero,
-                       FileMode.Open, 0x02000000u, IntPtr.Zero))
+            // Deterministically reproduce a Windows file-sharing violation.
+            // Directory handles do not reliably block rename on all Windows
+            // runner configurations, but FileShare.None on a protected mod
+            // file must prevent preservation. RM must fail BEFORE any swap.
+            string lockedMod = Path.Combine(game, "BepInEx", "plugins", "RebornCam.dll");
+            using (var lockHandle = new FileStream(lockedMod, FileMode.Open,
+                       FileAccess.Read, FileShare.None))
             {
-                Assert(!lockedDirectory.IsInvalid, "Could not establish folder lock test");
                 bool blocked = false;
                 try { await GameUpdateService.UpdateAsync(old, release, null); }
                 catch (IOException ex)
                 {
-                    blocked = ex.Message.Contains("renaming the existing game folder", StringComparison.Ordinal);
+                    blocked = ex.Message.Contains(
+                        "copying and checking BepInEx, plugins and settings",
+                        StringComparison.Ordinal);
                 }
-                Assert(blocked, "locked folder did not produce a clear update-stage error");
+                Assert(blocked,
+                    "locked plugin did not produce a preservation-stage error");
                 Assert(File.ReadAllText(Path.Combine(game, "OrbusVR.exe")) == "v1",
-                    "Windows access-denied test damaged the original game");
+                    "Windows file lock test damaged the original game");
                 Assert(store.Load().Single().GameVersion == "v1",
-                    "Windows access-denied test changed version registry");
+                    "Windows file lock test changed version registry");
             }
 
             await GameUpdateService.UpdateAsync(old, release, null);
