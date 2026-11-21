@@ -271,8 +271,20 @@ public static class GameUpdateService
                         missing.Push(candidate);
                         candidate = Path.GetDirectoryName(candidate)!;
                     }
-                    if ((File.GetAttributes(candidate) & FileAttributes.ReparsePoint) != 0)
-                        throw new InvalidOperationException("Cannot restore through a linked directory.");
+                    // The closest existing parent is not sufficient: a
+                    // higher ancestor (BepInEx/plugins, for example) could
+                    // resolve through a directory junction. Never follow one.
+                    string check = candidate;
+                    while (check.StartsWith(game + Path.DirectorySeparatorChar,
+                               StringComparison.OrdinalIgnoreCase) ||
+                           check.Equals(game, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if ((File.GetAttributes(check) & FileAttributes.ReparsePoint) != 0)
+                            throw new InvalidOperationException(
+                                "Cannot restore through a linked game directory.");
+                        if (check.Equals(game, StringComparison.OrdinalIgnoreCase)) break;
+                        check = Path.GetDirectoryName(check)!;
+                    }
                     while (missing.Count > 0)
                     {
                         string newDir = missing.Pop();
