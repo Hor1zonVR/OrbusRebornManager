@@ -62,6 +62,11 @@ static class Smoke
             File.WriteAllText(Path.Combine(bepinex, "config", "camera.cfg"), "settings");
             File.WriteAllText(Path.Combine(bepinex, "interop", "old-generated.dll"), "stale");
             File.WriteAllText(Path.Combine(game, "winhttp.dll"), "loader");
+            File.WriteAllText(Path.Combine(game, "doorstop_config.ini"), "config");
+            Directory.CreateDirectory(Path.Combine(bepinex, "core"));
+            File.WriteAllText(Path.Combine(bepinex, "core", "BepInEx.Unity.IL2CPP.dll"), "core");
+            Directory.CreateDirectory(Path.Combine(bepinex, "cache"));
+            File.WriteAllText(Path.Combine(bepinex, "cache", "old-generated.bin"), "stale-cache");
             // Regression: a Spades 1.13 -> 1.14 update previously lost the
             // IL2CPP BepInEx runtime because only BepInEx and winhttp were kept.
             string runtime = Path.Combine(game, "dotnet");
@@ -114,8 +119,43 @@ static class Smoke
                 "update lost IL2CPP coreclr runtime; BepInEx would not start");
             Assert(File.ReadAllText(Path.Combine(game, "dotnet", "System.Private.CoreLib.dll")) == "original-corlib",
                 "update lost managed runtime libraries");
+            Assert(File.ReadAllText(Path.Combine(game, "doorstop_config.ini")) == "config",
+                "doorstop config was lost");
+            Assert(!File.Exists(Path.Combine(game, "BepInEx", "cache", "old-generated.bin")),
+                "stale generated BepInEx cache retained");
             Assert(Directory.Exists(updated.BackupPath), "rollback folder not created");
             Assert(File.ReadAllText(Path.Combine(updated.BackupPath, "OrbusVR.exe")) == "v1", "backup incorrect");
+
+            // Simulate the native Spades in-game updater deleting BepInEx
+            // after RM updated the game. Recover without downgrading the
+            // current executable or overwriting a player's existing plugins.
+            Directory.Delete(Path.Combine(game, "BepInEx"), recursive: true);
+            Directory.Delete(Path.Combine(game, "dotnet"), recursive: true);
+            File.Delete(Path.Combine(game, "winhttp.dll"));
+            File.Delete(Path.Combine(game, "doorstop_config.ini"));
+            Directory.CreateDirectory(Path.Combine(game, "BepInEx", "plugins"));
+            File.WriteAllText(Path.Combine(game, "BepInEx", "plugins", "RebornCam.dll"),
+                "user-modified");
+            File.WriteAllText(Path.Combine(game, "BepInEx", "plugins", "Manual.dll"),
+                "user-owned");
+            int recovered = await GameUpdateService.RestoreMissingModSetupAsync(updated);
+            Assert(recovered > 0, "recover operation restored no missing files");
+            Assert(File.ReadAllText(Path.Combine(game, "OrbusVR.exe")) == "v2",
+                "recovery changed current game executable");
+            Assert(File.ReadAllText(Path.Combine(game, "BepInEx", "plugins", "RebornCam.dll")) == "user-modified",
+                "recovery overwrote an existing plugin");
+            Assert(File.ReadAllText(Path.Combine(game, "BepInEx", "plugins", "Manual.dll")) == "user-owned",
+                "recovery removed a manually installed plugin");
+            Assert(File.ReadAllText(Path.Combine(game, "BepInEx", "config", "camera.cfg")) == "settings",
+                "recovery lost config");
+            Assert(File.ReadAllText(Path.Combine(game, "winhttp.dll")) == "loader",
+                "recovery did not restore loader bootstrap");
+            Assert(File.ReadAllText(Path.Combine(game, "dotnet", "coreclr.dll")) == "original-coreclr",
+                "recovery did not restore runtime");
+            Assert(!File.Exists(Path.Combine(game, "BepInEx", "interop", "old-generated.dll")),
+                "recovery copied stale interop for the older game");
+            Assert(store.Load().Single().GameVersion == "v2",
+                "mod setup recovery altered game version registry");
 
             await GameUpdateService.RollbackAsync(updated);
             var restored = store.Load().Single();
@@ -130,7 +170,7 @@ static class Smoke
             Assert(store.Load().Single().GameVersion == "v2", "redo version not recorded");
             Assert(File.ReadAllText(Path.Combine(game, "dotnet", "coreclr.dll")) == "original-coreclr",
                 "reapply lost IL2CPP runtime");
-            Console.WriteLine("PASS: cancellation, SHA-256 cache, preserved mods/config/dotnet runtime, interop regeneration, update and two-way rollback");
+            Console.WriteLine("PASS: cancellation, SHA-256 cache, verified mod preservation, native-updater wipe recovery without overwrites, interop regeneration, update and two-way rollback");
         }
         finally
         {
