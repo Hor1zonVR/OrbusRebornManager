@@ -61,9 +61,13 @@ public sealed class ManagerService
     public string NormalizeGamePath(string selection) =>
         GameClientLayout.NormalizeFolder(selection);
 
+    // Checking only winhttp + BepInEx/core previously reported a working
+    // loader after native client updates deleted the required .NET runtime.
     public bool IsBepInExInstalled(string game) =>
         File.Exists(Path.Combine(game, "winhttp.dll")) &&
-        File.Exists(Path.Combine(game, "BepInEx", "core", "BepInEx.Unity.IL2CPP.dll"));
+        File.Exists(Path.Combine(game, "doorstop_config.ini")) &&
+        File.Exists(Path.Combine(game, "BepInEx", "core", "BepInEx.Unity.IL2CPP.dll")) &&
+        File.Exists(Path.Combine(game, "dotnet", "coreclr.dll"));
 
     public bool IsGameRunning() => GameClientLayout.IsClientRunning();
 
@@ -347,9 +351,16 @@ public sealed class ManagerService
     {
         if (IsGameRunning()) throw new InvalidOperationException("Close OrbusVR before installing BepInEx.");
         if (IsBepInExInstalled(game)) throw new InvalidOperationException("BepInEx is already present; leaving this installation untouched.");
-        // Refuse to overwrite an existing unknown loader to avoid destroying another setup.
-        if (File.Exists(Path.Combine(game, "winhttp.dll")) || File.Exists(Path.Combine(game, "doorstop_config.ini")))
-            throw new InvalidOperationException("A loader already occupies winhttp.dll or doorstop_config.ini. Back it up or remove it manually before installing.");
+        // Allow the user's explicit Install/Repair action to repair a *known*
+        // partial BepInEx install (e.g. native updater removed dotnet/).
+        // Unknown root DLL/config without BepInEx core remains protected.
+        bool hasRootLoader = File.Exists(Path.Combine(game, "winhttp.dll")) ||
+                             File.Exists(Path.Combine(game, "doorstop_config.ini"));
+        bool knownBepInEx = File.Exists(Path.Combine(game, "BepInEx", "core", "BepInEx.Unity.IL2CPP.dll"));
+        if (hasRootLoader && !knownBepInEx)
+            throw new InvalidOperationException(
+                "An unknown or incomplete loader occupies winhttp.dll/doorstop_config.ini. " +
+                "RM will not overwrite it automatically. Restore the mod setup from an RM backup first.");
         string managerRoot = GameManagerRoot(game);
         Directory.CreateDirectory(managerRoot);
         string archive = Path.Combine(managerRoot, "loader-download-" + Guid.NewGuid().ToString("N") + ".zip");

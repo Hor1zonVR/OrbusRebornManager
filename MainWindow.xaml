@@ -1897,6 +1897,11 @@
                                         Visibility="Collapsed"
                                         MinHeight="35" Padding="11,7" Margin="0,0,7,0"
                                         Click="RollbackGame_Click"/>
+                                <Button x:Name="GameRestoreModsButton" Content="Restore mod setup"
+                                        Style="{StaticResource PillButton}"
+                                        Visibility="Collapsed"
+                                        MinHeight="35" Padding="11,7" Margin="0,0,7,0"
+                                        Click="RestoreModSetup_Click"/>
                                 <Button x:Name="GameUpdateButton" Content="Update game"
                                         Style="{StaticResource PrimaryButton}"
                                         Visibility="Collapsed"
