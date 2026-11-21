@@ -108,6 +108,27 @@ static class Smoke
             }
             Assert(File.ReadAllText(Path.Combine(game, "OrbusVR.exe")) == "v1", "cancel touched original");
 
+            // Do not allow RM to advertise a successful mod-preserving update
+            // if another updater has already removed just the CoreCLR runtime.
+            string coreclr = Path.Combine(game, "dotnet", "coreclr.dll");
+            string savedRuntime = Path.Combine(root, "saved-coreclr.dll");
+            File.Move(coreclr, savedRuntime);
+            try
+            {
+                await GameUpdateService.UpdateAsync(old, release, null);
+                throw new Exception("Incomplete loader update was incorrectly allowed");
+            }
+            catch (InvalidOperationException ex) when (
+                ex.Message.Contains("incomplete BepInEx"))
+            {
+                Assert(File.ReadAllText(Path.Combine(game, "OrbusVR.exe")) == "v1",
+                    "incomplete-loader check modified game");
+            }
+            finally
+            {
+                File.Move(savedRuntime, coreclr);
+            }
+
             await GameUpdateService.UpdateAsync(old, release, null);
             var updated = store.Load().Single();
             Assert(updated.GameVersion == "v2", "updated version not recorded");
