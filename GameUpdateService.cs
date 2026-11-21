@@ -35,6 +35,7 @@ public static class GameUpdateService
 
         string game = Path.GetFullPath(selected.Path);
         EnsureLoaderIsCompleteBeforeUpdate(game);
+        EnsureNoInstanceProcesses(game);
         string parent = Path.GetDirectoryName(game)!;
         string working = Path.Combine(parent, ".orbus-update-" + Guid.NewGuid().ToString("N"));
         string backup = Path.Combine(parent, ".orbus-rollback-" + Guid.NewGuid().ToString("N"));
@@ -63,6 +64,7 @@ public static class GameUpdateService
                 throw new InvalidOperationException("An update backup location is already occupied.");
             if (GameClientLayout.IsClientRunning())
                 throw new InvalidOperationException("Close OrbusVR before applying the update.");
+            EnsureNoInstanceProcesses(game);
 
             // Everything above can be cancelled. The following critical
             // section is intentionally non-cancellable to prevent half-swaps.
@@ -392,6 +394,41 @@ public static class GameUpdateService
                 throw new InvalidOperationException("The new game ships a conflicting loader file: " + name);
             File.Copy(origin, destination);
         }
+    }
+
+    // Native launchers/updaters may remain open after OrbusVR.exe has exited.
+    // Check executables located inside this specific instance, not generic
+    // process names (which could match unrelated applications). This is
+    // best-effort; other tools with their working directory open may still
+    // prevent a Windows directory rename.
+    private static void EnsureNoInstanceProcesses(string game)
+    {
+        string prefix = game.TrimEnd(Path.DirectorySeparatorChar) +
+            Path.DirectorySeparatorChar;
+        var active = new List<string>();
+        foreach (var process in System.Diagnostics.Process.GetProcesses())
+        {
+            using (process)
+            {
+                try
+                {
+                    string? executable = process.MainModule?.FileName;
+                    if (!string.IsNullOrWhiteSpace(executable) &&
+                        Path.GetFullPath(executable).StartsWith(prefix,
+                            StringComparison.OrdinalIgnoreCase))
+                        active.Add(process.ProcessName + " (PID " + process.Id + ")");
+                }
+                catch (System.ComponentModel.Win32Exception) { }
+                catch (InvalidOperationException) { }
+                catch (UnauthorizedAccessException) { }
+            }
+        }
+        if (active.Count > 0)
+            throw new InvalidOperationException(
+                "This game instance still has an active executable: " +
+                string.Join(", ", active.Distinct()) +
+                ". Close it and any Spades updater before retrying. " +
+                "No game files were changed.");
     }
 
     // A native in-game updater may remove only part of the loader. Refuse to
