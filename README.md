@@ -10,6 +10,16 @@ Release DLL downloads still come directly from curated GitHub release assets wit
 
 # Orbus Reborn Manager
 
+## Game updates, Windows folder locks and mod setup recovery (development)
+
+The current update fix is **a draft pull request, not yet a published RM version**. The updater still stages and verifies the new game on the same drive, copies BepInEx plugins/configs and the `dotnet` loader runtime, then preserves the old full game as an RM rollback folder. It never intentionally overwrites an existing live game during extraction. Generated IL2CPP interop and BepInEx caches are excluded, so each changed client build regenerates them.
+
+If Windows refuses to rename the game directory, RM now reports the **exact operation** that failed and restores the old directory if a swap had already started. Close the game and the Spades updater, along with any Explorer windows or terminals holding the instance open, before retrying. Do **not** change Windows ACLs, delete the instance or manually remove `.orbus-rollback-*` folders to clear the error. A successful Windows CI build is not proof that your specific file lock is fixed.
+
+A native Spades in-game updater can bypass RM and remove BepInEx; RM cannot prevent third-party changes. When RM has an intact previous-version rollback and the current loader is incomplete, the instance's Update section offers **Restore mod setup**. This opt-in action restores **missing** plugin, config, loader and user-data files only; it does not downgrade the game or overwrite existing files. It requires an intact backup that contains the original loader. If no backup exists, RM cannot recover already erased custom mods. Mod compatibility with newly obfuscated Spades client builds still requires separate testing.
+
+Before updating the game, RM also checks the full IL2CPP loader components (`winhttp.dll`, `doorstop_config.ini`, `BepInEx/core/BepInEx.Unity.IL2CPP.dll`, `dotnet/coreclr.dll`), refusing to describe a partial loader as healthy. A known partial BepInEx installation can be explicitly repaired using Install BepInEx; unknown loaders remain protected.
+
 A Windows launcher and curated mod manager for **OrbusVR Reborn Community Edition**, including compatible **Orbus Renewed** PC clients.
 This project is not intended for OrbusVR Classic or Preborn.
 
