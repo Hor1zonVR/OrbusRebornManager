@@ -34,6 +34,7 @@ public static class GameUpdateService
             throw new InvalidOperationException("Close all OrbusVR clients before updating.");
 
         string game = Path.GetFullPath(selected.Path);
+        EnsureLoaderIsCompleteBeforeUpdate(game);
         string parent = Path.GetDirectoryName(game)!;
         string working = Path.Combine(parent, ".orbus-update-" + Guid.NewGuid().ToString("N"));
         string backup = Path.Combine(parent, ".orbus-rollback-" + Guid.NewGuid().ToString("N"));
@@ -391,6 +392,29 @@ public static class GameUpdateService
                 throw new InvalidOperationException("The new game ships a conflicting loader file: " + name);
             File.Copy(origin, destination);
         }
+    }
+
+    // A native in-game updater may remove only part of the loader. Refuse to
+    // stage that broken state and later claim the mods were preserved.
+    // Clean, unmodded instances remain eligible for ordinary game updates.
+    private static void EnsureLoaderIsCompleteBeforeUpdate(string game)
+    {
+        string[] essentials =
+        {
+            "winhttp.dll", "doorstop_config.ini",
+            Path.Combine("BepInEx", "core", "BepInEx.Unity.IL2CPP.dll"),
+            Path.Combine("dotnet", "coreclr.dll")
+        };
+        bool hasLoader = Directory.Exists(Path.Combine(game, "BepInEx")) ||
+                         Directory.Exists(Path.Combine(game, "dotnet")) ||
+                         essentials.Any(name => File.Exists(Path.Combine(game, name)));
+        if (!hasLoader) return;
+        if (essentials.Any(name => !File.Exists(Path.Combine(game, name))))
+            throw new InvalidOperationException(
+                "The selected game already has an incomplete BepInEx installation. " +
+                "Updating it now would preserve broken loader files. Use Restore mod " +
+                "setup (if an RM backup exists) or explicitly repair BepInEx first. " +
+                "Your existing game and mods were not changed.");
     }
 
     // Verify the staged mod overlay *before* swapping either game folder.
