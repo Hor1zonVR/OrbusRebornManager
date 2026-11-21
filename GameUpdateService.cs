@@ -41,16 +41,19 @@ public static class GameUpdateService
         Directory.CreateDirectory(working);
 
         bool oldMoved = false, newMoved = false;
+        string phase = "downloading and extracting the verified game archive";
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
             string staged = await GameReleaseDownloadService.ExtractReleaseAsync(
                 release, working, progress, cancellationToken);
 
+            phase = "copying and checking BepInEx, plugins and settings";
             await Task.Run(() =>
             {
                 progress?.Report(new("Preserving BepInEx, mods and settings...", 99));
                 PreserveUserFiles(game, staged, cancellationToken);
+                VerifyPreservedUserFiles(game, staged, cancellationToken);
                 GameClientLayout.FindExecutable(staged);
             }, cancellationToken);
 
@@ -60,29 +63,55 @@ public static class GameUpdateService
             if (GameClientLayout.IsClientRunning())
                 throw new InvalidOperationException("Close OrbusVR before applying the update.");
 
-            // Everything above can be cancelled. The following small critical
+            // Everything above can be cancelled. The following critical
             // section is intentionally non-cancellable to prevent half-swaps.
+            // Its operations are staged so a Windows access-denied error tells
+            // users what to close, rather than encouraging unsafe ACL changes.
+            phase = "renaming the existing game folder for rollback";
             Directory.Move(game, backup);
             oldMoved = true;
+            phase = "putting the staged game at the original location";
             Directory.Move(staged, game);
             newMoved = true;
+            phase = "saving the new version and rollback registration";
             SaveVersion(game, release.Version, backup, selected.GameVersion);
             progress?.Report(new("Update installed. Previous version retained for rollback.", 100));
         }
-        catch
+        catch (Exception failure)
         {
             // If a filesystem or registry operation fails after the first move,
             // put the original files back. Do not delete either version.
-            if (oldMoved)
+            try
             {
-                if (newMoved && Directory.Exists(game))
+                if (oldMoved)
                 {
-                    string failed = Path.Combine(parent, ".orbus-failed-update-" + Guid.NewGuid().ToString("N"));
-                    Directory.Move(game, failed);
+                    if (newMoved && Directory.Exists(game))
+                    {
+                        string failed = Path.Combine(parent, ".orbus-failed-update-" + Guid.NewGuid().ToString("N"));
+                        Directory.Move(game, failed);
+                    }
+                    if (!Directory.Exists(game) && Directory.Exists(backup))
+                        Directory.Move(backup, game);
                 }
-                if (!Directory.Exists(game) && Directory.Exists(backup))
-                    Directory.Move(backup, game);
             }
+            catch (Exception recoveryFailure)
+            {
+                throw new IOException(
+                    "Game update failed while " + phase +
+                    ", and restoring the original game folder also failed. " +
+                    "Do NOT delete either the game or .orbus-rollback-* folders. " +
+                    "Recovery details: " + recoveryFailure.Message,
+                    new AggregateException(failure, recoveryFailure));
+            }
+            if (failure is UnauthorizedAccessException or IOException)
+                throw new IOException(
+                    "Windows blocked the game update while " + phase + ". " +
+                    "The existing game was left unchanged or restored. " +
+                    "Close OrbusVR and any Spades updater/launcher, Explorer " +
+                    "windows or terminals using this instance, then retry. " +
+                    "If the issue persists, restart Windows; don't delete " +
+                    "BepInEx or change directory permissions. Details: " +
+                    failure.Message, failure);
             throw;
         }
         finally
@@ -221,6 +250,50 @@ public static class GameUpdateService
             if (File.Exists(destination))
                 throw new InvalidOperationException("The new game ships a conflicting loader file: " + name);
             File.Copy(origin, destination);
+        }
+    }
+
+    // Verify the staged mod overlay *before* swapping either game folder.
+    // Exclude only build-specific generated interop/cache; every real plugin
+    // and configuration file must survive intact. Never write to the source.
+    private static void VerifyPreservedUserFiles(string oldGame, string staged,
+        CancellationToken token)
+    {
+        foreach (string folder in PreservedDirectories)
+        {
+            token.ThrowIfCancellationRequested();
+            string source = Path.Combine(oldGame, folder);
+            if (!Directory.Exists(source)) continue;
+            string target = Path.Combine(staged, folder);
+            if (!Directory.Exists(target))
+                throw new IOException("Staged update is missing protected folder " + folder);
+            foreach (string file in Directory.EnumerateFiles(source, "*",
+                         SearchOption.AllDirectories))
+            {
+                token.ThrowIfCancellationRequested();
+                string relative = Path.GetRelativePath(source, file);
+                if (folder == "BepInEx" &&
+                    (relative.StartsWith("interop" + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase) ||
+                     relative.StartsWith("cache" + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase)))
+                    continue;
+                string restored = Path.Combine(target, relative);
+                if (!File.Exists(restored) ||
+                    new FileInfo(file).Length != new FileInfo(restored).Length)
+                    throw new IOException("Staged game failed to preserve " +
+                        folder + " / " + relative);
+            }
+        }
+        foreach (string name in PreservedFiles)
+        {
+            token.ThrowIfCancellationRequested();
+            string source = Path.Combine(oldGame, name);
+            if (!File.Exists(source)) continue;
+            string target = Path.Combine(staged, name);
+            if (!File.Exists(target) ||
+                new FileInfo(source).Length != new FileInfo(target).Length)
+                throw new IOException("Staged game failed to preserve loader file " + name);
         }
     }
 
