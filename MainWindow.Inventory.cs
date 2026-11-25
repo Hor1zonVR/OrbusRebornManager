@@ -219,6 +219,12 @@ public partial class MainWindow
             if (!folder.Equals(LocalItemArtwork.DirectoryPath, StringComparison.OrdinalIgnoreCase))
                 return;
             UpdateLocalIconStatus();
+            // Refresh selected artwork when the icon directory changes.
+            if (SelectedCatalogIconPreview != null)
+            {
+                SelectedCatalogIconPreview.DataContext = null;
+                SelectedCatalogIconPreview.DataContext = _selectedCatalogItem;
+            }
             // Rebind the displayed cards after indexing (they are immutable records).
             RefreshItemGrid();
             RefreshInventoryPage();
@@ -257,6 +263,8 @@ public partial class MainWindow
         _slotPage = 0;
         _itemPage = 0;
         _selectedCatalogItem = null;
+        if (SelectedCatalogIconPreview != null)
+            SelectedCatalogIconPreview.DataContext = null;
         _itemCategory = "All";
         CloseClassLevelEditor();
         if (CharacterInventoryStatusText == null) return;
@@ -415,6 +423,7 @@ public partial class MainWindow
     {
         if (sender is not Button { Tag: ServerItemEntry item }) return;
         _selectedCatalogItem = item;
+        SelectedCatalogIconPreview.DataContext = item;
         SelectedCatalogNameText.Text = $"{item.Name} · #{item.Id}";
         SelectedCatalogDetailsText.Text =
             $"Category: {item.Category}     Rarity: {item.Rarity}\n" +
